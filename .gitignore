@@ -1,0 +1,7 @@
+**/__pycache__/**
+venv/
+frames*/
+data/
+*.pdf
+*.nb
+*.prof
