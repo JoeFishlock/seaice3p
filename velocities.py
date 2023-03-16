@@ -45,7 +45,8 @@ def calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, params):
     drag = calculate_drag(bubble_radius, params)
     lag = calculate_lag(bubble_radius)
 
-    return B * drag + 2 * lag * Wl / (geometric(liquid_fraction) + reg)
+    # return B * drag + 2 * lag * Wl / (geometric(liquid_fraction) + reg)
+    return B * drag
 
 
 def calculate_velocities(liquid_fraction, pressure, D_g, params):
