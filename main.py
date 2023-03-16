@@ -1,6 +1,6 @@
 import numpy as np
 from params import Params
-from backward_euler_solver import solve
+from iterative_solver import solve
 from enthalpy_method import get_phase_masks, calculate_enthalpy_method
 from velocities import calculate_velocities
 import matplotlib.pyplot as plt
@@ -33,7 +33,7 @@ res = Params(
     far_gas_sat=1,
     temperature_forcing_choice="yearly",
     savefreq=1e-2,
-    bubble_radius_scaled=0.1,
+    bubble_radius_scaled=1.1,
     timestep=5e-5,
     I=100,
 )
@@ -42,40 +42,47 @@ res = Params(
 
 profile = Params(
     name="profile",
-    total_time=0.1,
-    temperature_forcing_choice="constant",
+    total_time=4,
+    temperature_forcing_choice="yearly",
     constant_top_temperature=-1.5,
     savefreq=1e-2,
     bubble_radius_scaled=0.1,
+    far_gas_sat=1,
+    timestep=7e-6,
+    I=100,
 )
 solve(profile)
 print("Done simulation")
 
 """Analysis"""
-# with np.load("data/res.npz") as data:
-#     enthalpy = data["enthalpy"]
-#     salt = data["salt"]
-#     gas = data["gas"]
-#     pressure = data["pressure"]
-#     times = data["times"]
+with np.load("data/profile.npz") as data:
+    enthalpy = data["enthalpy"]
+    salt = data["salt"]
+    gas = data["gas"]
+    pressure = data["pressure"]
+    times = data["times"]
 
-# phase_masks = get_phase_masks(enthalpy, salt, gas, res)
-# (
-#     temperature,
-#     liquid_fraction,
-#     gas_fraction,
-#     solid_fraction,
-#     liquid_salinity,
-#     dissolved_gas,
-# ) = calculate_enthalpy_method(enthalpy, salt, gas, res, phase_masks)
-# D_g = get_difference_matrix(res.I + 1, res.step)
-# Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, res)
-# step, centers, edges, ghosts = initialise_grids(res.I)
-# for n, _ in enumerate(temperature[0, :]):
-#     plt.figure(figsize=(5, 5))
-#     plt.plot(gas_fraction[:, n], ghosts, "g*--")
-#     plt.savefig(f"frames_res/gas_fraction{n}.pdf")
-#     plt.close()
+phase_masks = get_phase_masks(enthalpy, salt, gas, profile)
+(
+    temperature,
+    liquid_fraction,
+    gas_fraction,
+    solid_fraction,
+    liquid_salinity,
+    dissolved_gas,
+) = calculate_enthalpy_method(enthalpy, salt, gas, profile, phase_masks)
+D_g = get_difference_matrix(profile.I + 1, profile.step)
+Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, profile)
+step, centers, edges, ghosts = initialise_grids(profile.I)
+for n, _ in enumerate(temperature[0, :]):
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        gas_fraction[:, n],
+        ghosts,
+        "g*--",
+    )
+    plt.savefig(f"frames_profile/gas_fraction{n}.pdf")
+    plt.close()
 
 # l, L, m, M, e, E, s, S = phase_masks
 # phases = np.full_like(enthalpy, np.NaN)

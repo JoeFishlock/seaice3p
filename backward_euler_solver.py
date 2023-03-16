@@ -1,13 +1,32 @@
 from scipy.optimize import root
 import numpy as np
 from tqdm import tqdm
-from boundary_conditions import (
-    apply_boundary_conditions,
+from boundary_conditions import calculate_enthalpy_from_temp
+from forcing import get_temperature_forcing
+from enthalpy_method import (
+    calculate_enthalpy_method,
+    get_phase_masks,
+    calculate_temperature,
+    calculate_liquid_fraction,
+    calculate_gas_fraction,
 )
-from enthalpy_method import calculate_enthalpy_method, get_phase_masks
 from grids import get_difference_matrix, get_number_of_timesteps, upwind, geometric
-from spatial import calculate_discretised_fluxes, generate_initial_solution
 from velocities import calculate_velocities, calculate_absolute_permeability
+
+
+def generate_initial_solution(params, length):
+    """Generate initial solution on the ghost grid"""
+    bottom_enthalpy = calculate_enthalpy_from_temp(
+        params.concentration_ratio,
+        params.expansion_coefficient * params.far_gas_sat,
+        params.far_temp,
+        params,
+    )
+    enthalpy = np.full((length,), bottom_enthalpy)
+    salt = np.full_like(enthalpy, 0)
+    gas = np.full_like(enthalpy, params.expansion_coefficient * params.far_gas_sat)
+    pressure = np.full_like(enthalpy, 0)
+    return enthalpy, salt, gas, pressure
 
 
 def generate_storage_arrays(enthalpy, salt, gas, pressure):
@@ -34,31 +53,81 @@ def save_storage(
 
 def calculate_residual(new_solution, solution, time, params, D_e, D_g):
     timestep = params.timestep
+    I = params.I
+    chi = params.expansion_coefficient
+    C = params.concentration_ratio
 
-    new_enthalpy, new_salt, new_gas, new_pressure = np.split(new_solution, 4)
-    new_enthalpy = np.concatenate((np.array([0]), new_enthalpy, np.array([0])))
-    new_salt = np.concatenate((np.array([0]), new_salt, np.array([0])))
-    new_gas = np.concatenate((np.array([0]), new_gas, np.array([0])))
-    new_pressure = np.concatenate((np.array([0]), new_pressure, np.array([0])))
-    apply_boundary_conditions(
-        new_enthalpy, new_salt, new_gas, new_pressure, time, params
+    new_time = time + timestep
+    top_temperature = get_temperature_forcing(time, params)
+    new_top_temperature = get_temperature_forcing(new_time, params)
+    top_enthalpy = calculate_enthalpy_from_temp(0, 0, top_temperature, params)
+    new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, params)
+
+    """Extend to ghost grids"""
+    solution_ghost = np.zeros((4 * (I + 2)))
+    new_solution_ghost = np.zeros((4 * (I + 2)))
+
+    solution_ghost[1 : I + 1] = solution[0:I]
+    solution_ghost[I + 3 : 2 * I + 3] = solution[I : 2 * I]
+    solution_ghost[2 * I + 5 : 3 * I + 5] = solution[2 * I : 3 * I]
+    solution_ghost[3 * I + 7 : 4 * I + 7] = solution[3 * I :]
+
+    new_solution_ghost[1 : I + 1] = new_solution[0:I]
+    new_solution_ghost[I + 3 : 2 * I + 3] = new_solution[I : 2 * I]
+    new_solution_ghost[2 * I + 5 : 3 * I + 5] = new_solution[2 * I : 3 * I]
+    new_solution_ghost[3 * I + 7 : 4 * I + 7] = new_solution[3 * I :]
+
+    """Apply boundary conditions"""
+    solution_ghost[0] = params.far_temp
+    solution_ghost[I + 1] = top_enthalpy
+    solution_ghost[I + 2] = 0
+    solution_ghost[2 * I + 3] = 0
+    solution_ghost[2 * I + 4] = params.expansion_coefficient
+    solution_ghost[3 * I + 5] = 0
+    solution_ghost[3 * I + 6] = 0
+    solution_ghost[-1] = solution_ghost[-2]
+
+    new_solution_ghost[0] = params.far_temp
+    new_solution_ghost[I + 1] = new_top_enthalpy
+    new_solution_ghost[I + 2] = 0
+    new_solution_ghost[2 * I + 3] = 0
+    new_solution_ghost[2 * I + 4] = params.expansion_coefficient
+    new_solution_ghost[3 * I + 5] = 0
+    new_solution_ghost[3 * I + 6] = 0
+    new_solution_ghost[-1] = new_solution_ghost[-2]
+
+    """calculate gas fraction for time derivative in pressure residual"""
+    enthalpy = solution_ghost[0 : I + 2]
+    salt = solution_ghost[I + 2 : 2 * I + 4]
+    gas = solution_ghost[2 * I + 4 : 3 * I + 6]
+    phase_masks = get_phase_masks(
+        enthalpy,
+        salt,
+        gas,
+        params,
     )
-    enthalpy, salt, gas, pressure = np.split(solution, 4)
-
-    enthalpy_flux, salt_flux, gas_flux = calculate_discretised_fluxes(
-        new_enthalpy, new_salt, new_gas, new_pressure, params, D_e, D_g
+    temperature = calculate_temperature(enthalpy, salt, gas, params, phase_masks)
+    liquid_fraction = calculate_liquid_fraction(
+        enthalpy, salt, gas, temperature, params, phase_masks
     )
+    gas_fraction = calculate_gas_fraction(gas, liquid_fraction, params, phase_masks)
 
-    enthalpy_residual = (new_enthalpy[1:-1] - enthalpy[1:-1]) / timestep - enthalpy_flux
-    salt_residual = (new_salt[1:-1] - salt[1:-1]) / timestep - salt_flux
-    gas_residual = (new_gas[1:-1] - gas[1:-1]) / timestep - gas_flux
-
-    new_phase_masks = get_phase_masks(new_enthalpy, new_salt, new_gas, params)
+    """calculate variables needed to compute the fluxes at new timestep"""
+    new_enthalpy = new_solution_ghost[0 : I + 2]
+    new_salt = new_solution_ghost[I + 2 : 2 * I + 4]
+    new_gas = new_solution_ghost[2 * I + 4 : 3 * I + 6]
+    new_pressure = new_solution_ghost[3 * I + 6 :]
+    new_phase_masks = get_phase_masks(
+        new_enthalpy,
+        new_salt,
+        new_gas,
+        params,
+    )
     (
         new_temperature,
         new_liquid_fraction,
         new_gas_fraction,
-        new_solid_fraction,
+        _,
         new_liquid_salinity,
         new_dissolved_gas,
     ) = calculate_enthalpy_method(
@@ -66,54 +135,55 @@ def calculate_residual(new_solution, solution, time, params, D_e, D_g):
     )
     Vg, Wl, V = calculate_velocities(new_liquid_fraction, new_pressure, D_g, params)
     new_permeability = calculate_absolute_permeability(geometric(new_liquid_fraction))
-    phase_masks = get_phase_masks(enthalpy, salt, gas, params)
-    (
-        temperature,
-        liquid_fraction,
-        gas_fraction,
-        solid_fraction,
-        liquid_salinity,
-        dissolved_gas,
-    ) = calculate_enthalpy_method(enthalpy, salt, gas, params, phase_masks)
-    pressure_residual = (
-        (new_gas_fraction[1:-1] - gas_fraction[1:-1]) / timestep
-        + np.matmul(D_e, upwind(new_gas_fraction, V))
-        - np.matmul(D_e, (-new_permeability - 1e-7) * np.matmul(D_g, new_pressure))
+
+    """initialise time derivatives enthalpy, salt, gas, gas_fraction on centers"""
+    time_derivs = np.zeros((4 * I,))
+    time_derivs[0 : 3 * I] = (1 / timestep) * (
+        new_solution[0 : 3 * I] - solution[0 : 3 * I]
     )
-    return np.hstack(
-        (enthalpy_residual, salt_residual, gas_residual, pressure_residual)
+    time_derivs[3 * I :] = (1 / timestep) * (
+        new_gas_fraction[1:-1] - gas_fraction[1:-1]
     )
+
+    """initialise ode_functions"""
+    ode_func = np.zeros((4 * I,))
+    ode_func[0:I] = (
+        np.matmul(D_e, np.matmul(D_g, new_temperature))
+        - np.matmul(D_e, upwind(new_temperature, Wl))
+        - np.matmul(D_e, upwind(new_enthalpy, V))
+    )
+    ode_func[I : 2 * I] = (
+        (1 / params.lewis_salt)
+        * np.matmul(
+            D_e, geometric(new_liquid_fraction) * np.matmul(D_g, new_liquid_salinity)
+        )
+        - np.matmul(D_e, upwind(new_salt, V))
+        - np.matmul(D_e, upwind(new_liquid_salinity + C, Wl))
+    )
+    ode_func[2 * I : 3 * I] = (
+        (chi / params.lewis_gas)
+        * np.matmul(
+            D_e, geometric(new_liquid_fraction) * np.matmul(D_g, new_dissolved_gas)
+        )
+        - np.matmul(D_e, upwind(new_gas, V))
+        - np.matmul(D_e, upwind(new_gas_fraction, Vg))
+        - np.matmul(D_e, upwind(chi * new_dissolved_gas, Wl))
+    )
+    ode_func[3 * I :] = -np.matmul(D_e, upwind(new_gas_fraction, V)) + np.matmul(
+        D_e, (-new_permeability - 1e-7) * np.matmul(D_g, new_pressure)
+    )
+
+    return time_derivs - ode_func
 
 
 def solve_non_linear_system(solution, time, params, D_e, D_g):
-    enthalpy, salt, gas, pressure = np.split(solution, 4)
-    guess = np.hstack((enthalpy[1:-1], salt[1:-1], gas[1:-1], pressure[1:-1]))
     new_solution = root(
         lambda x: calculate_residual(x, solution, time, params, D_e, D_g),
-        x0=guess,
+        x0=solution,
         method="krylov",
-        options={"maxiter": 3},
+        options={"maxiter": 5},
     )
-    return new_solution
-
-
-def take_timestep(enthalpy, salt, gas, pressure, time, params, D_e, D_g):
-    timestep = params.timestep
-
-    apply_boundary_conditions(enthalpy, salt, gas, pressure, time, params)
-
-    """initialise new solution vectors on ghost grid"""
-    enthalpy_new = np.copy(enthalpy)
-    salt_new = np.copy(salt)
-    gas_new = np.copy(gas)
-    pressure_new = np.copy(pressure)
-
-    solution = np.hstack((enthalpy_new, salt_new, gas_new, pressure_new))
-    solution_new = solve_non_linear_system(solution, time, params, D_e, D_g)
-    enthalpy_new[1:-1], salt_new[1:-1], gas_new[1:-1], pressure_new[1:-1] = np.split(
-        solution_new.x, 4
-    )
-    return enthalpy_new, salt_new, gas_new, pressure_new
+    return new_solution.x
 
 
 def solve(params):
@@ -128,6 +198,11 @@ def solve(params):
     D_e = get_difference_matrix(params.I, params.step)
     D_g = get_difference_matrix(params.I + 1, params.step)
 
+    """generate initial solutions on centers"""
+    enthalpy = enthalpy[1:-1]
+    salt = salt[1:-1]
+    gas = gas[1:-1]
+    pressure = pressure[1:-1]
     (
         stored_times,
         stored_enthalpy,
@@ -135,15 +210,15 @@ def solve(params):
         stored_gas,
         stored_pressure,
     ) = generate_storage_arrays(enthalpy, salt, gas, pressure)
+    solution = np.hstack((enthalpy, salt, gas, pressure))
     time_to_save = 0
     for n in tqdm(range(N)):
         time = n * params.timestep
         time_to_save += params.timestep
-        enthalpy, salt, gas, pressure = take_timestep(
-            enthalpy, salt, gas, pressure, time, params, D_e, D_g
-        )
+        solution = solve_non_linear_system(solution, time, params, D_e, D_g)
 
         if (time_to_save - params.savefreq) >= 0:
+            enthalpy, salt, gas, pressure = np.split(solution, 4)
             time_to_save = 0
             stored_times = np.append(stored_times, time)
             stored_enthalpy = np.vstack((stored_enthalpy, enthalpy))
