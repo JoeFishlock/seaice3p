@@ -1,4 +1,4 @@
-from scipy.optimize import root
+from scipy.optimize import root, fsolve
 import numpy as np
 from tqdm import tqdm
 from boundary_conditions import calculate_enthalpy_from_temp
@@ -138,12 +138,8 @@ def calculate_residual(new_solution, solution, time, params, D_e, D_g):
 
     """initialise time derivatives enthalpy, salt, gas, gas_fraction on centers"""
     time_derivs = np.zeros((4 * I,))
-    time_derivs[0 : 3 * I] = (1 / timestep) * (
-        new_solution[0 : 3 * I] - solution[0 : 3 * I]
-    )
-    time_derivs[3 * I :] = (1 / timestep) * (
-        new_gas_fraction[1:-1] - gas_fraction[1:-1]
-    )
+    time_derivs[0 : 3 * I] = new_solution[0 : 3 * I] - solution[0 : 3 * I]
+    time_derivs[3 * I :] = new_gas_fraction[1:-1] - gas_fraction[1:-1]
 
     """initialise ode_functions"""
     ode_func = np.zeros((4 * I,))
@@ -170,10 +166,10 @@ def calculate_residual(new_solution, solution, time, params, D_e, D_g):
         - np.matmul(D_e, upwind(chi * new_dissolved_gas, Wl))
     )
     ode_func[3 * I :] = -np.matmul(D_e, upwind(new_gas_fraction, V)) + np.matmul(
-        D_e, (-new_permeability - 1e-7) * np.matmul(D_g, new_pressure)
+        D_e, (-new_permeability) * np.matmul(D_g, new_pressure)
     )
 
-    return time_derivs - ode_func
+    return time_derivs - timestep * ode_func
 
 
 def solve_non_linear_system(solution, time, params, D_e, D_g):
