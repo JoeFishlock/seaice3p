@@ -28,6 +28,8 @@ class Params:
     liquid_velocity: float = 0.0
     temperature_forcing_choice: str = "constant"
     constant_top_temperature: float = -1.5
+    CFL_limit = 0.5
+    Courant_limit = 0.4
 
     @property
     def step(self):

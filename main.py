@@ -1,10 +1,10 @@
 import numpy as np
 from params import Params
-from iterative_solver import solve
+from lagged_solver import solve
 from enthalpy_method import get_phase_masks, calculate_enthalpy_method
 from velocities import calculate_velocities
 import matplotlib.pyplot as plt
-from grids import initialise_grids, get_difference_matrix
+from grids import initialise_grids, get_difference_matrix, upwind
 
 plt.style.use(["science", "grid"])
 base = Params(
@@ -40,29 +40,43 @@ res = Params(
 # solve(res)
 # print("Done solve")
 
-profile = Params(
-    name="profile",
-    total_time=4,
+# profile = Params(
+#     name="profile",
+#     total_time=4,
+#     temperature_forcing_choice="yearly",
+#     constant_top_temperature=-1.5,
+#     savefreq=1e-2,
+#     bubble_radius_scaled=0.1,
+#     far_gas_sat=1,
+#     timestep=1.6e-4,
+#     I=50,
+# )
+# solve(profile)
+# print("Done simulation")
+
+adapt = Params(
+    name="adapt",
+    total_time=8,
     temperature_forcing_choice="yearly",
-    constant_top_temperature=-1.5,
-    savefreq=1e-2,
+    # constant_top_temperature=-1.5,
+    savefreq=1e-1,
     bubble_radius_scaled=0.1,
     far_gas_sat=1,
-    timestep=7e-6,
-    I=100,
+    timestep=1.6e-4,
+    I=50,
 )
-solve(profile)
+solve(adapt)
 print("Done simulation")
 
 """Analysis"""
-with np.load("data/profile.npz") as data:
+with np.load("data/adapt.npz") as data:
     enthalpy = data["enthalpy"]
     salt = data["salt"]
     gas = data["gas"]
     pressure = data["pressure"]
     times = data["times"]
 
-phase_masks = get_phase_masks(enthalpy, salt, gas, profile)
+phase_masks = get_phase_masks(enthalpy, salt, gas, adapt)
 (
     temperature,
     liquid_fraction,
@@ -70,18 +84,74 @@ phase_masks = get_phase_masks(enthalpy, salt, gas, profile)
     solid_fraction,
     liquid_salinity,
     dissolved_gas,
-) = calculate_enthalpy_method(enthalpy, salt, gas, profile, phase_masks)
-D_g = get_difference_matrix(profile.I + 1, profile.step)
-Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, profile)
-step, centers, edges, ghosts = initialise_grids(profile.I)
+) = calculate_enthalpy_method(enthalpy, salt, gas, adapt, phase_masks)
+D_g = get_difference_matrix(adapt.I + 1, adapt.step)
+Vg, Wl, V = calculate_velocities(
+    liquid_fraction, enthalpy, salt, gas, pressure, D_g, adapt
+)
+step, centers, edges, ghosts = initialise_grids(adapt.I)
 for n, _ in enumerate(temperature[0, :]):
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        temperature[:, n],
+        ghosts,
+        "r*--",
+    )
+    plt.savefig(f"frames_adapt/temperature{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        Wl[:, n],
+        edges,
+        "b*--",
+    )
+    plt.savefig(f"frames_adapt/Wl{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        upwind(gas_fraction[:, n], Vg[:, n]),
+        edges,
+        "g*--",
+    )
+    plt.savefig(f"frames_adapt/Wg{n}.pdf")
+    plt.close()
+
     plt.figure(figsize=(5, 5))
     plt.plot(
         gas_fraction[:, n],
         ghosts,
         "g*--",
     )
-    plt.savefig(f"frames_profile/gas_fraction{n}.pdf")
+    plt.savefig(f"frames_adapt/gas_fraction{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        solid_fraction[:, n],
+        ghosts,
+        "r*--",
+    )
+    plt.savefig(f"frames_adapt/solid_fraction{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        salt[:, n],
+        ghosts,
+        "b*--",
+    )
+    plt.savefig(f"frames_adapt/salt{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        gas[:, n],
+        ghosts,
+        "g*--",
+    )
+    plt.savefig(f"frames_adapt/gas{n}.pdf")
     plt.close()
 
 # l, L, m, M, e, E, s, S = phase_masks

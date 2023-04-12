@@ -36,3 +36,11 @@ def geometric(ghosts):
     upper_ghosts = ghosts[1:]
     lower_ghosts = ghosts[:-1]
     return np.sqrt(upper_ghosts * lower_ghosts)
+
+
+def average(ghosts, params):
+    A = np.zeros((params.I, params.I + 2))
+    for i in range(params.I):
+        A[i, i] = 0.5
+        A[i, i + 2] = 0.5
+    return np.matmul(A, ghosts)
