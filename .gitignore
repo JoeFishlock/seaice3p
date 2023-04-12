@@ -5,3 +5,4 @@ data/
 *.pdf
 *.nb
 *.prof
+.DS_Store
