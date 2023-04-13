@@ -264,7 +264,9 @@ def solve(params):
             enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g
         )
         time_to_save += timestep
-        print(f"time={time:.3f}, timestep={timestep:.2g}")
+        print(
+            f"time={time:.3f}/{params.total_time}, timestep={timestep:.2g} \r", end=""
+        )
         if np.min(salt) < -params.concentration_ratio:
             raise ValueError("salt crash")
 
@@ -281,4 +283,6 @@ def solve(params):
     save_storage(
         stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure, params
     )
+    # clear line after carriage return
+    print("")
     return 0, "solve complete"
