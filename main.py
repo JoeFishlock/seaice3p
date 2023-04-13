@@ -1,7 +1,7 @@
 """Celestine version 0.1.0"""
 import numpy as np
 from params import Params
-from lagged_solver import solve
+from lax_friedrich_solver import solve
 from enthalpy_method import get_phase_masks, calculate_enthalpy_method
 from velocities import calculate_velocities
 import matplotlib.pyplot as plt
