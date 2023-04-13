@@ -58,8 +58,6 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     C = params.concentration_ratio
 
     new_time = time + timestep
-    top_temperature = get_temperature_forcing(time, params)
-    top_enthalpy = calculate_enthalpy_from_temp(0, 0, top_temperature, params)
     new_top_temperature = get_temperature_forcing(new_time, params)
     new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, params)
 
@@ -94,29 +92,23 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     new_gas[0] = chi
 
     # Upwinding
-    new_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
-        np.matmul(D_e, np.matmul(D_g, temperature))
-        - np.matmul(D_e, upwind(temperature, Wl))
-        - np.matmul(D_e, upwind(enthalpy, V))
+    upwind_enthalpy_flux = (
+        -(D_g @ temperature) + upwind(temperature, Wl) + upwind(enthalpy, V)
     )
-    # new_salt[1:-1] = salt[1:-1] + timestep * (
-    #     (1 / params.lewis_salt)
-    #     * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity))
-    #     - np.matmul(D_e, upwind(salt, V))
-    #     - np.matmul(D_e, upwind(liquid_salinity + C, Wl))
-    # )
-    # new_gas[1:-1] = gas[1:-1] + timestep * (
-    #     (chi / params.lewis_gas)
-    #     * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas))
-    #     - np.matmul(D_e, upwind(gas, V))
-    #     - np.matmul(D_e, upwind(gas_fraction, Vg))
-    #     - np.matmul(D_e, upwind(chi * dissolved_gas, Wl))
-    # )
+    upwind_salt_flux = (
+        -(1 / params.lewis_salt)
+        * (geometric(liquid_fraction) * (D_g @ liquid_salinity))
+        + upwind(salt, V)
+        + upwind(liquid_salinity + C, Wl)
+    )
+    upwind_gas_flux = (
+        -(chi / params.lewis_gas) * (geometric(liquid_fraction) * (D_g @ dissolved_gas))
+        + upwind(gas, V)
+        + upwind(gas_fraction, Vg)
+        + upwind(chi * dissolved_gas, Wl)
+    )
 
     # Lax Friedrich
-    enthalpy_no_flux = np.insert(enthalpy[1:-1], 0, enthalpy[0])
-    enthalpy_no_flux = np.append(enthalpy_no_flux, enthalpy[-1])
-
     salt_no_flux = np.insert(salt[1:-1], 0, salt[0])
     salt_no_flux = np.append(salt_no_flux, salt[-1])
 
@@ -131,7 +123,7 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         -(1 / params.lewis_salt) * geometric(liquid_fraction) * (D_g @ liquid_salinity)
     )
     salt_LF_diffusion = -numerical_diffusivity * (D_g @ salt_no_flux)
-    salt_flux = (
+    LF_salt_flux = (
         salt_frame_advection
         + salt_liquid_advection
         + salt_diffusion
@@ -145,16 +137,29 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         -(chi / params.lewis_gas) * geometric(liquid_fraction) * (D_g @ dissolved_gas)
     )
     gas_LF_diffusion = -numerical_diffusivity * (D_g @ gas_no_flux)
-    gas_flux = (
+    LF_gas_flux = (
         gas_frame_advection
         + gas_bubble_advection
         + gas_liquid_advection
         + gas_diffusion
         + gas_LF_diffusion
     )
+    # this works to prevent salt diffusion in solid and for small gas bubbles
+    # However for more general case condition for gas flux should perhaps be when
+    # R_B = R_T
+    is_solid = geometric(liquid_fraction) == 0
+    # Must always upwind on the boundaries to avoid using incomplete information here
+    is_solid[-1] = True
+    is_solid[0] = True
 
+    enthalpy_flux = upwind_enthalpy_flux
+    salt_flux = np.where(is_solid, upwind_salt_flux, LF_salt_flux)
+    gas_flux = np.where(is_solid, upwind_gas_flux, LF_gas_flux)
+
+    new_enthalpy[1:-1] = enthalpy[1:-1] - timestep * (D_e @ enthalpy_flux)
     new_salt[1:-1] = salt[1:-1] - timestep * (D_e @ salt_flux)
     new_gas[1:-1] = gas[1:-1] - timestep * (D_e @ gas_flux)
+
     new_phase_masks = get_phase_masks(
         new_enthalpy,
         new_salt,
