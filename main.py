@@ -1,3 +1,4 @@
+"""Celestine version 0.1.0"""
 import numpy as np
 from params import Params
 from lagged_solver import solve
