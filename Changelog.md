@@ -1,0 +1,14 @@
+# Changelog
+
+## v0.1.0 (13/04/2023)
+
+- Simulate bubbles in a mushy layer in 1D using the enthalpy method with given surface forcing.
+- Phase fractions of solid, liquid and gas must sum to one and so bubble nucleation and motion drives a liquid flow.
+- Implemented a variety of implicit and semi-implicit solvers as calculating liquid velocity from pressure solver requires knowlege of gas fraction time derivative.
+- Backward euler approach uses scipy root findding (krylov solver) to solve non linear system of residuals.
+- Iterative solver performs a fixed point iteration for each timestep until residuals are suitably lows.
+- Lagged solver assumes velocity calculated in between each timestep, this will introduce some error in the flow calculated.
+
+# Problems
+
+- All of these methods seem to suffer instabilities when gas accumulates below an impermeable eutectic layer which melts as surface temperature forcing warms.
