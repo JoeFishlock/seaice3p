@@ -13,7 +13,7 @@ base = Params(
     total_time=4,
     bubble_radius_scaled=0.1,
     temperature_forcing_choice="yearly",
-    savefreq=1e-2,
+    savefreq=5e-2,
 )
 solve(base)
 print("Done solve")
@@ -48,5 +48,14 @@ for n, _ in enumerate(temperature[0, :]):
         ghosts,
         "g*--",
     )
-    plt.savefig(f"frames/gas_fraction{n}.pdf")
+    plt.savefig(f"frames/gas_fraction/gas_fraction{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        salt[:, n],
+        ghosts,
+        "b*--",
+    )
+    plt.savefig(f"frames/salt/salt{n}.pdf")
     plt.close()
