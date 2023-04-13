@@ -15,14 +15,6 @@ from grids import (
 from velocities import calculate_velocities, calculate_absolute_permeability
 
 
-def get_average_matrix(I):
-    Ag = np.zeros((I, I + 2))
-    for i in range(I):
-        Ag[i, i] = 0.5
-        Ag[i, i + 2] = 0.5
-    return Ag
-
-
 def generate_initial_solution(params, length):
     """Generate initial solution on the ghost grid"""
     bottom_enthalpy = calculate_enthalpy_from_temp(
@@ -102,11 +94,11 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     new_gas[0] = chi
 
     # Upwinding
-    # new_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
-    #     np.matmul(D_e, np.matmul(D_g, temperature))
-    #     - np.matmul(D_e, upwind(temperature, Wl))
-    #     - np.matmul(D_e, upwind(enthalpy, V))
-    # )
+    new_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
+        np.matmul(D_e, np.matmul(D_g, temperature))
+        - np.matmul(D_e, upwind(temperature, Wl))
+        - np.matmul(D_e, upwind(enthalpy, V))
+    )
     # new_salt[1:-1] = salt[1:-1] + timestep * (
     #     (1 / params.lewis_salt)
     #     * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity))
@@ -131,26 +123,38 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     gas_no_flux = np.insert(gas[1:-1], 0, gas[0])
     gas_no_flux = np.append(gas_no_flux, gas[-1])
 
-    average_matrix = get_average_matrix(params.I)
+    numerical_diffusivity = (params.step**2) / (2 * timestep)
 
-    new_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
-        np.matmul(D_e, np.matmul(D_g, temperature))
-        # - np.matmul(D_e, Wl * average(temperature))
-        # - np.matmul(D_e, average(enthalpy) * V)
+    salt_frame_advection = V * average(salt)
+    salt_liquid_advection = Wl * (average(liquid_salinity) + C)
+    salt_diffusion = (
+        -(1 / params.lewis_salt) * geometric(liquid_fraction) * (D_g @ liquid_salinity)
     )
-    new_salt[1:-1] = (average_matrix @ salt_no_flux) + timestep * (
-        (1 / params.lewis_salt)
-        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity))
-        - np.matmul(D_e, V * average(salt))
-        - np.matmul(D_e, Wl * average(liquid_salinity + C))
+    salt_LF_diffusion = -numerical_diffusivity * (D_g @ salt_no_flux)
+    salt_flux = (
+        salt_frame_advection
+        + salt_liquid_advection
+        + salt_diffusion
+        + salt_LF_diffusion
     )
-    new_gas[1:-1] = (average_matrix @ gas_no_flux) + timestep * (
-        (chi / params.lewis_gas)
-        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas))
-        - np.matmul(D_e, V * average(gas))
-        - np.matmul(D_e, Vg * average(gas_fraction))
-        - np.matmul(D_e, Wl * average(chi * dissolved_gas))
+
+    gas_frame_advection = V * average(gas)
+    gas_bubble_advection = average(gas_fraction) * Vg
+    gas_liquid_advection = chi * Wl * average(dissolved_gas)
+    gas_diffusion = (
+        -(chi / params.lewis_gas) * geometric(liquid_fraction) * (D_g @ dissolved_gas)
     )
+    gas_LF_diffusion = -numerical_diffusivity * (D_g @ gas_no_flux)
+    gas_flux = (
+        gas_frame_advection
+        + gas_bubble_advection
+        + gas_liquid_advection
+        + gas_diffusion
+        + gas_LF_diffusion
+    )
+
+    new_salt[1:-1] = salt[1:-1] - timestep * (D_e @ salt_flux)
+    new_gas[1:-1] = gas[1:-1] - timestep * (D_e @ gas_flux)
     new_phase_masks = get_phase_masks(
         new_enthalpy,
         new_salt,
