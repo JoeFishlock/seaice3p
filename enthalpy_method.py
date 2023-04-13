@@ -2,9 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from phase_boundaries import get_phase_masks
 from params import Params
-import scienceplots
-
-plt.style.use(["science", "grid"])
 
 
 def calculate_temperature(enthalpy, salt, gas, params: Params, phase_masks):
