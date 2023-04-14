@@ -4,6 +4,7 @@ dev/
 frames*/
 data/
 *.pdf
+*.svg
 *.nb
 *.prof
 .DS_Store
