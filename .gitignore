@@ -6,3 +6,4 @@ data/
 *.nb
 *.prof
 .DS_Store
+*scratch.py

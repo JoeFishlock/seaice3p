@@ -1,9 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scienceplots
 from params import Params
-
-plt.style.use(["science", "ieee", "grid"])
 
 
 def calculate_liquidus(salt, gas, params):

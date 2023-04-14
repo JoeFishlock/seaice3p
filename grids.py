@@ -38,9 +38,12 @@ def geometric(ghosts):
     return np.sqrt(upper_ghosts * lower_ghosts)
 
 
-def average(ghosts, params):
-    A = np.zeros((params.I, params.I + 2))
-    for i in range(params.I):
-        A[i, i] = 0.5
-        A[i, i + 2] = 0.5
-    return np.matmul(A, ghosts)
+def average(ghosts):
+    """Returns arithmetic mean pairwise of first dimension of an array
+
+    This should get values on the ghost grid and returns the arithmetic average
+    onto the edge grid
+    """
+    upper_ghosts = ghosts[1:]
+    lower_ghosts = ghosts[:-1]
+    return 0.5 * (upper_ghosts + lower_ghosts)

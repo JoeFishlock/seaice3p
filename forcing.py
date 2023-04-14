@@ -11,7 +11,7 @@ def constant_temperature_forcing(time, params):
 
 
 def yearly_temperature_forcing(time, params):
-    return 0.75 * (np.cos(time * 2 * np.pi / (8)) - 1)
+    return 0.75 * (np.cos(time * 2 * np.pi / (4)) - 1)
 
 
 TEMPERATURE_FORCINGS = {
