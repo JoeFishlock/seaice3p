@@ -1,5 +1,6 @@
 **/__pycache__/**
 venv/
+dev/
 frames*/
 data/
 *.pdf
