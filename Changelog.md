@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.2.0 (14/04/2023) ##
+
+### Docs ###
+
+- add requirements in requirements.txt file
+
+### Added ###
+
+- lax friedrich solver (still upwind enthalpy, boundary values and solid regions)
+
+## Removed ##
+
+- remove dependency on scienceplots
+
+### Changed ###
+
+- change yearly temperature forcing period to be 4 units of time
+- function to compute cell edge values as arithmetic mean of centers
+- main function just run one yearly simulation with small bubbles and plot gas fraction and bulk salinity for debugging
+
 ## v0.1.0 (13/04/2023)
 
 - Simulate bubbles in a mushy layer in 1D using the enthalpy method with given surface forcing.

@@ -1,4 +1,4 @@
-"""Celestine version 0.1.0"""
+"""Celestine version 0.2.0"""
 import numpy as np
 from params import Params
 from lax_friedrich_solver import solve
