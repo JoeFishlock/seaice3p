@@ -1,3 +1,5 @@
+"""DEPRECATED since refactoring params objects into Config and moving into package"""
+
 import time
 import numpy as np
 from scipy.optimize import root

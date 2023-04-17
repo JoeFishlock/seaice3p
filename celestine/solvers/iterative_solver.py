@@ -1,3 +1,5 @@
+"""DEPRECATED since refactoring params objects into Config and moving into package"""
+
 import numpy as np
 from tqdm import tqdm
 from boundary_conditions import calculate_enthalpy_from_temp

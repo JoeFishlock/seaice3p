@@ -1,3 +1,5 @@
+"""DEPRECATED since refactoring params objects into Config and moving into package"""
+
 from scipy.optimize import root, fsolve
 import numpy as np
 from tqdm import tqdm
