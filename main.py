@@ -1,4 +1,4 @@
-"""Celestine version 0.2.0"""
+"""Celestine"""
 import numpy as np
 from celestine.params import Config, DarcyLawParams, ForcingConfig
 from celestine.solvers.lax_friedrich_solver import solve
@@ -7,8 +7,10 @@ from celestine.velocities import calculate_velocities
 import matplotlib.pyplot as plt
 from celestine.grids import initialise_grids, get_difference_matrix
 from celestine.logging_config import logger, log_time
+from celestine.__init__ import __version__
 
-logger.info("Celestine version 0.2.0")
+logger.info(f"Celestine version {__version__}")
+
 
 base = Config(
     name="base",
