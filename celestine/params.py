@@ -55,7 +55,7 @@ class NumericalParams:
     regularisation: float = 1e-6
     CFL_limit = 0.5
     Courant_limit = 0.4
-    solver: str = "euler"
+    solver: str = "LXF"
 
     @property
     def step(self):
