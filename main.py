@@ -1,6 +1,6 @@
 """Celestine version 0.2.0"""
 import numpy as np
-from params import Params
+from params import Config, DarcyLawParams, ForcingConfig
 from lax_friedrich_solver import solve
 from enthalpy_method import get_phase_masks, calculate_enthalpy_method
 from velocities import calculate_velocities
@@ -10,15 +10,14 @@ from logging_config import logger, log_time
 
 logger.info("Celestine version 0.2.0")
 
-base = Params(
+base = Config(
     name="base",
-    far_gas_sat=1,
     total_time=4,
-    bubble_radius_scaled=0.1,
-    temperature_forcing_choice="yearly",
     savefreq=5e-2,
+    darcy_law_params=DarcyLawParams(bubble_radius_scaled=0.1),
+    forcing_config=ForcingConfig(temperature_forcing_choice="yearly"),
 )
-
+base.save()
 status, duration = solve(base)
 log_time(logger, duration, message="solve ran in ")
 
@@ -30,8 +29,8 @@ with np.load("data/base.npz") as data:
     gas = data["gas"]
     pressure = data["pressure"]
     times = data["times"]
-
-phase_masks = get_phase_masks(enthalpy, salt, gas, base)
+cfg = Config.load("data/base.yml")
+phase_masks = get_phase_masks(enthalpy, salt, gas, cfg)
 (
     temperature,
     liquid_fraction,
@@ -39,12 +38,12 @@ phase_masks = get_phase_masks(enthalpy, salt, gas, base)
     solid_fraction,
     liquid_salinity,
     dissolved_gas,
-) = calculate_enthalpy_method(enthalpy, salt, gas, base, phase_masks)
-D_g = get_difference_matrix(base.I + 1, base.step)
+) = calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks)
+D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.step)
 Vg, Wl, V = calculate_velocities(
-    liquid_fraction, enthalpy, salt, gas, pressure, D_g, base
+    liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
 )
-step, centers, edges, ghosts = initialise_grids(base.I)
+step, centers, edges, ghosts = initialise_grids(cfg.numerical_params.I)
 for n, _ in enumerate(temperature[0, :]):
     plt.figure(figsize=(5, 5))
     plt.plot(

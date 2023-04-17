@@ -14,19 +14,25 @@ from grids import (
 )
 from velocities import calculate_velocities, calculate_absolute_permeability
 from logging_config import time_function
+from params import Config
 
 
-def generate_initial_solution(params, length):
+def generate_initial_solution(cfg: Config, length):
     """Generate initial solution on the ghost grid"""
     bottom_enthalpy = calculate_enthalpy_from_temp(
-        params.concentration_ratio,
-        params.expansion_coefficient * params.far_gas_sat,
-        params.far_temp,
-        params,
+        cfg.physical_params.concentration_ratio,
+        cfg.physical_params.expansion_coefficient
+        * cfg.boundary_conditions_config.far_gas_sat,
+        cfg.boundary_conditions_config.far_temp,
+        cfg,
     )
     enthalpy = np.full((length,), bottom_enthalpy)
     salt = np.full_like(enthalpy, 0)
-    gas = np.full_like(enthalpy, params.expansion_coefficient * params.far_gas_sat)
+    gas = np.full_like(
+        enthalpy,
+        cfg.physical_params.expansion_coefficient
+        * cfg.boundary_conditions_config.far_gas_sat,
+    )
     pressure = np.full_like(enthalpy, 0)
     return enthalpy, salt, gas, pressure
 
@@ -41,10 +47,10 @@ def generate_storage_arrays(enthalpy, salt, gas, pressure):
 
 
 def save_storage(
-    stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure, params
+    stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure, cfg: Config
 ):
     np.savez(
-        f"{params.data_path}{params.name}.npz",
+        f"{cfg.data_path}{cfg.name}.npz",
         times=stored_times,
         enthalpy=np.transpose(stored_enthalpy),
         salt=np.transpose(stored_salt),
@@ -53,20 +59,20 @@ def save_storage(
     )
 
 
-def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
-    I = params.I
-    chi = params.expansion_coefficient
-    C = params.concentration_ratio
+def take_timestep(enthalpy, salt, gas, pressure, time, timestep, cfg: Config, D_e, D_g):
+    I = cfg.numerical_params.I
+    chi = cfg.physical_params.expansion_coefficient
+    C = cfg.physical_params.concentration_ratio
 
     new_time = time + timestep
-    new_top_temperature = get_temperature_forcing(new_time, params)
-    new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, params)
+    new_top_temperature = get_temperature_forcing(new_time, cfg)
+    new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, cfg)
 
     phase_masks = get_phase_masks(
         enthalpy,
         salt,
         gas,
-        params,
+        cfg,
     )
     (
         temperature,
@@ -75,9 +81,9 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         _,
         liquid_salinity,
         dissolved_gas,
-    ) = calculate_enthalpy_method(enthalpy, salt, gas, params, phase_masks)
+    ) = calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks)
     Vg, Wl, V = calculate_velocities(
-        liquid_fraction, enthalpy, salt, gas, pressure, D_g, params
+        liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
     )
 
     new_enthalpy = np.zeros((I + 2,))
@@ -86,7 +92,7 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     new_pressure = np.zeros((I + 2,))
 
     new_enthalpy[-1] = new_top_enthalpy
-    new_enthalpy[0] = params.far_temp
+    new_enthalpy[0] = cfg.boundary_conditions_config.far_temp
     new_salt[-1] = 0
     new_salt[0] = 0
     new_gas[-1] = 0
@@ -97,13 +103,14 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         -(D_g @ temperature) + upwind(temperature, Wl) + upwind(enthalpy, V)
     )
     upwind_salt_flux = (
-        -(1 / params.lewis_salt)
+        -(1 / cfg.physical_params.lewis_salt)
         * (geometric(liquid_fraction) * (D_g @ liquid_salinity))
         + upwind(salt, V)
         + upwind(liquid_salinity + C, Wl)
     )
     upwind_gas_flux = (
-        -(chi / params.lewis_gas) * (geometric(liquid_fraction) * (D_g @ dissolved_gas))
+        -(chi / cfg.physical_params.lewis_gas)
+        * (geometric(liquid_fraction) * (D_g @ dissolved_gas))
         + upwind(gas, V)
         + upwind(gas_fraction, Vg)
         + upwind(chi * dissolved_gas, Wl)
@@ -116,12 +123,14 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     gas_no_flux = np.insert(gas[1:-1], 0, gas[0])
     gas_no_flux = np.append(gas_no_flux, gas[-1])
 
-    numerical_diffusivity = (params.step**2) / (2 * timestep)
+    numerical_diffusivity = (cfg.numerical_params.step**2) / (2 * timestep)
 
     salt_frame_advection = V * average(salt)
     salt_liquid_advection = Wl * (average(liquid_salinity) + C)
     salt_diffusion = (
-        -(1 / params.lewis_salt) * geometric(liquid_fraction) * (D_g @ liquid_salinity)
+        -(1 / cfg.physical_params.lewis_salt)
+        * geometric(liquid_fraction)
+        * (D_g @ liquid_salinity)
     )
     salt_LF_diffusion = -numerical_diffusivity * (D_g @ salt_no_flux)
     LF_salt_flux = (
@@ -135,7 +144,9 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     gas_bubble_advection = average(gas_fraction) * Vg
     gas_liquid_advection = chi * Wl * average(dissolved_gas)
     gas_diffusion = (
-        -(chi / params.lewis_gas) * geometric(liquid_fraction) * (D_g @ dissolved_gas)
+        -(chi / cfg.physical_params.lewis_gas)
+        * geometric(liquid_fraction)
+        * (D_g @ dissolved_gas)
     )
     gas_LF_diffusion = -numerical_diffusivity * (D_g @ gas_no_flux)
     LF_gas_flux = (
@@ -165,7 +176,7 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         new_enthalpy,
         new_salt,
         new_gas,
-        params,
+        cfg,
     )
     (
         new_temperature,
@@ -174,9 +185,7 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         _,
         new_liquid_salinity,
         new_dissolved_gas,
-    ) = calculate_enthalpy_method(
-        new_enthalpy, new_salt, new_gas, params, new_phase_masks
-    )
+    ) = calculate_enthalpy_method(new_enthalpy, new_salt, new_gas, cfg, new_phase_masks)
     # toggle this to old liquid fraction to see if it makes any difference
     new_permeability = calculate_absolute_permeability(geometric(new_liquid_fraction))
 
@@ -195,15 +204,15 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     pressure_matrix[-1, -2] = -1
     new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
 
-    step, _, _, _ = initialise_grids(params.I)
+    step, _, _, _ = initialise_grids(cfg.numerical_params.I)
 
     # Calculation for adaptive timestepping
     CFL_timesteps = (
-        params.CFL_limit
+        cfg.numerical_params.CFL_limit
         * step
         / np.where(np.abs(upwind(gas_fraction, Vg)) > 0, np.abs(Vg), 1e-10)
     )
-    Courant_timesteps = params.Courant_limit * step**2
+    Courant_timesteps = cfg.numerical_params.Courant_limit * step**2
     CFL_min_timestep = np.min(CFL_timesteps)
     Courant_min_timestep = np.min(Courant_timesteps)
     min_timestep = min(CFL_min_timestep, Courant_min_timestep)
@@ -211,7 +220,7 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     return new_enthalpy, new_salt, new_gas, new_pressure, new_time, min_timestep
 
 
-def advance(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
+def advance(enthalpy, salt, gas, pressure, time, timestep, cfg: Config, D_e, D_g):
     (
         new_enthalpy,
         new_salt,
@@ -219,7 +228,7 @@ def advance(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
         new_pressure,
         new_time,
         min_timestep,
-    ) = take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g)
+    ) = take_timestep(enthalpy, salt, gas, pressure, time, timestep, cfg, D_e, D_g)
     while timestep > min_timestep:
         timestep = min_timestep
         (
@@ -229,9 +238,7 @@ def advance(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
             new_pressure,
             new_time,
             min_timestep,
-        ) = take_timestep(
-            enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g
-        )
+        ) = take_timestep(enthalpy, salt, gas, pressure, time, timestep, cfg, D_e, D_g)
 
     return (
         new_enthalpy,
@@ -245,12 +252,14 @@ def advance(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
 
 
 @time_function
-def solve(params):
-    enthalpy, salt, gas, pressure = generate_initial_solution(params, params.I + 2)
-    T = params.total_time
-    timestep = params.timestep
-    D_e = get_difference_matrix(params.I, params.step)
-    D_g = get_difference_matrix(params.I + 1, params.step)
+def solve(cfg: Config):
+    enthalpy, salt, gas, pressure = generate_initial_solution(
+        cfg, cfg.numerical_params.I + 2
+    )
+    T = cfg.total_time
+    timestep = cfg.numerical_params.timestep
+    D_e = get_difference_matrix(cfg.numerical_params.I, cfg.numerical_params.step)
+    D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.step)
 
     (
         stored_times,
@@ -263,18 +272,16 @@ def solve(params):
     time = 0
     while time < T:
         enthalpy, salt, gas, pressure, time, timestep, min_timestep = advance(
-            enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g
+            enthalpy, salt, gas, pressure, time, timestep, cfg, D_e, D_g
         )
         time_to_save += timestep
-        print(
-            f"time={time:.3f}/{params.total_time}, timestep={timestep:.2g} \r", end=""
-        )
-        if np.min(salt) < -params.concentration_ratio:
+        print(f"time={time:.3f}/{cfg.total_time}, timestep={timestep:.2g} \r", end="")
+        if np.min(salt) < -cfg.physical_params.concentration_ratio:
             raise ValueError("salt crash")
 
         timestep = min_timestep
 
-        if (time_to_save - params.savefreq) >= 0:
+        if (time_to_save - cfg.savefreq) >= 0:
             time_to_save = 0
             stored_times = np.append(stored_times, time)
             stored_enthalpy = np.vstack((stored_enthalpy, enthalpy))
@@ -283,7 +290,7 @@ def solve(params):
             stored_pressure = np.vstack((stored_pressure, pressure))
 
     save_storage(
-        stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure, params
+        stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure, cfg
     )
     # clear line after carriage return
     print("")
