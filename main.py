@@ -6,6 +6,9 @@ from enthalpy_method import get_phase_masks, calculate_enthalpy_method
 from velocities import calculate_velocities
 import matplotlib.pyplot as plt
 from grids import initialise_grids, get_difference_matrix
+from logging_config import logger, log_time
+
+logger.info("Celestine version 0.2.0")
 
 base = Params(
     name="base",
@@ -15,8 +18,9 @@ base = Params(
     temperature_forcing_choice="yearly",
     savefreq=5e-2,
 )
-solve(base)
-print("Done solve")
+
+status, duration = solve(base)
+log_time(logger, duration, message="solve ran in ")
 
 
 """Analysis"""

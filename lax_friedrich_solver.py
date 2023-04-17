@@ -13,6 +13,7 @@ from grids import (
     average,
 )
 from velocities import calculate_velocities, calculate_absolute_permeability
+from logging_config import time_function
 
 
 def generate_initial_solution(params, length):
@@ -243,6 +244,7 @@ def advance(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
     )
 
 
+@time_function
 def solve(params):
     enthalpy, salt, gas, pressure = generate_initial_solution(params, params.I + 2)
     T = params.total_time
@@ -285,4 +287,4 @@ def solve(params):
     )
     # clear line after carriage return
     print("")
-    return 0, "solve complete"
+    return 0
