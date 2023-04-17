@@ -3,6 +3,3 @@
 ***********************************************************************
 
 * refactor the lax friedrich solver using the template design pattern
-
-* separate the parameters object into multiple objects
-We want to group numerical parameters differently to physical parameters.
