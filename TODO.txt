@@ -2,6 +2,8 @@
 *                                TODOS                                *
 ***********************************************************************
 
+* add forcing options for yearly forcing
+
 * Use template pattern to implement different solvers
 
 * Implement standard way of testing if different simulations run
