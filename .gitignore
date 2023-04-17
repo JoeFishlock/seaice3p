@@ -1,9 +1,12 @@
 **/__pycache__/**
 venv/
+dev/
 frames*/
 data/
 *.pdf
+*.svg
 *.nb
 *.prof
 .DS_Store
 *scratch.py
+*.log

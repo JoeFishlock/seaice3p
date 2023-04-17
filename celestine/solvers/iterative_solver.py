@@ -1,3 +1,5 @@
+"""DEPRECATED since refactoring params objects into Config and moving into package"""
+
 import numpy as np
 from tqdm import tqdm
 from boundary_conditions import calculate_enthalpy_from_temp
@@ -9,14 +11,7 @@ from enthalpy_method import (
     calculate_liquid_fraction,
     calculate_gas_fraction,
 )
-from grids import (
-    get_difference_matrix,
-    get_number_of_timesteps,
-    upwind,
-    geometric,
-    initialise_grids,
-    average,
-)
+from grids import get_difference_matrix, get_number_of_timesteps, upwind, geometric
 from velocities import calculate_velocities, calculate_absolute_permeability
 
 
@@ -57,7 +52,22 @@ def save_storage(
     )
 
 
-def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
+def iterate(
+    new_enthalpy,
+    new_salt,
+    new_gas,
+    new_pressure,
+    enthalpy,
+    salt,
+    gas,
+    pressure,
+    time,
+    params,
+    D_e,
+    D_g,
+):
+    """supply variables on ghost grid with BCs"""
+    timestep = params.timestep
     I = params.I
     chi = params.expansion_coefficient
     C = params.concentration_ratio
@@ -68,6 +78,7 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     top_enthalpy = calculate_enthalpy_from_temp(0, 0, top_temperature, params)
     new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, params)
 
+    """calculate gas fraction for time derivative in pressure residual"""
     phase_masks = get_phase_masks(
         enthalpy,
         salt,
@@ -82,42 +93,8 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
         liquid_salinity,
         dissolved_gas,
     ) = calculate_enthalpy_method(enthalpy, salt, gas, params, phase_masks)
-    Vg, Wl, V = calculate_velocities(
-        liquid_fraction, enthalpy, salt, gas, pressure, D_g, params
-    )
 
-    new_enthalpy = np.zeros((I + 2,))
-    new_salt = np.zeros((I + 2,))
-    new_gas = np.zeros((I + 2,))
-    new_pressure = np.zeros((I + 2,))
-
-    new_enthalpy[-1] = new_top_enthalpy
-    new_enthalpy[0] = params.far_temp
-    new_salt[-1] = 0
-    new_salt[0] = 0
-    new_gas[-1] = 0
-    new_gas[0] = chi
-
-    new_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
-        np.matmul(D_e, np.matmul(D_g, temperature))
-        - np.matmul(D_e, upwind(temperature, Wl))
-        - np.matmul(D_e, upwind(enthalpy, V))
-    )
-    new_salt[1:-1] = salt[1:-1] + timestep * (
-        (1 / params.lewis_salt)
-        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity))
-        - np.matmul(D_e, upwind(salt, V))
-        - np.matmul(D_e, upwind(liquid_salinity + C, Wl))
-    )
-    new_gas[1:-1] = gas[1:-1] + timestep * (
-        (chi / params.lewis_gas)
-        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas))
-        - np.matmul(D_e, upwind(gas, V))
-        - np.matmul(D_e, upwind(gas_fraction, Vg))
-        - np.matmul(D_e, upwind(chi * dissolved_gas, Wl))
-    )
-
-    # TODO: Try lax friedrich instead to suppress instability caused by liquid velocity <22-03-23, Joe Fishlock> #
+    """calculate variables needed to compute the fluxes at new timestep"""
     new_phase_masks = get_phase_masks(
         new_enthalpy,
         new_salt,
@@ -134,7 +111,39 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     ) = calculate_enthalpy_method(
         new_enthalpy, new_salt, new_gas, params, new_phase_masks
     )
+    Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, params)
     new_permeability = calculate_absolute_permeability(geometric(new_liquid_fraction))
+
+    iterated_enthalpy = np.zeros((I + 2,))
+    iterated_salt = np.zeros((I + 2,))
+    iterated_gas = np.zeros((I + 2,))
+    iterated_pressure = np.zeros((I + 2,))
+
+    iterated_enthalpy[-1] = new_top_enthalpy
+    iterated_enthalpy[0] = params.far_temp
+    iterated_salt[-1] = 0
+    iterated_salt[0] = 0
+    iterated_gas[-1] = 0
+    iterated_gas[0] = chi
+
+    iterated_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
+        np.matmul(D_e, np.matmul(D_g, temperature))
+        - np.matmul(D_e, upwind(temperature, Wl))
+        - np.matmul(D_e, upwind(enthalpy, V))
+    )
+    iterated_salt[1:-1] = salt[1:-1] + timestep * (
+        (1 / params.lewis_salt)
+        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity))
+        - np.matmul(D_e, upwind(salt, V))
+        - np.matmul(D_e, upwind(liquid_salinity + C, Wl))
+    )
+    iterated_gas[1:-1] = gas[1:-1] + timestep * (
+        (chi / params.lewis_gas)
+        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas))
+        - np.matmul(D_e, upwind(gas, V))
+        - np.matmul(D_e, upwind(gas_fraction, Vg))
+        - np.matmul(D_e, upwind(chi * dissolved_gas, Wl))
+    )
 
     pressure_forcing = np.zeros((I + 2,))
     pressure_forcing[1:-1] = (1 / timestep) * (
@@ -144,68 +153,50 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     pressure_forcing[-1] = 0
     pressure_matrix = np.zeros((I + 2, I + 2))
     perm_matrix = np.zeros((I + 1, I + 1))
-    np.fill_diagonal(perm_matrix, new_permeability + 1e-15)
+    np.fill_diagonal(perm_matrix, new_permeability + 1e-7)
     pressure_matrix[1:-1, :] = np.matmul(D_e, np.matmul(-perm_matrix, D_g))
     pressure_matrix[0, 0] = 1
     pressure_matrix[-1, -1] = 1
     pressure_matrix[-1, -2] = -1
-    new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
+    iterated_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
 
-    step, _, _, _ = initialise_grids(params.I)
-
-    CFL_timesteps = (
-        params.CFL_limit
-        * step
-        / np.where(np.abs(upwind(gas_fraction, Vg)) > 0, np.abs(Vg), 1e-10)
-    )
-    Courant_timesteps = params.Courant_limit * step**2
-    CFL_min_timestep = np.min(CFL_timesteps)
-    Courant_min_timestep = np.min(Courant_timesteps)
-    min_timestep = min(CFL_min_timestep, Courant_min_timestep)
-
-    """DEBUG"""
-    # new_pressure = pressure
-
-    return new_enthalpy, new_salt, new_gas, new_pressure, new_time, min_timestep
+    return iterated_enthalpy, iterated_salt, iterated_gas, iterated_pressure
 
 
-def advance(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g):
-    (
-        new_enthalpy,
-        new_salt,
-        new_gas,
-        new_pressure,
-        new_time,
-        min_timestep,
-    ) = take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g)
-    while timestep > min_timestep:
-        timestep = min_timestep
-        (
+def solve_non_linear_system(
+    enthalpy, salt, gas, pressure, time, params, D_e, D_g, Niter
+):
+    new_enthalpy = np.copy(enthalpy)
+    new_salt = np.copy(salt)
+    new_gas = np.copy(gas)
+    new_pressure = np.copy(pressure)
+    for _ in range(Niter):
+        new_enthalpy, new_salt, new_gas, new_pressure = iterate(
             new_enthalpy,
             new_salt,
             new_gas,
             new_pressure,
-            new_time,
-            min_timestep,
-        ) = take_timestep(
-            enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g
+            enthalpy,
+            salt,
+            gas,
+            pressure,
+            time,
+            params,
+            D_e,
+            D_g,
         )
-
-    return (
-        new_enthalpy,
-        new_salt,
-        new_gas,
-        new_pressure,
-        new_time,
-        timestep,
-        min_timestep,
-    )
+    return new_enthalpy, new_salt, new_gas, new_pressure
 
 
 def solve(params):
+    if params.check_buoyancy_CFL():
+        return 1, "unstable CFL for gas advection"
+
+    if params.check_thermal_diffusion_stability():
+        return 1, "unstable thermal diffusion"
+
     enthalpy, salt, gas, pressure = generate_initial_solution(params, params.I + 2)
-    T = params.total_time
-    timestep = params.timestep
+    N = get_number_of_timesteps(params.total_time, params.timestep)
     D_e = get_difference_matrix(params.I, params.step)
     D_g = get_difference_matrix(params.I + 1, params.step)
 
@@ -217,17 +208,12 @@ def solve(params):
         stored_pressure,
     ) = generate_storage_arrays(enthalpy, salt, gas, pressure)
     time_to_save = 0
-    time = 0
-    while time < T:
-        enthalpy, salt, gas, pressure, time, timestep, min_timestep = advance(
-            enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g
+    for n in tqdm(range(N)):
+        time = n * params.timestep
+        time_to_save += params.timestep
+        enthalpy, salt, gas, pressure = solve_non_linear_system(
+            enthalpy, salt, gas, pressure, time, params, D_e, D_g, 10
         )
-        time_to_save += timestep
-        print(f"time={time:.3f}, timestep={timestep:.2g}")
-        if np.min(salt) < -params.concentration_ratio:
-            raise ValueError("salt crash")
-
-        timestep = min_timestep
 
         if (time_to_save - params.savefreq) >= 0:
             time_to_save = 0

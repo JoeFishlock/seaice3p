@@ -1,12 +1,19 @@
+"""DEPRECATED since refactoring params objects into Config and moving into package"""
+
 import numpy as np
+from tqdm import tqdm
 from boundary_conditions import calculate_enthalpy_from_temp
 from forcing import get_temperature_forcing
 from enthalpy_method import (
     calculate_enthalpy_method,
     get_phase_masks,
+    calculate_temperature,
+    calculate_liquid_fraction,
+    calculate_gas_fraction,
 )
 from grids import (
     get_difference_matrix,
+    get_number_of_timesteps,
     upwind,
     geometric,
     initialise_grids,
@@ -58,7 +65,9 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     C = params.concentration_ratio
 
     new_time = time + timestep
+    top_temperature = get_temperature_forcing(time, params)
     new_top_temperature = get_temperature_forcing(new_time, params)
+    top_enthalpy = calculate_enthalpy_from_temp(0, 0, top_temperature, params)
     new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, params)
 
     phase_masks = get_phase_masks(
@@ -91,75 +100,26 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     new_gas[-1] = 0
     new_gas[0] = chi
 
-    # Upwinding
-    upwind_enthalpy_flux = (
-        -(D_g @ temperature) + upwind(temperature, Wl) + upwind(enthalpy, V)
+    new_enthalpy[1:-1] = enthalpy[1:-1] + timestep * (
+        np.matmul(D_e, np.matmul(D_g, temperature))
+        - np.matmul(D_e, upwind(temperature, Wl))
+        - np.matmul(D_e, upwind(enthalpy, V))
     )
-    upwind_salt_flux = (
-        -(1 / params.lewis_salt)
-        * (geometric(liquid_fraction) * (D_g @ liquid_salinity))
-        + upwind(salt, V)
-        + upwind(liquid_salinity + C, Wl)
+    new_salt[1:-1] = salt[1:-1] + timestep * (
+        (1 / params.lewis_salt)
+        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity))
+        - np.matmul(D_e, upwind(salt, V))
+        - np.matmul(D_e, upwind(liquid_salinity + C, Wl))
     )
-    upwind_gas_flux = (
-        -(chi / params.lewis_gas) * (geometric(liquid_fraction) * (D_g @ dissolved_gas))
-        + upwind(gas, V)
-        + upwind(gas_fraction, Vg)
-        + upwind(chi * dissolved_gas, Wl)
-    )
-
-    # Lax Friedrich
-    salt_no_flux = np.insert(salt[1:-1], 0, salt[0])
-    salt_no_flux = np.append(salt_no_flux, salt[-1])
-
-    gas_no_flux = np.insert(gas[1:-1], 0, gas[0])
-    gas_no_flux = np.append(gas_no_flux, gas[-1])
-
-    numerical_diffusivity = (params.step**2) / (2 * timestep)
-
-    salt_frame_advection = V * average(salt)
-    salt_liquid_advection = Wl * (average(liquid_salinity) + C)
-    salt_diffusion = (
-        -(1 / params.lewis_salt) * geometric(liquid_fraction) * (D_g @ liquid_salinity)
-    )
-    salt_LF_diffusion = -numerical_diffusivity * (D_g @ salt_no_flux)
-    LF_salt_flux = (
-        salt_frame_advection
-        + salt_liquid_advection
-        + salt_diffusion
-        + salt_LF_diffusion
+    new_gas[1:-1] = gas[1:-1] + timestep * (
+        (chi / params.lewis_gas)
+        * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas))
+        - np.matmul(D_e, upwind(gas, V))
+        - np.matmul(D_e, upwind(gas_fraction, Vg))
+        - np.matmul(D_e, upwind(chi * dissolved_gas, Wl))
     )
 
-    gas_frame_advection = V * average(gas)
-    gas_bubble_advection = average(gas_fraction) * Vg
-    gas_liquid_advection = chi * Wl * average(dissolved_gas)
-    gas_diffusion = (
-        -(chi / params.lewis_gas) * geometric(liquid_fraction) * (D_g @ dissolved_gas)
-    )
-    gas_LF_diffusion = -numerical_diffusivity * (D_g @ gas_no_flux)
-    LF_gas_flux = (
-        gas_frame_advection
-        + gas_bubble_advection
-        + gas_liquid_advection
-        + gas_diffusion
-        + gas_LF_diffusion
-    )
-    # this works to prevent salt diffusion in solid and for small gas bubbles
-    # However for more general case condition for gas flux should perhaps be when
-    # R_B = R_T
-    is_solid = geometric(liquid_fraction) == 0
-    # Must always upwind on the boundaries to avoid using incomplete information here
-    is_solid[-1] = True
-    is_solid[0] = True
-
-    enthalpy_flux = upwind_enthalpy_flux
-    salt_flux = np.where(is_solid, upwind_salt_flux, LF_salt_flux)
-    gas_flux = np.where(is_solid, upwind_gas_flux, LF_gas_flux)
-
-    new_enthalpy[1:-1] = enthalpy[1:-1] - timestep * (D_e @ enthalpy_flux)
-    new_salt[1:-1] = salt[1:-1] - timestep * (D_e @ salt_flux)
-    new_gas[1:-1] = gas[1:-1] - timestep * (D_e @ gas_flux)
-
+    # TODO: Try lax friedrich instead to suppress instability caused by liquid velocity <22-03-23, Joe Fishlock> #
     new_phase_masks = get_phase_masks(
         new_enthalpy,
         new_salt,
@@ -176,7 +136,6 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     ) = calculate_enthalpy_method(
         new_enthalpy, new_salt, new_gas, params, new_phase_masks
     )
-    # toggle this to old liquid fraction to see if it makes any difference
     new_permeability = calculate_absolute_permeability(geometric(new_liquid_fraction))
 
     pressure_forcing = np.zeros((I + 2,))
@@ -196,7 +155,6 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
 
     step, _, _, _ = initialise_grids(params.I)
 
-    # Calculation for adaptive timestepping
     CFL_timesteps = (
         params.CFL_limit
         * step
@@ -206,6 +164,9 @@ def take_timestep(enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_
     CFL_min_timestep = np.min(CFL_timesteps)
     Courant_min_timestep = np.min(Courant_timesteps)
     min_timestep = min(CFL_min_timestep, Courant_min_timestep)
+
+    """DEBUG"""
+    # new_pressure = pressure
 
     return new_enthalpy, new_salt, new_gas, new_pressure, new_time, min_timestep
 
@@ -264,9 +225,7 @@ def solve(params):
             enthalpy, salt, gas, pressure, time, timestep, params, D_e, D_g
         )
         time_to_save += timestep
-        print(
-            f"time={time:.3f}/{params.total_time}, timestep={timestep:.2g} \r", end=""
-        )
+        print(f"time={time:.3f}, timestep={timestep:.2g}")
         if np.min(salt) < -params.concentration_ratio:
             raise ValueError("salt crash")
 
@@ -283,6 +242,4 @@ def solve(params):
     save_storage(
         stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure, params
     )
-    # clear line after carriage return
-    print("")
     return 0, "solve complete"

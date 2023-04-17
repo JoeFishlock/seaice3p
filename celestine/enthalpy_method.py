@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from phase_boundaries import get_phase_masks
-from params import Params
+from celestine.phase_boundaries import get_phase_masks
+from celestine.params import Config
 
 
-def calculate_temperature(enthalpy, salt, gas, params: Params, phase_masks):
-    chi = params.expansion_coefficient
-    St = params.stefan_number
-    C = params.concentration_ratio
+def calculate_temperature(enthalpy, salt, gas, cfg: Config, phase_masks):
+    chi = cfg.physical_params.expansion_coefficient
+    St = cfg.physical_params.stefan_number
+    C = cfg.physical_params.concentration_ratio
     temperature = np.full_like(enthalpy, np.NaN)
     l, L, m, M, e, E, s, S = phase_masks
     temperature[l] = enthalpy[l]
@@ -34,11 +34,11 @@ def calculate_temperature(enthalpy, salt, gas, params: Params, phase_masks):
 
 
 def calculate_liquid_fraction(
-    enthalpy, salt, gas, temperature, params: Params, phase_masks
+    enthalpy, salt, gas, temperature, cfg: Config, phase_masks
 ):
-    chi = params.expansion_coefficient
-    St = params.stefan_number
-    C = params.concentration_ratio
+    chi = cfg.physical_params.expansion_coefficient
+    St = cfg.physical_params.stefan_number
+    C = cfg.physical_params.concentration_ratio
     liquid_fraction = np.full_like(enthalpy, np.NaN)
     l, L, m, M, e, E, s, S = phase_masks
 
@@ -59,8 +59,8 @@ def calculate_liquid_fraction(
     return liquid_fraction
 
 
-def calculate_gas_fraction(gas, liquid_fraction, params: Params, phase_masks):
-    chi = params.expansion_coefficient
+def calculate_gas_fraction(gas, liquid_fraction, cfg: Config, phase_masks):
+    chi = cfg.physical_params.expansion_coefficient
     gas_fraction = np.full_like(gas, np.NaN)
     l, L, m, M, e, E, s, S = phase_masks
 
@@ -79,13 +79,13 @@ def calculate_gas_fraction(gas, liquid_fraction, params: Params, phase_masks):
     return gas_fraction
 
 
-def calculate_solid_fraction(liquid_fraction, gas_fraction, params: Params):
+def calculate_solid_fraction(liquid_fraction, gas_fraction, cfg: Config):
     solid_fraction = 1 - liquid_fraction - gas_fraction
     return solid_fraction
 
 
-def calculate_dissolved_gas(gas, liquid_fraction, params: Params, phase_masks):
-    chi = params.expansion_coefficient
+def calculate_dissolved_gas(gas, liquid_fraction, cfg: Config, phase_masks):
+    chi = cfg.physical_params.expansion_coefficient
     dissolved_gas = np.full_like(gas, np.NaN)
     l, L, m, M, e, E, s, S = phase_masks
 
@@ -104,9 +104,9 @@ def calculate_dissolved_gas(gas, liquid_fraction, params: Params, phase_masks):
     return dissolved_gas
 
 
-def calculate_liquid_salinity(salt, gas, temperature, params: Params, phase_masks):
-    chi = params.expansion_coefficient
-    C = params.concentration_ratio
+def calculate_liquid_salinity(salt, gas, temperature, cfg: Config, phase_masks):
+    chi = cfg.physical_params.expansion_coefficient
+    C = cfg.physical_params.concentration_ratio
     liquid_salinity = np.full_like(salt, np.NaN)
     l, L, m, M, e, E, s, S = phase_masks
 
@@ -126,17 +126,17 @@ def calculate_liquid_salinity(salt, gas, temperature, params: Params, phase_mask
     return liquid_salinity
 
 
-def calculate_enthalpy_method(enthalpy, salt, gas, params, phase_masks):
-    temperature = calculate_temperature(enthalpy, salt, gas, params, phase_masks)
+def calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks):
+    temperature = calculate_temperature(enthalpy, salt, gas, cfg, phase_masks)
     liquid_fraction = calculate_liquid_fraction(
-        enthalpy, salt, gas, temperature, params, phase_masks
+        enthalpy, salt, gas, temperature, cfg, phase_masks
     )
-    gas_fraction = calculate_gas_fraction(gas, liquid_fraction, params, phase_masks)
-    solid_fraction = calculate_solid_fraction(liquid_fraction, gas_fraction, params)
+    gas_fraction = calculate_gas_fraction(gas, liquid_fraction, cfg, phase_masks)
+    solid_fraction = calculate_solid_fraction(liquid_fraction, gas_fraction, cfg)
     liquid_salinity = calculate_liquid_salinity(
-        salt, gas, temperature, params, phase_masks
+        salt, gas, temperature, cfg, phase_masks
     )
-    dissolved_gas = calculate_dissolved_gas(gas, liquid_fraction, params, phase_masks)
+    dissolved_gas = calculate_dissolved_gas(gas, liquid_fraction, cfg, phase_masks)
     return (
         temperature,
         liquid_fraction,
@@ -153,15 +153,15 @@ if __name__ == "__main__":
     gas1 = np.full_like(enthalpy, 0)
     gas2 = np.full_like(enthalpy, 0.02)
     gas3 = np.full_like(enthalpy, 0.2)
-    params = Params(name="base")
+    cfg = Config(name="base")
 
-    phase_masks1 = get_phase_masks(enthalpy, salt, gas1, params)
-    phase_masks2 = get_phase_masks(enthalpy, salt, gas2, params)
-    phase_masks3 = get_phase_masks(enthalpy, salt, gas3, params)
+    phase_masks1 = get_phase_masks(enthalpy, salt, gas1, cfg)
+    phase_masks2 = get_phase_masks(enthalpy, salt, gas2, cfg)
+    phase_masks3 = get_phase_masks(enthalpy, salt, gas3, cfg)
 
-    temperature1 = calculate_temperature(enthalpy, salt, gas1, params, phase_masks1)
-    temperature2 = calculate_temperature(enthalpy, salt, gas2, params, phase_masks2)
-    temperature3 = calculate_temperature(enthalpy, salt, gas3, params, phase_masks3)
+    temperature1 = calculate_temperature(enthalpy, salt, gas1, cfg, phase_masks1)
+    temperature2 = calculate_temperature(enthalpy, salt, gas2, cfg, phase_masks2)
+    temperature3 = calculate_temperature(enthalpy, salt, gas3, cfg, phase_masks3)
 
     plt.figure()
     plt.plot(enthalpy, temperature1, "k")
@@ -170,13 +170,13 @@ if __name__ == "__main__":
     plt.show()
 
     liquid_fraction1 = calculate_liquid_fraction(
-        enthalpy, salt, gas1, temperature1, params, phase_masks1
+        enthalpy, salt, gas1, temperature1, cfg, phase_masks1
     )
     liquid_fraction2 = calculate_liquid_fraction(
-        enthalpy, salt, gas2, temperature2, params, phase_masks2
+        enthalpy, salt, gas2, temperature2, cfg, phase_masks2
     )
     liquid_fraction3 = calculate_liquid_fraction(
-        enthalpy, salt, gas3, temperature3, params, phase_masks3
+        enthalpy, salt, gas3, temperature3, cfg, phase_masks3
     )
     plt.figure()
     plt.plot(enthalpy, liquid_fraction1, "k")
@@ -184,18 +184,18 @@ if __name__ == "__main__":
     plt.plot(enthalpy, liquid_fraction3, "b")
     plt.show()
 
-    gas_fraction1 = calculate_gas_fraction(gas1, liquid_fraction1, params, phase_masks1)
-    gas_fraction2 = calculate_gas_fraction(gas2, liquid_fraction2, params, phase_masks2)
-    gas_fraction3 = calculate_gas_fraction(gas3, liquid_fraction3, params, phase_masks3)
+    gas_fraction1 = calculate_gas_fraction(gas1, liquid_fraction1, cfg, phase_masks1)
+    gas_fraction2 = calculate_gas_fraction(gas2, liquid_fraction2, cfg, phase_masks2)
+    gas_fraction3 = calculate_gas_fraction(gas3, liquid_fraction3, cfg, phase_masks3)
     plt.figure()
     plt.plot(enthalpy, gas_fraction1, "k")
     plt.plot(enthalpy, gas_fraction2, "r")
     plt.plot(enthalpy, gas_fraction3, "b")
     plt.show()
 
-    solid_fraction1 = calculate_solid_fraction(liquid_fraction1, gas_fraction1, params)
-    solid_fraction2 = calculate_solid_fraction(liquid_fraction2, gas_fraction2, params)
-    solid_fraction3 = calculate_solid_fraction(liquid_fraction3, gas_fraction3, params)
+    solid_fraction1 = calculate_solid_fraction(liquid_fraction1, gas_fraction1, cfg)
+    solid_fraction2 = calculate_solid_fraction(liquid_fraction2, gas_fraction2, cfg)
+    solid_fraction3 = calculate_solid_fraction(liquid_fraction3, gas_fraction3, cfg)
     plt.figure()
     plt.plot(enthalpy, solid_fraction1, "k")
     plt.plot(enthalpy, solid_fraction2, "r")
@@ -205,19 +205,19 @@ if __name__ == "__main__":
     dissolved_gas1 = calculate_dissolved_gas(
         gas1,
         liquid_fraction1,
-        params,
+        cfg,
         phase_masks1,
     )
     dissolved_gas2 = calculate_dissolved_gas(
         gas2,
         liquid_fraction2,
-        params,
+        cfg,
         phase_masks2,
     )
     dissolved_gas3 = calculate_dissolved_gas(
         gas3,
         liquid_fraction3,
-        params,
+        cfg,
         phase_masks3,
     )
     plt.figure()
@@ -227,13 +227,13 @@ if __name__ == "__main__":
     plt.show()
 
     liquid_salinity1 = calculate_liquid_salinity(
-        salt, gas1, temperature1, params, phase_masks1
+        salt, gas1, temperature1, cfg, phase_masks1
     )
     liquid_salinity2 = calculate_liquid_salinity(
-        salt, gas2, temperature2, params, phase_masks2
+        salt, gas2, temperature2, cfg, phase_masks2
     )
     liquid_salinity3 = calculate_liquid_salinity(
-        salt, gas3, temperature3, params, phase_masks3
+        salt, gas3, temperature3, cfg, phase_masks3
     )
     plt.figure()
     plt.plot(enthalpy, liquid_salinity1, "k")
