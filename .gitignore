@@ -9,3 +9,4 @@ data/
 *.prof
 .DS_Store
 *scratch.py
+*.log
