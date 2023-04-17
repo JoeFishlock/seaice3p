@@ -1,17 +1,16 @@
 """DEPRECATED since refactoring params objects into Config and moving into package"""
 
 import numpy as np
-from tqdm import tqdm
-from boundary_conditions import calculate_enthalpy_from_temp
-from forcing import get_temperature_forcing
-from enthalpy_method import (
+from celestine.boundary_conditions import calculate_enthalpy_from_temp
+from celestine.forcing import get_temperature_forcing
+from celestine.enthalpy_method import (
     calculate_enthalpy_method,
     get_phase_masks,
     calculate_temperature,
     calculate_liquid_fraction,
     calculate_gas_fraction,
 )
-from grids import (
+from celestine.grids import (
     get_difference_matrix,
     get_number_of_timesteps,
     upwind,
@@ -19,7 +18,7 @@ from grids import (
     initialise_grids,
     average,
 )
-from velocities import calculate_velocities, calculate_absolute_permeability
+from celestine.velocities import calculate_velocities, calculate_absolute_permeability
 
 
 def generate_initial_solution(params, length):
