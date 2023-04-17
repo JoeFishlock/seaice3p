@@ -1,7 +1,7 @@
 import numpy as np
-from grids import geometric
-from phase_boundaries import calculate_eutectic
-from params import Config
+from celestine.grids import geometric
+from celestine.phase_boundaries import calculate_eutectic
+from celestine.params import Config
 
 """To prevent flow into a partially completely frozen region we must cut off
 permeability if a cell becomes eutectic. I.e if H<H_E set perm=0 smoothly"""

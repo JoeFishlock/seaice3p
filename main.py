@@ -1,12 +1,12 @@
 """Celestine version 0.2.0"""
 import numpy as np
-from params import Config, DarcyLawParams, ForcingConfig
-from lax_friedrich_solver import solve
-from enthalpy_method import get_phase_masks, calculate_enthalpy_method
-from velocities import calculate_velocities
+from celestine.params import Config, DarcyLawParams, ForcingConfig
+from celestine.solvers.lax_friedrich_solver import solve
+from celestine.enthalpy_method import get_phase_masks, calculate_enthalpy_method
+from celestine.velocities import calculate_velocities
 import matplotlib.pyplot as plt
-from grids import initialise_grids, get_difference_matrix
-from logging_config import logger, log_time
+from celestine.grids import initialise_grids, get_difference_matrix
+from celestine.logging_config import logger, log_time
 
 logger.info("Celestine version 0.2.0")
 

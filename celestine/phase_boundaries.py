@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from params import Config
+from celestine.params import Config
 
 
 def calculate_liquidus(salt, gas, cfg: Config):

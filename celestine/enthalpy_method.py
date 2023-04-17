@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from phase_boundaries import get_phase_masks
-from params import Config
+from celestine.phase_boundaries import get_phase_masks
+from celestine.params import Config
 
 
 def calculate_temperature(enthalpy, salt, gas, cfg: Config, phase_masks):

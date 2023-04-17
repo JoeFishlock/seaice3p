@@ -1,5 +1,5 @@
 import numpy as np
-from params import Config
+from celestine.params import Config
 
 
 def get_temperature_forcing(time, cfg: Config):

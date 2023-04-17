@@ -1,12 +1,12 @@
 import numpy as np
-from phase_boundaries import (
+from celestine.phase_boundaries import (
     calculate_saturation,
     get_phase_masks,
     calculate_eutectic,
     calculate_solidus,
 )
-from forcing import get_temperature_forcing
-from params import Config
+from celestine.forcing import get_temperature_forcing
+from celestine.params import Config
 
 
 def calculate_enthalpy_from_temp(

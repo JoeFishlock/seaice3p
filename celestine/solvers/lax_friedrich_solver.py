@@ -1,20 +1,20 @@
 import numpy as np
-from boundary_conditions import calculate_enthalpy_from_temp
-from forcing import get_temperature_forcing
-from enthalpy_method import (
+from celestine.boundary_conditions import calculate_enthalpy_from_temp
+from celestine.forcing import get_temperature_forcing
+from celestine.enthalpy_method import (
     calculate_enthalpy_method,
     get_phase_masks,
 )
-from grids import (
+from celestine.grids import (
     get_difference_matrix,
     upwind,
     geometric,
     initialise_grids,
     average,
 )
-from velocities import calculate_velocities, calculate_absolute_permeability
-from logging_config import time_function
-from params import Config
+from celestine.velocities import calculate_velocities, calculate_absolute_permeability
+from celestine.logging_config import time_function
+from celestine.params import Config
 
 
 def generate_initial_solution(cfg: Config, length):
