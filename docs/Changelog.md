@@ -1,6 +1,29 @@
 # Changelog
 
-## v0.2.0 (14/04/2023) ##
+## v0.3.0 (2023-04-17) ##
+
+### Added ###
+
+- Logging. Logs are generated for the simulation in main stating the version
+number and duration of the simulation stored in the logs/ directory.
+
+### Changed ###
+
+- Split the Params class into multiple different classes. These are combined
+in the new Config class. 
+- Code refactored to use the Config class (only the lax friedrich solver not
+the others).
+- Config object can be saved to and loaded from a yaml file not json.
+
+### Docs ###
+
+- Added release checklist.
+
+### Removed ###
+
+- Removed dependency on tqdm for progress bar.
+
+## v0.2.0 (2023-04-14) ##
 
 ### Docs ###
 
@@ -20,7 +43,7 @@
 - function to compute cell edge values as arithmetic mean of centers
 - main function just run one yearly simulation with small bubbles and plot gas fraction and bulk salinity for debugging
 
-## v0.1.0 (13/04/2023)
+## v0.1.0 (2023-04-13)
 
 - Simulate bubbles in a mushy layer in 1D using the enthalpy method with given surface forcing.
 - Phase fractions of solid, liquid and gas must sum to one and so bubble nucleation and motion drives a liquid flow.
