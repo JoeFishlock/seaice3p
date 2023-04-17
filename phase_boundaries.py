@@ -1,12 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from params import Params
+from params import Config
 
 
-def calculate_liquidus(salt, gas, params):
+def calculate_liquidus(salt, gas, cfg: Config):
     liquidus = np.full_like(salt, np.NaN)
-    chi = params.expansion_coefficient
-    C = params.concentration_ratio
+    chi = cfg.physical_params.expansion_coefficient
+    C = cfg.physical_params.concentration_ratio
     is_sub = gas <= chi
     is_super = ~is_sub
     liquidus[is_sub] = -salt[is_sub]
@@ -14,11 +14,11 @@ def calculate_liquidus(salt, gas, params):
     return liquidus
 
 
-def calculate_eutectic(salt, gas, params):
+def calculate_eutectic(salt, gas, cfg: Config):
     eutectic = np.full_like(salt, np.NaN)
-    chi = params.expansion_coefficient
-    C = params.concentration_ratio
-    St = params.stefan_number
+    chi = cfg.physical_params.expansion_coefficient
+    C = cfg.physical_params.concentration_ratio
+    St = cfg.physical_params.stefan_number
     eutectic_liquid_fraction = (salt + C) / (1 + C)
     is_sub = gas <= chi * eutectic_liquid_fraction
     is_super = ~is_sub
@@ -30,9 +30,9 @@ def calculate_eutectic(salt, gas, params):
     return eutectic
 
 
-def calculate_solidus(salt, gas, params):
+def calculate_solidus(salt, gas, cfg: Config):
     solidus = np.full_like(salt, np.NaN)
-    St = params.stefan_number
+    St = cfg.physical_params.stefan_number
     is_sub = gas <= 0
     is_super = ~is_sub
     solidus[is_sub] = -1 - St
@@ -40,15 +40,15 @@ def calculate_solidus(salt, gas, params):
     return solidus
 
 
-def calculate_saturation(enthalpy, salt, params):
-    chi = params.expansion_coefficient
-    St = params.stefan_number
-    C = params.concentration_ratio
+def calculate_saturation(enthalpy, salt, cfg: Config):
+    chi = cfg.physical_params.expansion_coefficient
+    St = cfg.physical_params.stefan_number
+    C = cfg.physical_params.concentration_ratio
     saturation = np.full_like(enthalpy, np.NaN)
     no_gas = np.zeros_like(salt)
-    liquidus = calculate_liquidus(salt, no_gas, params)
-    eutectic = calculate_eutectic(salt, no_gas, params)
-    solidus = calculate_solidus(salt, no_gas, params)
+    liquidus = calculate_liquidus(salt, no_gas, cfg)
+    eutectic = calculate_eutectic(salt, no_gas, cfg)
+    solidus = calculate_solidus(salt, no_gas, cfg)
     is_liquid = enthalpy >= liquidus
     is_mush = (enthalpy >= eutectic) & (enthalpy < liquidus)
     is_eutectic = (enthalpy >= solidus) & (enthalpy < eutectic)
@@ -63,10 +63,10 @@ def calculate_saturation(enthalpy, salt, params):
     return saturation
 
 
-def calculate_max_salt(gas, params):
+def calculate_max_salt(gas, cfg: Config):
     max_salt = np.full_like(gas, np.NaN)
-    chi = params.expansion_coefficient
-    C = params.concentration_ratio
+    chi = cfg.physical_params.expansion_coefficient
+    C = cfg.physical_params.concentration_ratio
     is_sub = gas <= chi
     is_super = ~is_sub
     max_salt[is_sub] = 1
@@ -74,11 +74,11 @@ def calculate_max_salt(gas, params):
     return max_salt
 
 
-def get_phase_masks(enthalpy, salt, gas, params):
-    liquidus = calculate_liquidus(salt, gas, params)
-    eutectic = calculate_eutectic(salt, gas, params)
-    solidus = calculate_solidus(salt, gas, params)
-    saturation = calculate_saturation(enthalpy, salt, params)
+def get_phase_masks(enthalpy, salt, gas, cfg: Config):
+    liquidus = calculate_liquidus(salt, gas, cfg)
+    eutectic = calculate_eutectic(salt, gas, cfg)
+    solidus = calculate_solidus(salt, gas, cfg)
+    saturation = calculate_saturation(enthalpy, salt, cfg)
     is_liquid = enthalpy >= liquidus
     is_mush = (enthalpy >= eutectic) & (enthalpy < liquidus)
     is_eutectic = (enthalpy >= solidus) & (enthalpy < eutectic)
@@ -96,14 +96,14 @@ def get_phase_masks(enthalpy, salt, gas, params):
     return l, L, m, M, e, E, s, S
 
 
-def plot_phases(gas_value, params, axes):
-    max_salt = calculate_max_salt(np.array([gas_value]), params)
+def plot_phases(gas_value, cfg: Config, axes):
+    max_salt = calculate_max_salt(np.array([gas_value]), cfg)
     max_salt = max_salt[0]
-    salt = np.linspace(-params.concentration_ratio, max_salt, 1000)
+    salt = np.linspace(-cfg.physical_params.concentration_ratio, max_salt, 1000)
     enthalpy = np.linspace(-6, 1, 1000)
     salt_mesh, enthalpy_mesh = np.meshgrid(salt, enthalpy)
     gas = np.full_like(salt_mesh, gas_value)
-    l, L, m, M, e, E, s, S = get_phase_masks(enthalpy_mesh, salt_mesh, gas, params)
+    l, L, m, M, e, E, s, S = get_phase_masks(enthalpy_mesh, salt_mesh, gas, cfg)
     phases = np.full_like(salt_mesh, np.NaN)
     phases[l] = 0
     phases[L] = 1
@@ -175,26 +175,26 @@ def plot_phases(gas_value, params, axes):
     )
 
 
-def plot_phase_boundaries(gas_value, params, axes):
-    max_salt = calculate_max_salt(np.array([gas_value]), params)
+def plot_phase_boundaries(gas_value, cfg: Config, axes):
+    max_salt = calculate_max_salt(np.array([gas_value]), cfg)
     max_salt = max_salt[0]
-    salt = np.linspace(-params.concentration_ratio, max_salt, 1000)
+    salt = np.linspace(-cfg.physical_params.concentration_ratio, max_salt, 1000)
     gas = np.full_like(salt, gas_value)
-    liquidus = calculate_liquidus(salt, gas, params)
-    eutectic = calculate_eutectic(salt, gas, params)
-    solidus = calculate_solidus(salt, gas, params)
+    liquidus = calculate_liquidus(salt, gas, cfg)
+    eutectic = calculate_eutectic(salt, gas, cfg)
+    solidus = calculate_solidus(salt, gas, cfg)
     axes.plot(salt, liquidus, "b")
     axes.plot(salt, eutectic, "r")
     axes.plot(salt, solidus, "g")
 
 
-def plot_saturation_contour(gas_value, params, axes):
+def plot_saturation_contour(gas_value, cfg: Config, axes):
     H_range = np.linspace(-5, 1, 1000)
-    max_salt = calculate_max_salt(np.array([gas_value]), params)
+    max_salt = calculate_max_salt(np.array([gas_value]), cfg)
     max_salt = max_salt[0]
-    salt = np.linspace(-params.concentration_ratio, max_salt, 1000)
+    salt = np.linspace(-cfg.physical_params.concentration_ratio, max_salt, 1000)
     S, H = np.meshgrid(salt, H_range)
-    saturation = calculate_saturation(H, S, params)
+    saturation = calculate_saturation(H, S, cfg)
     axes.contour(
         S,
         H,
@@ -205,17 +205,17 @@ def plot_saturation_contour(gas_value, params, axes):
 
 
 if __name__ == "__main__":
-    params = Params(name="base")
-    chi = params.expansion_coefficient
+    cfg = Config(name="base")
+    chi = cfg.physical_params.expansion_coefficient
 
     fig, axs = plt.subplots(nrows=3, ncols=2, figsize=(5, 7))
     axes = [axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1], axs[2, 0], axs[2, 1]]
     for ax, gas_value in zip(axes, [0, chi * 0.25, chi * 0.5, chi * 0.75, chi, 0.3]):
-        ax.set_xlim(-params.concentration_ratio, 1)
-        plot_phases(gas_value, params, ax)
-        plot_phase_boundaries(gas_value, params, ax)
+        ax.set_xlim(-cfg.physical_params.concentration_ratio, 1)
+        plot_phases(gas_value, cfg, ax)
+        plot_phase_boundaries(gas_value, cfg, ax)
         try:
-            plot_saturation_contour(gas_value, params, ax)
+            plot_saturation_contour(gas_value, cfg, ax)
         except:
             pass
         ax.set_title(f"bulk gas {gas_value:.3f}")
