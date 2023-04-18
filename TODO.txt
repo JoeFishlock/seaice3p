@@ -2,10 +2,4 @@
 *                                TODOS                                *
 ***********************************************************************
 
-* lax friedrich solver doesn't need to import forcing
-Should be able to apply forcings only in the boundary conditions module.
-At the moment this has broken down only because when calculating
-the pressure solve we need to calculate the permeability which
-requires the liquid fraction at the next timestep on the ghost grid.
-We can remove this and just use the center values if we extend the
-centered liquid fraction values to the edges at the top and bottom.
+* Use template pattern to implement lagged upwind solver
