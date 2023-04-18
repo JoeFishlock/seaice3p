@@ -4,8 +4,6 @@
 
 * add forcing options for yearly forcing
 
-* Implement standard way of testing if different simulations run
-
 * lax friedrich solver doesn't need to import forcing
 Should be able to apply forcings only in the boundary conditions module.
 At the moment this has broken down only because when calculating
