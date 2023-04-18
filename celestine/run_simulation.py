@@ -1,10 +1,11 @@
 from celestine.params import Config
 from celestine.logging_config import logger
 from celestine.solvers.lax_friedrich_solver import LXFSolver
+from celestine.solvers.lagged_solver import LaggedUpwindSolver
 
 
 def solve(cfg: Config):
-    SOLVER_OPTIONS = {"LXF": LXFSolver}
+    SOLVER_OPTIONS = {"LXF": LXFSolver, "LU": LaggedUpwindSolver}
     solver_choice = cfg.numerical_params.solver
     if solver_choice in SOLVER_OPTIONS.keys():
         solver_class = SOLVER_OPTIONS[solver_choice]
