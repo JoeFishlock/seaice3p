@@ -3,6 +3,7 @@ venv/
 dev/
 frames*/
 data/
+test_data/*
 *.pdf
 *.svg
 *.nb
