@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.4.0 (2023-04-18) ##
+
+### Added ###
+
+- Lagged upwind solver as an option to use.
+
+### Changed ###
+
+- Refactored solvers to use a template solver which handles common methods.
+Implemented solvers should inherit and overwrite the relevant methods.
+
+## Docs ##
+
+- Specified a testing procedure to run for each release.
+
+### Tests ###
+
+- Added script to generate test simulation config yaml files in `test_data/`.
+- Added script to run test simulation config and log if any crash.
+- This information can be recorded manually in the template file in `docs/`.
+
 ## v0.3.0 (2023-04-17) ##
 
 ### Added ###
