@@ -61,7 +61,7 @@ class LaggedUpwindSolver(SolverTemplate):
         new_pressure = np.zeros((I + 2,))
 
         new_enthalpy[-1] = new_top_enthalpy
-        new_enthalpy[0] = cfg.far_temp
+        new_enthalpy[0] = cfg.boundary_conditions_config.far_temp
         new_salt[-1] = 0
         new_salt[0] = 0
         new_gas[-1] = 0
@@ -73,7 +73,7 @@ class LaggedUpwindSolver(SolverTemplate):
             - np.matmul(D_e, upwind(enthalpy, V))
         )
         new_salt[1:-1] = salt[1:-1] + timestep * (
-            (1 / cfg.lewis_salt)
+            (1 / cfg.physical_params.lewis_salt)
             * np.matmul(
                 D_e, geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity)
             )
@@ -81,7 +81,7 @@ class LaggedUpwindSolver(SolverTemplate):
             - np.matmul(D_e, upwind(liquid_salinity + C, Wl))
         )
         new_gas[1:-1] = gas[1:-1] + timestep * (
-            (chi / cfg.lewis_gas)
+            (chi / cfg.physical_params.lewis_gas)
             * np.matmul(D_e, geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas))
             - np.matmul(D_e, upwind(gas, V))
             - np.matmul(D_e, upwind(gas_fraction, Vg))
@@ -123,14 +123,14 @@ class LaggedUpwindSolver(SolverTemplate):
         pressure_matrix[-1, -2] = -1
         new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
 
-        step, _, _, _ = initialise_grids(cfg.I)
+        step, _, _, _ = initialise_grids(self.I)
 
         CFL_timesteps = (
-            cfg.CFL_limit
+            cfg.numerical_params.CFL_limit
             * step
             / np.where(np.abs(upwind(gas_fraction, Vg)) > 0, np.abs(Vg), 1e-10)
         )
-        Courant_timesteps = cfg.Courant_limit * step**2
+        Courant_timesteps = cfg.numerical_params.Courant_limit * step**2
         CFL_min_timestep = np.min(CFL_timesteps)
         Courant_min_timestep = np.min(Courant_timesteps)
         min_timestep = min(CFL_min_timestep, Courant_min_timestep)
