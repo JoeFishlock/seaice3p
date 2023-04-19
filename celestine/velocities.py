@@ -1,5 +1,5 @@
 import numpy as np
-from celestine.grids import geometric
+from celestine.grids import geometric, upwind
 from celestine.phase_boundaries import calculate_eutectic
 from celestine.params import Config
 
@@ -31,6 +31,28 @@ def calculate_liquid_darcy_velocity(
     )
     Wl = -absolute_permeability * np.matmul(D_g, pressure)
     return Wl
+
+
+def solve_pressure_equation(
+    gas_fraction, new_gas_fraction, permeability, timestep, D_e, D_g, cfg: Config
+):
+    I = cfg.numerical_params.I
+    V = cfg.physical_params.frame_velocity
+    pressure_forcing = np.zeros((I + 2,))
+    pressure_forcing[1:-1] = (1 / timestep) * (
+        new_gas_fraction[1:-1] - gas_fraction[1:-1]
+    ) + np.matmul(D_e, upwind(new_gas_fraction, V))
+    pressure_forcing[0] = 0
+    pressure_forcing[-1] = 0
+    pressure_matrix = np.zeros((I + 2, I + 2))
+    perm_matrix = np.zeros((I + 1, I + 1))
+    np.fill_diagonal(perm_matrix, permeability + 1e-15)
+    pressure_matrix[1:-1, :] = np.matmul(D_e, np.matmul(-perm_matrix, D_g))
+    pressure_matrix[0, 0] = 1
+    pressure_matrix[-1, -1] = 1
+    pressure_matrix[-1, -2] = -1
+    new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
+    return new_pressure
 
 
 def calculate_bubble_radius(liquid_fraction, cfg: Config):
