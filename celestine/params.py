@@ -44,6 +44,9 @@ class ForcingConfig:
 
     temperature_forcing_choice: str = "constant"
     constant_top_temperature: float = -1.5
+    offset: float = -1.0
+    amplitude: float = 0.75
+    period: float = 4.0
 
 
 @dataclass

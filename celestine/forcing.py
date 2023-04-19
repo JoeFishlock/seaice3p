@@ -12,7 +12,10 @@ def constant_temperature_forcing(time, cfg: Config):
 
 
 def yearly_temperature_forcing(time, cfg: Config):
-    return 0.75 * (np.cos(time * 2 * np.pi / (4)) - 1)
+    amplitude = cfg.forcing_config.amplitude
+    period = cfg.forcing_config.period
+    offset = cfg.forcing_config.offset
+    return amplitude * (np.cos(time * 2 * np.pi / period) + offset)
 
 
 TEMPERATURE_FORCINGS = {
