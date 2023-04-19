@@ -103,16 +103,17 @@ class SolverTemplate(ABC):
             new_time,
             min_timestep,
         ) = self.take_timestep(enthalpy, salt, gas, pressure, time, timestep)
-        while timestep > min_timestep:
-            timestep = min_timestep
-            (
-                new_enthalpy,
-                new_salt,
-                new_gas,
-                new_pressure,
-                new_time,
-                min_timestep,
-            ) = self.take_timestep(enthalpy, salt, gas, pressure, time, timestep)
+        if self.cfg.numerical_params.adaptive_timestepping:
+            while timestep > min_timestep:
+                timestep = min_timestep
+                (
+                    new_enthalpy,
+                    new_salt,
+                    new_gas,
+                    new_pressure,
+                    new_time,
+                    min_timestep,
+                ) = self.take_timestep(enthalpy, salt, gas, pressure, time, timestep)
 
         return (
             new_enthalpy,
@@ -148,7 +149,8 @@ class SolverTemplate(ABC):
             if np.min(salt) < -self.cfg.physical_params.concentration_ratio:
                 raise ValueError("salt crash")
 
-            timestep = min_timestep
+            if self.cfg.numerical_params.adaptive_timestepping:
+                timestep = min_timestep
 
             if (time_to_save - self.cfg.savefreq) >= 0:
                 time_to_save = 0
