@@ -11,7 +11,11 @@ from celestine.grids import (
     initialise_grids,
     average,
 )
-from celestine.velocities import calculate_velocities, calculate_absolute_permeability
+from celestine.velocities import (
+    calculate_velocities,
+    calculate_absolute_permeability,
+    solve_pressure_equation,
+)
 from celestine.solvers.template import SolverTemplate
 
 
@@ -159,20 +163,15 @@ class LXFSolver(SolverTemplate):
             geometric(new_liquid_fraction)
         )
 
-        pressure_forcing = np.zeros((I + 2,))
-        pressure_forcing[1:-1] = (1 / timestep) * (
-            new_gas_fraction[1:-1] - gas_fraction[1:-1]
-        ) + np.matmul(D_e, upwind(new_gas_fraction, V))
-        pressure_forcing[0] = 0
-        pressure_forcing[-1] = 0
-        pressure_matrix = np.zeros((I + 2, I + 2))
-        perm_matrix = np.zeros((I + 1, I + 1))
-        np.fill_diagonal(perm_matrix, new_permeability + 1e-15)
-        pressure_matrix[1:-1, :] = np.matmul(D_e, np.matmul(-perm_matrix, D_g))
-        pressure_matrix[0, 0] = 1
-        pressure_matrix[-1, -1] = 1
-        pressure_matrix[-1, -2] = -1
-        new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
+        new_pressure = solve_pressure_equation(
+            gas_fraction,
+            new_gas_fraction,
+            new_permeability,
+            timestep,
+            D_e,
+            D_g,
+            self.cfg,
+        )
 
         step, _, _, _ = initialise_grids(self.I)
 
