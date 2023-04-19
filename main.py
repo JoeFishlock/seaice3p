@@ -12,6 +12,9 @@ from celestine.__init__ import __version__
 logger.info(f"Celestine version {__version__}")
 
 
+"""Generate one simulation config and save to data/base.yml
+run the config and save data to data/base.npz
+"""
 base = Config(
     name="base",
     total_time=4,
@@ -24,7 +27,14 @@ status, duration = solve(base)
 log_time(logger, duration, message="solve ran in ")
 
 
-"""Analysis"""
+"""Analysis load data from data/base.npz
+plot
+gas_fraction
+salt
+temperature
+solid_fraction
+save as frames in frames/gas_fraction etc...
+"""
 with np.load("data/base.npz") as data:
     enthalpy = data["enthalpy"]
     salt = data["salt"]
@@ -63,4 +73,22 @@ for n, _ in enumerate(temperature[0, :]):
         "b*--",
     )
     plt.savefig(f"frames/salt/salt{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        temperature[:, n],
+        ghosts,
+        "r*--",
+    )
+    plt.savefig(f"frames/temperature/temperature{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    plt.plot(
+        solid_fraction[:, n],
+        ghosts,
+        "m*--",
+    )
+    plt.savefig(f"frames/solid_fraction/solid_fraction{n}.pdf")
     plt.close()
