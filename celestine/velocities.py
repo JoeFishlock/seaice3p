@@ -36,7 +36,7 @@ def solve_pressure_equation(
     pressure_forcing[-1] = 0
     pressure_matrix = np.zeros((I + 2, I + 2))
     perm_matrix = np.zeros((I + 1, I + 1))
-    np.fill_diagonal(perm_matrix, permeability + 1e-15)
+    np.fill_diagonal(perm_matrix, permeability + 1e-4)
     pressure_matrix[1:-1, :] = np.matmul(D_e, np.matmul(-perm_matrix, D_g))
     pressure_matrix[0, 0] = 1
     pressure_matrix[-1, -1] = 1
