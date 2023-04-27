@@ -15,20 +15,10 @@ def calculate_absolute_permeability(liquid_fraction):
     return liquid_fraction**3
 
 
-# def calculate_absolute_permeability(liquid_fraction, enthalpy, salt, gas, cfg: Config):
-#     boundary = calculate_eutectic(salt, gas, cfg)
-#     return np.where(enthalpy <= boundary, 0, liquid_fraction**3)
-
-
 def calculate_liquid_darcy_velocity(
     liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg: Config
 ):
-    # absolute_permeability = geometric(
-    #     calculate_absolute_permeability(liquid_fraction, enthalpy, salt, gas, cfg)
-    # )
-    absolute_permeability = calculate_absolute_permeability(
-        geometric(np.maximum(0, liquid_fraction - 0.146))
-    )
+    absolute_permeability = geometric(calculate_absolute_permeability(liquid_fraction))
     Wl = -absolute_permeability * np.matmul(D_g, pressure)
     return Wl
 
