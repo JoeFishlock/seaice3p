@@ -1,8 +1,8 @@
 # Results #
 
-Version: 0.4.0
+Version: 0.5.0
 
-2023-04-18 22:32
+2023-04-27 15:47
 
 ---
 
@@ -10,7 +10,7 @@ Name: ConstantMicroLXF
 
 Output looked at: None
 
-Result (P/C): P
+Result (P/C): C
 
 ---
 
@@ -34,7 +34,7 @@ Name: YearlyMicroLXF
 
 Output looked at: None
 
-Result (P/C): P
+Result (P/C): C
 
 ---
 
@@ -74,7 +74,7 @@ Name: ConstantMedLXF
 
 Output looked at: None
 
-Result (P/C): P
+Result (P/C): C
 
 ---
 
@@ -99,5 +99,53 @@ Name: ConstantMacroLXF
 Output looked at: None
 
 Result (P/C): C
+
+---
+
+Name: YearlyMacroLXFImplicit
+
+Output looked at: None
+
+Result (P/C): C
+
+---
+
+Name: ConstantMacroLXFImplicit
+
+Output looked at: None
+
+Result (P/C): C
+
+---
+
+Name: ConstantMedLXFImplicit
+
+Output looked at: None
+
+Result (P/C): C
+
+---
+
+Name: ConstantMicroLXFImplicit
+
+Output looked at: None
+
+Result (P/C): P
+
+---
+
+Name: YearlyMedLXFImplicit
+
+Output looked at: None
+
+Result (P/C): C
+
+---
+
+Name: YearlyMicroLXFImplicit
+
+Output looked at: None
+
+Result (P/C): P
 
 ---
