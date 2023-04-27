@@ -1,5 +1,32 @@
 # Changelog
 
+## v0.5.0 (2023-04-27) ##
+
+### Added ###
+
+- Options to forcing configuration to control sinusoidal yearly temperature forcing.
+- LXFImplicit solver option which is the same as lax friedrich solver but uses backwards
+Euler for temperature diffusion terms. This relaxes timestep constraint so that grid can 
+be refined to investigate numerical diffusion introduced by this method.
+- Scripts to generate benchmark configuration, run the simulations and plot the data.
+These scripts compare the LU, LXF and LXFImplicit solvers for a yearly temperature forcing
+run with micro bubbles and plot the profiles from the different solvers on the same axis to
+compare.
+
+### Changed ###
+
+- Example simulation in main.py now plots solid fraction and temperature.
+- Adaptive timestepping now controlled by flag in nuerical params object.
+Default is false so solve will just proceed with initial timestep.
+- Calculate liquid Darcy velocity with permeability as the cube of liquid fraction.
+This reverts a change made to debug instability which I forgot about.
+- Pressure solver regularisation increased from 1e-15 to 1e-4 so it can have more of
+an effect.
+
+### Tests ###
+
+- Add LXFImplicit solver to manual testing cases.
+
 ## v0.4.0 (2023-04-18) ##
 
 ### Added ###
