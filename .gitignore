@@ -1,6 +1,6 @@
 **/__pycache__/**
-venv/
-dev/
+.venv/
+.dev/
 frames*/
 data/
 benchmarks/
