@@ -1,6 +1,5 @@
 import numpy as np
 from celestine.grids import geometric, upwind
-from celestine.phase_boundaries import calculate_eutectic
 from celestine.params import Config
 
 """To prevent flow into a partially completely frozen region we must cut off
