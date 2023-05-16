@@ -1,6 +1,6 @@
 """Celestine"""
 import numpy as np
-from celestine.params import Config, DarcyLawParams, ForcingConfig
+from celestine.params import Config, DarcyLawParams, ForcingConfig, NumericalParams
 from celestine.run_simulation import solve
 from celestine.enthalpy_method import get_phase_masks, calculate_enthalpy_method
 from celestine.velocities import calculate_velocities
@@ -21,6 +21,7 @@ base = Config(
     savefreq=5e-2,
     darcy_law_params=DarcyLawParams(bubble_radius_scaled=0.1),
     forcing_config=ForcingConfig(temperature_forcing_choice="yearly"),
+    numerical_params=NumericalParams(solver="LU"),
 )
 base.save()
 status, duration = solve(base)
