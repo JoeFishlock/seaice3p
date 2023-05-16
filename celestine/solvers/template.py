@@ -49,6 +49,44 @@ class State:
         self.dissolved_gas = dissolved_gas
 
 
+class Solution:
+    """store solution at specified times on the center grid"""
+
+    def __init__(self, cfg: cp.Config):
+        self.time_length = 1 + int(cfg.total_time / cfg.savefreq)
+        self.name = cfg.name
+        self.data_path = cfg.data_path
+
+        self.times = np.zeros((self.time_length,))
+        self.top_temperature = np.zeros_like(self.times)
+
+        self.enthalpy = np.zeros((cfg.numerical_params.I, self.time_length))
+        self.salt = np.zeros_like(self.enthalpy)
+        self.gas = np.zeros_like(self.enthalpy)
+        self.pressure = np.zeros_like(self.enthalpy)
+
+    def add_state(self, state: State, index: int):
+        """add state to stored solution at given time index"""
+        self.times[index] = state.time
+        self.top_temperature[index] = state.top_temperature
+        self.enthalpy[:, index] = state.enthalpy
+        self.salt[:, index] = state.salt
+        self.gas[:, index] = state.gas
+        self.pressure[:, index] = state.pressure
+
+    def save_solution(self):
+        data_path = self.data_path
+        name = self.name
+        np.savez(
+            f"{data_path}{name}.npz",
+            times=self.times,
+            enthalpy=np.transpose(self.enthalpy),
+            salt=np.transpose(self.salt),
+            gas=np.transpose(self.gas),
+            pressure=np.transpose(self.pressure),
+        )
+
+
 class SolverTemplate(ABC):
     def __init__(self, cfg: cp.Config):
         """initialise solver object
