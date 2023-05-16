@@ -8,6 +8,46 @@ import celestine.grids as grids
 import celestine.boundary_conditions as bc
 import celestine.logging_config as logs
 
+from celestine.enthalpy_method import calculate_enthalpy_method
+from celestine.phase_boundaries import get_phase_masks
+
+
+class State:
+    """Stores information needed for solution at one timestep"""
+
+    def __init__(
+        self, time, enthalpy, salt, gas, pressure=None, top_temperature=np.NaN
+    ):
+        self.time = time
+        self.enthalpy = enthalpy
+        self.salt = salt
+        self.gas = gas
+        self.top_temperature = top_temperature
+
+        if pressure is not None:
+            self.pressure = pressure
+        else:
+            self.pressure = np.full_like(self.enthalpy, 0)
+
+    def calculate_enthalpy_method(self, cfg):
+        phase_masks = get_phase_masks(self.enthalpy, self.salt, self.gas, cfg)
+        (
+            temperature,
+            liquid_fraction,
+            gas_fraction,
+            solid_fraction,
+            liquid_salinity,
+            dissolved_gas,
+        ) = calculate_enthalpy_method(
+            self.enthalpy, self.salt, self.gas, cfg, phase_masks
+        )
+        self.temperature = temperature
+        self.liquid_fraction = liquid_fraction
+        self.gas_fraction = gas_fraction
+        self.solid_fraction = solid_fraction
+        self.liquid_salinity = liquid_salinity
+        self.dissolved_gas = dissolved_gas
+
 
 class SolverTemplate(ABC):
     def __init__(self, cfg: cp.Config):
