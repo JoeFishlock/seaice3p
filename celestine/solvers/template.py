@@ -74,16 +74,16 @@ class Solution:
         self.gas[:, index] = state.gas
         self.pressure[:, index] = state.pressure
 
-    def save_solution(self):
+    def save(self):
         data_path = self.data_path
         name = self.name
         np.savez(
             f"{data_path}{name}.npz",
             times=self.times,
-            enthalpy=np.transpose(self.enthalpy),
-            salt=np.transpose(self.salt),
-            gas=np.transpose(self.gas),
-            pressure=np.transpose(self.pressure),
+            enthalpy=self.enthalpy,
+            salt=self.salt,
+            gas=self.gas,
+            pressure=self.pressure,
         )
 
 
@@ -129,33 +129,6 @@ class SolverTemplate(ABC):
         )
         pressure = np.full_like(enthalpy, 0)
         return enthalpy, salt, gas, pressure
-
-    def generate_storage_arrays(self, enthalpy, salt, gas, pressure):
-        stored_enthalpy = np.copy(enthalpy)
-        stored_salt = np.copy(salt)
-        stored_gas = np.copy(gas)
-        stored_pressure = np.copy(pressure)
-        stored_times = np.array([0])
-        return stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure
-
-    def save_storage(
-        self,
-        stored_times,
-        stored_enthalpy,
-        stored_salt,
-        stored_gas,
-        stored_pressure,
-    ):
-        data_path = self.cfg.data_path
-        name = self.cfg.name
-        np.savez(
-            f"{data_path}{name}.npz",
-            times=stored_times,
-            enthalpy=np.transpose(stored_enthalpy),
-            salt=np.transpose(stored_salt),
-            gas=np.transpose(stored_gas),
-            pressure=np.transpose(stored_pressure),
-        )
 
     @abstractmethod
     def take_timestep(self, enthalpy, salt, gas, pressure, time, timestep):
@@ -212,20 +185,18 @@ class SolverTemplate(ABC):
         T = self.cfg.total_time
         timestep = self.cfg.numerical_params.timestep
 
-        (
-            stored_times,
-            stored_enthalpy,
-            stored_salt,
-            stored_gas,
-            stored_pressure,
-        ) = self.generate_storage_arrays(enthalpy, salt, gas, pressure)
-        time_to_save = 0
+        solution = Solution(self.cfg)
+        initial_state = State(0, enthalpy[1:-1], salt[1:-1], gas[1:-1], pressure[1:-1])
+        solution.add_state(initial_state, 0)
+
         time = 0
+        old_time_index = 0
         while time < T:
             enthalpy, salt, gas, pressure, time, timestep, min_timestep = self.advance(
                 enthalpy, salt, gas, pressure, time, timestep
             )
-            time_to_save += timestep
+            new_time_index = int(time / self.cfg.savefreq)
+
             print(f"time={time:.3f}/{T}, timestep={timestep:.2g} \r", end="")
             if np.min(salt) < -self.cfg.physical_params.concentration_ratio:
                 raise ValueError("salt crash")
@@ -233,17 +204,16 @@ class SolverTemplate(ABC):
             if self.cfg.numerical_params.adaptive_timestepping:
                 timestep = min_timestep
 
-            if (time_to_save - self.cfg.savefreq) >= 0:
+            if new_time_index - old_time_index > 0:
                 time_to_save = 0
-                stored_times = np.append(stored_times, time)
-                stored_enthalpy = np.vstack((stored_enthalpy, enthalpy))
-                stored_salt = np.vstack((stored_salt, salt))
-                stored_gas = np.vstack((stored_gas, gas))
-                stored_pressure = np.vstack((stored_pressure, pressure))
+                state = State(
+                    time, enthalpy[1:-1], salt[1:-1], gas[1:-1], pressure[1:-1]
+                )
+                solution.add_state(state, index=new_time_index)
 
-        self.save_storage(
-            stored_times, stored_enthalpy, stored_salt, stored_gas, stored_pressure
-        )
+            old_time_index = new_time_index
+
+        solution.save()
         # clear line after carriage return
         print("")
         return 0

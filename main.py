@@ -53,15 +53,15 @@ phase_masks = get_phase_masks(enthalpy, salt, gas, cfg)
     dissolved_gas,
 ) = calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks)
 D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.step)
-Vg, Wl, V = calculate_velocities(
-    liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
-)
+# Vg, Wl, V = calculate_velocities(
+#     liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
+# )
 step, centers, edges, ghosts = initialise_grids(cfg.numerical_params.I)
 for n, _ in enumerate(temperature[0, :]):
     plt.figure(figsize=(5, 5))
     plt.plot(
         gas_fraction[:, n],
-        ghosts,
+        centers,
         "g*--",
     )
     plt.savefig(f"frames/gas_fraction/gas_fraction{n}.pdf")
@@ -70,7 +70,7 @@ for n, _ in enumerate(temperature[0, :]):
     plt.figure(figsize=(5, 5))
     plt.plot(
         salt[:, n],
-        ghosts,
+        centers,
         "b*--",
     )
     plt.savefig(f"frames/salt/salt{n}.pdf")
@@ -79,7 +79,7 @@ for n, _ in enumerate(temperature[0, :]):
     plt.figure(figsize=(5, 5))
     plt.plot(
         temperature[:, n],
-        ghosts,
+        centers,
         "r*--",
     )
     plt.savefig(f"frames/temperature/temperature{n}.pdf")
@@ -88,7 +88,7 @@ for n, _ in enumerate(temperature[0, :]):
     plt.figure(figsize=(5, 5))
     plt.plot(
         solid_fraction[:, n],
-        ghosts,
+        centers,
         "m*--",
     )
     plt.savefig(f"frames/solid_fraction/solid_fraction{n}.pdf")
