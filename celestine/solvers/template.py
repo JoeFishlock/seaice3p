@@ -3,11 +3,14 @@ concrete solvers should inherit and overwrite required methods"""
 
 import numpy as np
 from abc import ABC, abstractmethod
-import celestine as cl
+import celestine.params as cp
+import celestine.grids as grids
+import celestine.boundary_conditions as bc
+import celestine.logging_config as logs
 
 
 class SolverTemplate(ABC):
-    def __init__(self, cfg: cl.params.Config):
+    def __init__(self, cfg: cp.Config):
         """initialise solver object
 
         Assign step size, number of cells and difference matrices for convenience.
@@ -17,8 +20,8 @@ class SolverTemplate(ABC):
         self.cfg = cfg
         self.step = cfg.numerical_params.step
         self.I = cfg.numerical_params.I
-        self.D_e = cl.grids.get_difference_matrix(self.I, self.step)
-        self.D_g = cl.grids.get_difference_matrix(self.I + 1, self.step)
+        self.D_e = grids.get_difference_matrix(self.I, self.step)
+        self.D_g = grids.get_difference_matrix(self.I + 1, self.step)
 
     def generate_initial_solution(self):
         """Generate initial solution on the ghost grid
@@ -34,7 +37,7 @@ class SolverTemplate(ABC):
         bottom_temp = self.cfg.boundary_conditions_config.far_temp
         bottom_bulk_gas = bottom_dissolved_gas * chi
 
-        bottom_enthalpy = cl.boundary_conditions.calculate_enthalpy_from_temp(
+        bottom_enthalpy = bc.calculate_enthalpy_from_temp(
             bottom_bulk_salinity,
             bottom_bulk_gas,
             bottom_temp,
@@ -125,7 +128,7 @@ class SolverTemplate(ABC):
             min_timestep,
         )
 
-    @cl.logging_config.time_function
+    @logs.time_function
     def solve(self):
         enthalpy, salt, gas, pressure = self.generate_initial_solution()
         T = self.cfg.total_time
