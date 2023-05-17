@@ -47,3 +47,17 @@ def average(ghosts):
     upper_ghosts = ghosts[1:]
     lower_ghosts = ghosts[:-1]
     return 0.5 * (upper_ghosts + lower_ghosts)
+
+
+def add_ghost_cells(centers, bottom, top):
+    """Add specified bottom and top value to center grid
+
+    :param centers: numpy array on centered grid (size I).
+    :type centers: Numpy array
+    :param bottom: bottom value placed at index 0.
+    :type bottom: float
+    :param top: top value placed at index -1.
+    :type top: float
+    :return: numpy array on ghost grid (size I+2).
+    """
+    return np.concatenate((np.array([bottom]), centers, np.array([top])))
