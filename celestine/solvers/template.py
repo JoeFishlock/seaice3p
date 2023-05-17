@@ -119,7 +119,9 @@ class SolverTemplate(ABC):
         gas = np.full_like(enthalpy, bottom_bulk_gas)
         pressure = np.full_like(enthalpy, 0)
 
-        return enthalpy, salt, gas, pressure
+        initial_state = State(0, enthalpy, salt, gas, pressure)
+
+        return initial_state
 
     @abstractmethod
     def take_timestep(self, enthalpy, salt, gas, pressure, time, timestep):
