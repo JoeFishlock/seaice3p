@@ -5,7 +5,6 @@ import numpy as np
 from abc import ABC, abstractmethod
 import celestine.params as cp
 import celestine.grids as grids
-import celestine.boundary_conditions as bc
 import celestine.logging_config as logs
 
 from celestine.enthalpy_method import calculate_enthalpy_method
@@ -147,24 +146,18 @@ class SolverTemplate(ABC):
         solution = Solution(self.cfg)
         solution.add_state(state, 0)
 
-        time = 0
         old_time_index = 0
 
-        while time < T:
+        while state.time < T:
             state = self.take_timestep(state)
-            new_time_index = int(time / self.cfg.savefreq)
+            new_time_index = int(state.time / self.cfg.savefreq)
 
-            print(f"time={time:.3f}/{T}, timestep={timestep:.2g} \r", end="")
-            if np.min(salt) < -self.cfg.physical_params.concentration_ratio:
+            print(f"time={state.time:.3f}/{T}, timestep={timestep:.2g} \r", end="")
+
+            if np.min(state.salt) < -self.cfg.physical_params.concentration_ratio:
                 raise ValueError("salt crash")
 
-            if self.cfg.numerical_params.adaptive_timestepping:
-                timestep = min_timestep
-
             if new_time_index - old_time_index > 0:
-                state = State(
-                    time, enthalpy[1:-1], salt[1:-1], gas[1:-1], pressure[1:-1]
-                )
                 solution.add_state(state, index=new_time_index)
 
             old_time_index = new_time_index
