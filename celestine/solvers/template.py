@@ -174,12 +174,11 @@ class SolverTemplate(ABC):
 
     @logs.time_function
     def solve(self):
-        enthalpy, salt, gas, pressure = self.generate_initial_solution()
+        initial_state = self.generate_initial_solution()
         T = self.cfg.total_time
         timestep = self.cfg.numerical_params.timestep
 
         solution = Solution(self.cfg)
-        initial_state = State(0, enthalpy[1:-1], salt[1:-1], gas[1:-1], pressure[1:-1])
         solution.add_state(initial_state, 0)
 
         time = 0
