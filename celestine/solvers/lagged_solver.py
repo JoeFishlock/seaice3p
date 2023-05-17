@@ -21,40 +21,41 @@ from celestine.velocities import (
     calculate_absolute_permeability,
     solve_pressure_equation,
 )
-from celestine.solvers.template import SolverTemplate
+from celestine.solvers.template import SolverTemplate, State
 
 
 class LaggedUpwindSolver(SolverTemplate):
     """Take timestep using upwind scheme with liquid velocity calculation lagged."""
 
-    def take_timestep(self, enthalpy, salt, gas, pressure, time, timestep):
-        I = self.I
-        chi = self.cfg.physical_params.expansion_coefficient
-        C = self.cfg.physical_params.concentration_ratio
+    def take_timestep(self, state: State):
         cfg = self.cfg
+        I = self.I
+        timestep = cfg.numerical_params.timestep
+
+        chi = cfg.physical_params.expansion_coefficient
+        C = cfg.physical_params.concentration_ratio
+
         D_g = self.D_g
         D_e = self.D_e
 
+        time = state.time
+
         new_time = time + timestep
+
         top_temperature = get_temperature_forcing(time, cfg)
         new_top_temperature = get_temperature_forcing(new_time, cfg)
+
         top_enthalpy = calculate_enthalpy_from_temp(0, 0, top_temperature, cfg)
         new_top_enthalpy = calculate_enthalpy_from_temp(0, 0, new_top_temperature, cfg)
 
-        phase_masks = get_phase_masks(
-            enthalpy,
-            salt,
-            gas,
-            cfg,
-        )
-        (
-            temperature,
-            liquid_fraction,
-            gas_fraction,
-            _,
-            liquid_salinity,
-            dissolved_gas,
-        ) = calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks)
+        # calculate temperature, salinity etc for state on grid centers
+        state.calculate_enthalpy_method(cfg)
+        liquid_fraction_centers = state.liquid_fraction
+        enthalpy_centers = state.enthalpy
+        salt_centers = state.salt
+        gas_centers = state.gas
+        pressure_centers = state.pressure
+
         Vg, Wl, V = calculate_velocities(
             liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
         )
