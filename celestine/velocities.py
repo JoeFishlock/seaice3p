@@ -1,5 +1,5 @@
 import numpy as np
-from celestine.grids import geometric, upwind, centers_to_edges, add_ghost_cells
+from celestine.grids import upwind, centers_to_edges, add_ghost_cells
 from celestine.params import Config
 
 """To prevent flow into a partially completely frozen region we must cut off
@@ -30,7 +30,7 @@ def calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g):
     liquid_fraction_on_edges = centers_to_edges(liquid_fraction)
     absolute_permeability = calculate_absolute_permeability(liquid_fraction_on_edges)
     pressure_ghost = add_ghost_cells(pressure, 0, pressure[-1])  # BCs for Wl=0 at top
-    Wl = -absolute_permeability * np.matmul(D_g, pressure)
+    Wl = -absolute_permeability * np.matmul(D_g, pressure_ghost)
     return Wl
 
 
@@ -66,9 +66,10 @@ def solve_pressure_equation(
 
 
 def calculate_bubble_radius(liquid_fraction, cfg: Config):
+    """Takes liquid fraction on edges and returns bubble radius parameter on edges"""
     exponent = cfg.darcy_law_params.pore_throat_scaling
     reg = cfg.numerical_params.regularisation
-    effective_tube_radius = geometric(liquid_fraction) ** exponent + reg
+    effective_tube_radius = liquid_fraction**exponent + reg
     return cfg.darcy_law_params.bubble_radius_scaled / effective_tube_radius
 
 
