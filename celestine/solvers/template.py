@@ -6,13 +6,14 @@ from abc import ABC, abstractmethod
 import celestine.params as cp
 import celestine.grids as grids
 import celestine.logging_config as logs
+import celestine.boundary_conditions as bc
 
 from celestine.enthalpy_method import calculate_enthalpy_method
 from celestine.phase_boundaries import get_phase_masks
 
 
 class State:
-    """Stores information needed for solution at one timestep"""
+    """Stores information needed for solution at one timestep on cell centers"""
 
     def __init__(
         self, time, enthalpy, salt, gas, pressure=None, top_temperature=np.NaN
@@ -46,6 +47,31 @@ class State:
         self.solid_fraction = solid_fraction
         self.liquid_salinity = liquid_salinity
         self.dissolved_gas = dissolved_gas
+
+
+class StateBCs:
+    """Stores information needed for solution at one timestep with BCs on ghost
+    cells as well
+
+    Note must initialise once enthalpy method has already run on State."""
+
+    def __init__(self, state: State, cfg):
+        self.cfg = cfg
+        self.time = state.time
+        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
+        self.salt = bc.salt_BCs(state.salt, cfg)
+        self.gas = bc.gas_BCs(state.gas, cfg)
+        self.top_temperature = state.top_temperature
+
+        if state.pressure is not None:
+            self.pressure = state.pressure
+        else:
+            self.pressure = np.full_like(self.enthalpy, 0)
+
+        self.temperature = bc.temperature_BCs(state.temperature, state.time, cfg)
+        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
+        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
+        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
 
 
 class Solution:
