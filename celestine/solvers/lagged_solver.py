@@ -51,14 +51,10 @@ class LaggedUpwindSolver(SolverTemplate):
         # calculate temperature, salinity etc for state on grid centers
         state.calculate_enthalpy_method(cfg)
         liquid_fraction_centers = state.liquid_fraction
-        enthalpy_centers = state.enthalpy
-        salt_centers = state.salt
-        gas_centers = state.gas
-        pressure_centers = state.pressure
+        pressure = state.pressure
+        liquid_fraction = state.liquid_fraction
 
-        Vg, Wl, V = calculate_velocities(
-            liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
-        )
+        Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, cfg)
 
         new_enthalpy = np.zeros((I + 2,))
         new_salt = np.zeros((I + 2,))
