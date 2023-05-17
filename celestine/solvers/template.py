@@ -124,69 +124,34 @@ class SolverTemplate(ABC):
         return initial_state
 
     @abstractmethod
-    def take_timestep(self, enthalpy, salt, gas, pressure, time, timestep):
+    def take_timestep(self, state: State) -> State:
         """advance enthalpy, salt, gas and pressure to the next timestep.
 
-        Allowing for the possibiltiy of a variable timestep we make this an input param
-        and return the minimal allowable timestep from stability criteria.
+        Note as of 2023-05-17 removed ability to have adaptive timestepping for
+        simplicity.
 
-        :param enthalpy:
-        :param salt:
-        :param gas:
-        :param pressure:
-        :param time:
-        :param timestep:
-
-        :return: (new_enthalpy, new_salt, new_gas, new_pressure, new_time, min_timestep)
+        :param state: object containing current time, enthalpy, salt, gas, pressure
+        and surface temperature.
+        :type state: ``celestine.solvers.template.State``
+        :return: state of system (new enthalpy, salt, gas and pressure) after one
+        timestep.
         """
         pass
 
-    def advance(self, enthalpy, salt, gas, pressure, time, timestep):
-        (
-            new_enthalpy,
-            new_salt,
-            new_gas,
-            new_pressure,
-            new_time,
-            min_timestep,
-        ) = self.take_timestep(enthalpy, salt, gas, pressure, time, timestep)
-        if self.cfg.numerical_params.adaptive_timestepping:
-            while timestep > min_timestep:
-                timestep = min_timestep
-                (
-                    new_enthalpy,
-                    new_salt,
-                    new_gas,
-                    new_pressure,
-                    new_time,
-                    min_timestep,
-                ) = self.take_timestep(enthalpy, salt, gas, pressure, time, timestep)
-
-        return (
-            new_enthalpy,
-            new_salt,
-            new_gas,
-            new_pressure,
-            new_time,
-            timestep,
-            min_timestep,
-        )
-
     @logs.time_function
     def solve(self):
-        initial_state = self.generate_initial_solution()
+        state = self.generate_initial_solution()
         T = self.cfg.total_time
         timestep = self.cfg.numerical_params.timestep
 
         solution = Solution(self.cfg)
-        solution.add_state(initial_state, 0)
+        solution.add_state(state, 0)
 
         time = 0
         old_time_index = 0
+
         while time < T:
-            enthalpy, salt, gas, pressure, time, timestep, min_timestep = self.advance(
-                enthalpy, salt, gas, pressure, time, timestep
-            )
+            state = self.take_timestep(state)
             new_time_index = int(time / self.cfg.savefreq)
 
             print(f"time={time:.3f}/{T}, timestep={timestep:.2g} \r", end="")
@@ -197,7 +162,6 @@ class SolverTemplate(ABC):
                 timestep = min_timestep
 
             if new_time_index - old_time_index > 0:
-                time_to_save = 0
                 state = State(
                     time, enthalpy[1:-1], salt[1:-1], gas[1:-1], pressure[1:-1]
                 )
