@@ -1,8 +1,6 @@
 import numpy as np
-from celestine.forcing import get_temperature_forcing
 from celestine.grids import (
     upwind,
-    add_ghost_cells,
     centers_to_edges,
 )
 from celestine.velocities import (
@@ -10,7 +8,7 @@ from celestine.velocities import (
     calculate_absolute_permeability,
     solve_pressure_equation,
 )
-from celestine.solvers.template import SolverTemplate, State
+from celestine.solvers.template import SolverTemplate, State, StateBCs
 
 
 class LaggedUpwindSolver(SolverTemplate):
@@ -28,46 +26,25 @@ class LaggedUpwindSolver(SolverTemplate):
         D_e = self.D_e
 
         time = state.time
-
         new_time = time + timestep
-
-        top_temperature = get_temperature_forcing(time, cfg)
-        new_top_temperature = get_temperature_forcing(new_time, cfg)
-        far_temp = cfg.boundary_conditions_config.far_temp
-        far_gas_sat = cfg.boundary_conditions_config.far_gas_sat
-        far_bulk_salt = cfg.boundary_conditions_config.far_bulk_salinity
-
-        state.top_temperature = top_temperature
 
         # calculate temperature, salinity etc for state on grid centers
         state.calculate_enthalpy_method(cfg)
-
-        enthalpy = state.enthalpy
-        salt = state.salt
-        gas = state.gas
         pressure = state.pressure
         liquid_fraction = state.liquid_fraction
-        temperature = state.temperature
-        liquid_salinity = state.liquid_salinity
         gas_fraction = state.gas_fraction
-        dissolved_gas = state.dissolved_gas
 
-        dissolved_gas_ghosts = add_ghost_cells(dissolved_gas, bottom=far_gas_sat, top=1)
-        gas_fraction_ghosts = add_ghost_cells(gas_fraction, bottom=0, top=0)
-        gas_ghosts = add_ghost_cells(gas, bottom=chi * far_gas_sat, top=chi)
+        state_BCs = StateBCs(state, cfg)
 
-        liquid_salinity_ghosts = add_ghost_cells(
-            liquid_salinity, bottom=far_bulk_salt, top=liquid_salinity[-1]
-        )
-
-        temperature_ghosts = add_ghost_cells(
-            temperature, bottom=far_temp, top=top_temperature
-        )
-        enthalpy_ghosts = add_ghost_cells(enthalpy, bottom=far_temp, top=enthalpy[-1])
-        salt_ghosts = add_ghost_cells(salt, bottom=far_bulk_salt, top=salt[-1])
+        dissolved_gas_ghosts = state_BCs.dissolved_gas
+        gas_fraction_ghosts = state_BCs.gas_fraction
+        gas_ghosts = state_BCs.gas
+        liquid_salinity_ghosts = state_BCs.liquid_salinity
+        temperature_ghosts = state_BCs.temperature
+        enthalpy_ghosts = state_BCs.enthalpy
+        salt_ghosts = state_BCs.salt
 
         liquid_fraction_edges = centers_to_edges(liquid_fraction)
-
         Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, cfg)
 
         new_enthalpy = np.zeros((I,))
@@ -75,12 +52,12 @@ class LaggedUpwindSolver(SolverTemplate):
         new_gas = np.zeros((I,))
         new_pressure = np.zeros((I,))
 
-        new_enthalpy = enthalpy + timestep * (
+        new_enthalpy = enthalpy_ghosts[1:-1] + timestep * (
             np.matmul(D_e, np.matmul(D_g, temperature_ghosts))
             - np.matmul(D_e, upwind(temperature_ghosts, Wl))
             - np.matmul(D_e, upwind(enthalpy_ghosts, V))
         )
-        new_salt = salt + timestep * (
+        new_salt = salt_ghosts[1:-1] + timestep * (
             (1 / cfg.physical_params.lewis_salt)
             * np.matmul(
                 D_e, liquid_fraction_edges * np.matmul(D_g, liquid_salinity_ghosts)
@@ -88,7 +65,7 @@ class LaggedUpwindSolver(SolverTemplate):
             - np.matmul(D_e, upwind(salt_ghosts, V))
             - np.matmul(D_e, upwind(liquid_salinity_ghosts + C, Wl))
         )
-        new_gas = gas + timestep * (
+        new_gas = gas_ghosts[1:-1] + timestep * (
             (chi / cfg.physical_params.lewis_gas)
             * np.matmul(
                 D_e, liquid_fraction_edges * np.matmul(D_g, dissolved_gas_ghosts)
@@ -103,7 +80,6 @@ class LaggedUpwindSolver(SolverTemplate):
             new_enthalpy,
             new_salt,
             new_gas,
-            top_temperature=new_top_temperature,
         )
         new_state.calculate_enthalpy_method(cfg)
 
