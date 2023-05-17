@@ -106,28 +106,19 @@ class SolverTemplate(ABC):
 
         :returns: initial solution arrays on ghost grid (enthalpy, salt, gas, pressure)
         """
-        ghost_length = self.I + 2
-        C = self.cfg.physical_params.concentration_ratio
         chi = self.cfg.physical_params.expansion_coefficient
-        bottom_dissolved_gas = self.cfg.boundary_conditions_config.far_gas_sat
 
-        bottom_bulk_salinity = C
         bottom_temp = self.cfg.boundary_conditions_config.far_temp
+        bottom_bulk_salinity = self.cfg.boundary_conditions_config.far_bulk_salinity
+        bottom_dissolved_gas = self.cfg.boundary_conditions_config.far_gas_sat
         bottom_bulk_gas = bottom_dissolved_gas * chi
 
-        bottom_enthalpy = bc.calculate_enthalpy_from_temp(
-            bottom_bulk_salinity,
-            bottom_bulk_gas,
-            bottom_temp,
-            self.cfg,
-        )
-        enthalpy = np.full((ghost_length,), bottom_enthalpy)
-        salt = np.full_like(enthalpy, 0)
-        gas = np.full_like(
-            enthalpy,
-            bottom_bulk_gas,
-        )
+        # Initialise uniform enthalpy assuming completely liquid initial domain
+        enthalpy = np.full((self.I,), bottom_temp)
+        salt = np.full_like(enthalpy, bottom_bulk_salinity)
+        gas = np.full_like(enthalpy, bottom_bulk_gas)
         pressure = np.full_like(enthalpy, 0)
+
         return enthalpy, salt, gas, pressure
 
     @abstractmethod
