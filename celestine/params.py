@@ -57,10 +57,9 @@ class NumericalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    adaptive_timestepping: bool = False
     CFL_limit = 0.5
     Courant_limit = 0.4
-    solver: str = "LXF"
+    solver: str = "LU"
 
     @property
     def step(self):
