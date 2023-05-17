@@ -75,7 +75,7 @@ def centers_to_edges(centers, interpolator=geometric):
     :type interpolator: function with signature (ghosts) -> edges.
     :return: numpy array on cell edges (size I+1).
     """
-    edges = np.full_like((centers.size + 1,), np.NaN)
+    edges = np.full((centers.size + 1,), np.NaN)
     edges[0] = centers[0]
     edges[-1] = centers[-1]
     edges[1:-1] = interpolator(centers)
