@@ -59,3 +59,7 @@ def liquid_fraction_BCs(liquid_fraction_centers, cfg: Config):
         bottom=liquid_fraction_centers[0],
         top=liquid_fraction_centers[-1],
     )
+
+
+def pressure_BCs(pressure_centers, cfg: Config):
+    return add_ghost_cells(pressure_centers, bottom=0, top=pressure_centers[-1])
