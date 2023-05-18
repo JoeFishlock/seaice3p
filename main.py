@@ -2,12 +2,11 @@
 import numpy as np
 from celestine.params import Config, DarcyLawParams, ForcingConfig, NumericalParams
 from celestine.run_simulation import solve
-from celestine.enthalpy_method import get_phase_masks, calculate_enthalpy_method
-from celestine.velocities import calculate_velocities
 import matplotlib.pyplot as plt
 from celestine.grids import initialise_grids, get_difference_matrix
 from celestine.logging_config import logger, log_time
 from celestine.__init__ import __version__
+from celestine.state import State
 
 logger.info(f"Celestine version {__version__}")
 
@@ -43,24 +42,16 @@ with np.load("data/base.npz") as data:
     pressure = data["pressure"]
     times = data["times"]
 cfg = Config.load("data/base.yml")
-phase_masks = get_phase_masks(enthalpy, salt, gas, cfg)
-(
-    temperature,
-    liquid_fraction,
-    gas_fraction,
-    solid_fraction,
-    liquid_salinity,
-    dissolved_gas,
-) = calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks)
+
 D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.step)
-# Vg, Wl, V = calculate_velocities(
-#     liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
-# )
 step, centers, edges, ghosts = initialise_grids(cfg.numerical_params.I)
-for n, _ in enumerate(temperature[0, :]):
+
+for n, time in enumerate(times):
+    state = State(time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
+    state.calculate_enthalpy_method(cfg)
     plt.figure(figsize=(5, 5))
     plt.plot(
-        gas_fraction[:, n],
+        state.gas_fraction,
         centers,
         "g*--",
     )
@@ -69,7 +60,7 @@ for n, _ in enumerate(temperature[0, :]):
 
     plt.figure(figsize=(5, 5))
     plt.plot(
-        salt[:, n],
+        state.salt,
         centers,
         "b*--",
     )
@@ -78,7 +69,7 @@ for n, _ in enumerate(temperature[0, :]):
 
     plt.figure(figsize=(5, 5))
     plt.plot(
-        temperature[:, n],
+        state.temperature,
         centers,
         "r*--",
     )
@@ -87,7 +78,7 @@ for n, _ in enumerate(temperature[0, :]):
 
     plt.figure(figsize=(5, 5))
     plt.plot(
-        solid_fraction[:, n],
+        state.solid_fraction,
         centers,
         "m*--",
     )

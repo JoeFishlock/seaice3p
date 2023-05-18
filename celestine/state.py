@@ -8,8 +8,7 @@ Solution: store primary variables at each timestep we want to save data
 import numpy as np
 import celestine.params as cp
 import celestine.boundary_conditions as bc
-from celestine.enthalpy_method import calculate_enthalpy_method
-from celestine.phase_boundaries import get_phase_masks
+from celestine.enthalpy_method import FullEnthalpyMethod
 
 
 class State:
@@ -30,7 +29,6 @@ class State:
             self.pressure = np.full_like(self.enthalpy, 0)
 
     def calculate_enthalpy_method(self, cfg):
-        phase_masks = get_phase_masks(self.enthalpy, self.salt, self.gas, cfg)
         (
             temperature,
             liquid_fraction,
@@ -38,9 +36,7 @@ class State:
             solid_fraction,
             liquid_salinity,
             dissolved_gas,
-        ) = calculate_enthalpy_method(
-            self.enthalpy, self.salt, self.gas, cfg, phase_masks
-        )
+        ) = FullEnthalpyMethod(cfg.physical_params).calculate_enthalpy_method(self)
         self.temperature = temperature
         self.liquid_fraction = liquid_fraction
         self.gas_fraction = gas_fraction
