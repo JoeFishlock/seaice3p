@@ -39,8 +39,8 @@ class LaggedUpwindSolver(SolverTemplate):
         new_time = time + timestep
 
         # calculate temperature, salinity etc for state on grid centers
-        state.calculate_enthalpy_method(cfg)
-        state_BCs = StateBCs(state, cfg)  # Add boundary conditions
+        state.calculate_enthalpy_method()
+        state_BCs = StateBCs(state)  # Add boundary conditions
 
         Vg, Wl, V = calculate_velocities(state_BCs, D_g, cfg)
 
@@ -53,13 +53,14 @@ class LaggedUpwindSolver(SolverTemplate):
         new_gas = take_forward_euler_step(state.gas, gas_flux, timestep, D_e)
 
         new_state = State(
+            cfg,
             new_time,
             new_enthalpy,
             new_salt,
             new_gas,
         )
-        new_state.calculate_enthalpy_method(cfg)
-        new_state_BCs = StateBCs(new_state, cfg)
+        new_state.calculate_enthalpy_method()
+        new_state_BCs = StateBCs(new_state)
         new_pressure = solve_pressure_equation(
             state_BCs, new_state_BCs, timestep, D_e, D_g, cfg
         )

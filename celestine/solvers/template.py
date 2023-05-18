@@ -41,7 +41,7 @@ class SolverTemplate(ABC):
         gas = np.full_like(enthalpy, bottom_bulk_gas)
         pressure = np.full_like(enthalpy, 0)
 
-        initial_state = State(0, enthalpy, salt, gas, pressure)
+        initial_state = State(self.cfg, 0, enthalpy, salt, gas, pressure)
 
         return initial_state
 

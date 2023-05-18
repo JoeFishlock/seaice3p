@@ -14,7 +14,8 @@ from celestine.enthalpy_method import get_enthalpy_method
 class State:
     """Stores information needed for solution at one timestep on cell centers"""
 
-    def __init__(self, time, enthalpy, salt, gas, pressure=None):
+    def __init__(self, cfg: cp.Config, time, enthalpy, salt, gas, pressure=None):
+        self.cfg = cfg
         self.time = time
         self.enthalpy = enthalpy
         self.salt = salt
@@ -25,8 +26,8 @@ class State:
         else:
             self.pressure = np.full_like(self.enthalpy, 0)
 
-    def calculate_enthalpy_method(self, cfg):
-        enthalpy_method = get_enthalpy_method(cfg)(cfg.physical_params)
+    def calculate_enthalpy_method(self):
+        enthalpy_method = get_enthalpy_method(self.cfg)(self.cfg.physical_params)
         (
             temperature,
             liquid_fraction,
@@ -49,23 +50,23 @@ class StateBCs:
 
     Note must initialise once enthalpy method has already run on State."""
 
-    def __init__(self, state: State, cfg):
-        self.cfg = cfg
+    def __init__(self, state: State):
+        self.cfg = state.cfg
         self.time = state.time
-        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
-        self.salt = bc.salt_BCs(state.salt, cfg)
-        self.gas = bc.gas_BCs(state.gas, cfg)
+        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, state.cfg)
+        self.salt = bc.salt_BCs(state.salt, state.cfg)
+        self.gas = bc.gas_BCs(state.gas, state.cfg)
 
         if state.pressure is not None:
-            self.pressure = bc.pressure_BCs(state.pressure, cfg)
+            self.pressure = bc.pressure_BCs(state.pressure, state.cfg)
         else:
             self.pressure = np.full_like(self.enthalpy, 0)
 
-        self.temperature = bc.temperature_BCs(state.temperature, state.time, cfg)
-        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
-        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
-        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
-        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, cfg)
+        self.temperature = bc.temperature_BCs(state.temperature, state.time, state.cfg)
+        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, state.cfg)
+        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
+        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, state.cfg)
+        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, state.cfg)
 
 
 class Solution:

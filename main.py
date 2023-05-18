@@ -47,8 +47,8 @@ D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.ste
 step, centers, edges, ghosts = initialise_grids(cfg.numerical_params.I)
 
 for n, time in enumerate(times):
-    state = State(time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
-    state.calculate_enthalpy_method(cfg)
+    state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
+    state.calculate_enthalpy_method()
     plt.figure(figsize=(5, 5))
     plt.plot(
         state.gas_fraction,
