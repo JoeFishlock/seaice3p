@@ -64,7 +64,7 @@ class StateBCs:
         self.top_temperature = state.top_temperature
 
         if state.pressure is not None:
-            self.pressure = state.pressure
+            self.pressure = bc.pressure_BCs(state.pressure, cfg)
         else:
             self.pressure = np.full_like(self.enthalpy, 0)
 
