@@ -53,10 +53,10 @@ class SolverTemplate(ABC):
         simplicity.
 
         :param state: object containing current time, enthalpy, salt, gas, pressure
-        and surface temperature.
+            and surface temperature.
         :type state: ``celestine.solvers.template.State``
         :return: state of system (new enthalpy, salt, gas and pressure) after one
-        timestep.
+            timestep.
         """
         pass
 
