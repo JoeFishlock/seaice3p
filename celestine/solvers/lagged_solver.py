@@ -28,6 +28,9 @@ def take_forward_euler_step(quantity, flux, timestep, D_e):
 class LaggedUpwindSolver(SolverTemplate):
     """Take timestep using upwind scheme with liquid velocity calculation lagged."""
 
+    def pre_solve_checks(self):
+        self.cfg.check_thermal_Courant_number()
+
     def take_timestep(self, state: State):
         cfg = self.cfg
         timestep = cfg.numerical_params.timestep

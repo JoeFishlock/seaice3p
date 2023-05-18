@@ -60,8 +60,17 @@ class SolverTemplate(ABC):
         """
         pass
 
+    def pre_solve_checks(self):
+        """Optionally implement this method if you want to check anything before
+        running the solver.
+
+        For example to check the timestep and grid step satisfy some constraint.
+        """
+        pass
+
     @logs.time_function
     def solve(self):
+        self.pre_solve_checks()  # optional method
         state = self.generate_initial_solution()
         T = self.cfg.total_time
         timestep = self.cfg.numerical_params.timestep
