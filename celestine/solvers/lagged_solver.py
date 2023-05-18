@@ -12,6 +12,23 @@ from celestine.flux import calculate_heat_flux
 from celestine.solvers.template import SolverTemplate, State, StateBCs
 
 
+def take_forward_euler_step(quantity, flux, timestep, D_e):
+    r"""Advance the given quantity one forward Euler step using the given flux
+
+    The quantity is given on cell centers and the flux on cell edges.
+
+    Discretise the conservation equation
+
+    .. math:: \frac{\partial Q}{\partial t} = -\frac{\partial F}{\partial z}
+
+    as
+
+    .. math:: Q^{n+1} = Q^n - \Delta t (\frac{\partial F}{\partial z})
+
+    """
+    return quantity - timestep * np.matmul(D_e, flux)
+
+
 class LaggedUpwindSolver(SolverTemplate):
     """Take timestep using upwind scheme with liquid velocity calculation lagged."""
 
@@ -41,19 +58,17 @@ class LaggedUpwindSolver(SolverTemplate):
         gas_fraction_ghosts = state_BCs.gas_fraction
         gas_ghosts = state_BCs.gas
         liquid_salinity_ghosts = state_BCs.liquid_salinity
-        enthalpy_ghosts = state_BCs.enthalpy
         salt_ghosts = state_BCs.salt
 
         liquid_fraction_edges = centers_to_edges(liquid_fraction)
         Vg, Wl, V = calculate_velocities(liquid_fraction, pressure, D_g, cfg)
 
-        new_enthalpy = np.zeros((I,))
         new_salt = np.zeros((I,))
         new_gas = np.zeros((I,))
         new_pressure = np.zeros((I,))
 
         heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g)
-        new_enthalpy = enthalpy_ghosts[1:-1] + timestep * (-np.matmul(D_e, heat_flux))
+        new_enthalpy = take_forward_euler_step(state.enthalpy, heat_flux, timestep, D_e)
 
         new_salt = salt_ghosts[1:-1] + timestep * (
             (1 / cfg.physical_params.lewis_salt)
