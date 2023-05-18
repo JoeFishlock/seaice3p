@@ -162,3 +162,9 @@ class FullEnthalpyMethod(EnthalpyMethod):
             liquid_salinity,
             dissolved_gas,
         )
+
+
+def get_enthalpy_method(cfg):
+    solver_choice = cfg.numerical_params.solver
+    options = {"LU": FullEnthalpyMethod}
+    return options[solver_choice]
