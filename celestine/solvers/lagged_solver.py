@@ -1,7 +1,6 @@
 import numpy as np
 from celestine.velocities import (
     calculate_velocities,
-    calculate_absolute_permeability,
     solve_pressure_equation,
 )
 from celestine.flux import calculate_heat_flux, calculate_salt_flux, calculate_gas_flux
@@ -40,8 +39,7 @@ class LaggedUpwindSolver(SolverTemplate):
 
         # calculate temperature, salinity etc for state on grid centers
         state.calculate_enthalpy_method(cfg)
-
-        state_BCs = StateBCs(state, cfg)
+        state_BCs = StateBCs(state, cfg)  # Add boundary conditions
 
         Vg, Wl, V = calculate_velocities(state_BCs, D_g, cfg)
 
@@ -61,7 +59,6 @@ class LaggedUpwindSolver(SolverTemplate):
         )
         new_state.calculate_enthalpy_method(cfg)
         new_state_BCs = StateBCs(new_state, cfg)
-
         new_pressure = solve_pressure_equation(
             state_BCs, new_state_BCs, timestep, D_e, D_g, cfg
         )
