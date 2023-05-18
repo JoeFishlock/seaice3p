@@ -9,6 +9,7 @@ import numpy as np
 import celestine.params as cp
 import celestine.boundary_conditions as bc
 from celestine.enthalpy_method import get_enthalpy_method
+from celestine.grids import initialise_grids
 
 
 class State:
@@ -25,6 +26,11 @@ class State:
             self.pressure = pressure
         else:
             self.pressure = np.full_like(self.enthalpy, 0)
+
+    @property
+    def grid(self):
+        _, centers, _, _ = initialise_grids(self.cfg.numerical_params.I)
+        return centers
 
     def calculate_enthalpy_method(self):
         enthalpy_method = get_enthalpy_method(self.cfg)(self.cfg.physical_params)
@@ -67,6 +73,11 @@ class StateBCs:
         self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
         self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, state.cfg)
         self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, state.cfg)
+
+    @property
+    def grid(self):
+        _, _, _, ghosts = initialise_grids(self.cfg.numerical_params.I)
+        return ghosts
 
 
 class Solution:
