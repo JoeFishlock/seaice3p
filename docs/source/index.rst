@@ -24,7 +24,6 @@ Celestine
    lagged_solver
    template
 
-
 Indices and tables
 ==================
 
