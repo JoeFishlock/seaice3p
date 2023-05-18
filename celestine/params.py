@@ -2,9 +2,11 @@
 
 The config class contains all the parameters needed to run a simulation as well
 as methods to save and load this configuration to a yaml file."""
+
 from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
 import numpy as np
+from celestine.logging_config import logger
 
 
 @dataclass
@@ -25,6 +27,7 @@ class BoundaryConditionsConfig:
 
     far_gas_sat: float = 1.0
     far_temp: float = 0.1
+    far_bulk_salinity: float = 0
 
 
 @dataclass
@@ -56,17 +59,14 @@ class NumericalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    adaptive_timestepping: bool = False
-    CFL_limit = 0.5
-    Courant_limit = 0.4
-    solver: str = "LXF"
+    solver: str = "LU"
 
     @property
     def step(self):
         return 1 / self.I
 
     @property
-    def Diff_num(self):
+    def Courant(self):
         """This number must be <0.5 for stability of temperature diffusion terms"""
         return self.timestep / (self.step**2)
 
@@ -86,15 +86,6 @@ class Config:
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
     data_path: str = "data/"
-
-    @property
-    def Courant_gas(self):
-        """ "This number must be <1.0 for CFL condition of gas buoyant transport"""
-        return (
-            self.darcy_law_params.B
-            * self.numerical_params.step
-            / self.numerical_params.step
-        )
 
     def save(self):
         with open(f"{self.data_path}{self.name}.yml", "w") as outfile:
@@ -118,14 +109,6 @@ class Config:
             numerical_params=NumericalParams(**dictionary["numerical_params"]),
         )
 
-    def check_buoyancy_CFL(self):
-        if self.Courant_gas > 1.0:
-            return True
-        else:
-            return False
-
-    def check_thermal_diffusion_stability(self):
-        if self.numerical_params.Diff_num > 0.5:
-            return True
-        else:
-            return False
+    def check_thermal_Courant_number(self):
+        if self.numerical_params.Courant > 0.5:
+            logger.warning(f"Courant number is {self.numerical_params.Courant}")

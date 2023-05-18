@@ -1,13 +1,12 @@
 """Celestine"""
 import numpy as np
-from celestine.params import Config, DarcyLawParams, ForcingConfig
+from celestine.params import Config, DarcyLawParams, ForcingConfig, NumericalParams
 from celestine.run_simulation import solve
-from celestine.enthalpy_method import get_phase_masks, calculate_enthalpy_method
-from celestine.velocities import calculate_velocities
 import matplotlib.pyplot as plt
 from celestine.grids import initialise_grids, get_difference_matrix
 from celestine.logging_config import logger, log_time
 from celestine.__init__ import __version__
+from celestine.state import State
 
 logger.info(f"Celestine version {__version__}")
 
@@ -21,6 +20,7 @@ base = Config(
     savefreq=5e-2,
     darcy_law_params=DarcyLawParams(bubble_radius_scaled=0.1),
     forcing_config=ForcingConfig(temperature_forcing_choice="yearly"),
+    numerical_params=NumericalParams(solver="LU"),
 )
 base.save()
 status, duration = solve(base)
@@ -42,25 +42,17 @@ with np.load("data/base.npz") as data:
     pressure = data["pressure"]
     times = data["times"]
 cfg = Config.load("data/base.yml")
-phase_masks = get_phase_masks(enthalpy, salt, gas, cfg)
-(
-    temperature,
-    liquid_fraction,
-    gas_fraction,
-    solid_fraction,
-    liquid_salinity,
-    dissolved_gas,
-) = calculate_enthalpy_method(enthalpy, salt, gas, cfg, phase_masks)
+
 D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.step)
-Vg, Wl, V = calculate_velocities(
-    liquid_fraction, enthalpy, salt, gas, pressure, D_g, cfg
-)
 step, centers, edges, ghosts = initialise_grids(cfg.numerical_params.I)
-for n, _ in enumerate(temperature[0, :]):
+
+for n, time in enumerate(times):
+    state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
+    state.calculate_enthalpy_method()
     plt.figure(figsize=(5, 5))
     plt.plot(
-        gas_fraction[:, n],
-        ghosts,
+        state.gas_fraction,
+        centers,
         "g*--",
     )
     plt.savefig(f"frames/gas_fraction/gas_fraction{n}.pdf")
@@ -68,8 +60,8 @@ for n, _ in enumerate(temperature[0, :]):
 
     plt.figure(figsize=(5, 5))
     plt.plot(
-        salt[:, n],
-        ghosts,
+        state.salt,
+        centers,
         "b*--",
     )
     plt.savefig(f"frames/salt/salt{n}.pdf")
@@ -77,8 +69,8 @@ for n, _ in enumerate(temperature[0, :]):
 
     plt.figure(figsize=(5, 5))
     plt.plot(
-        temperature[:, n],
-        ghosts,
+        state.temperature,
+        centers,
         "r*--",
     )
     plt.savefig(f"frames/temperature/temperature{n}.pdf")
@@ -86,8 +78,8 @@ for n, _ in enumerate(temperature[0, :]):
 
     plt.figure(figsize=(5, 5))
     plt.plot(
-        solid_fraction[:, n],
-        ghosts,
+        state.solid_fraction,
+        centers,
         "m*--",
     )
     plt.savefig(f"frames/solid_fraction/solid_fraction{n}.pdf")
