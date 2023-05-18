@@ -49,3 +49,13 @@ def salt_BCs(salt_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
     far_bulk_salt = cfg.boundary_conditions_config.far_bulk_salinity
     return add_ghost_cells(salt_centers, bottom=far_bulk_salt, top=salt_centers[-1])
+
+
+def liquid_fraction_BCs(liquid_fraction_centers, cfg: Config):
+    """Add ghost cells to liquid fraction such that top and bottom boundaries take the
+    same value as the top and bottom cell center"""
+    return add_ghost_cells(
+        liquid_fraction_centers,
+        bottom=liquid_fraction_centers[0],
+        top=liquid_fraction_centers[-1],
+    )

@@ -72,6 +72,7 @@ class StateBCs:
         self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
         self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
         self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
+        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, cfg)
 
 
 class Solution:
