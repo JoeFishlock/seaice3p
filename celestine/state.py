@@ -14,14 +14,11 @@ from celestine.enthalpy_method import get_enthalpy_method
 class State:
     """Stores information needed for solution at one timestep on cell centers"""
 
-    def __init__(
-        self, time, enthalpy, salt, gas, pressure=None, top_temperature=np.NaN
-    ):
+    def __init__(self, time, enthalpy, salt, gas, pressure=None):
         self.time = time
         self.enthalpy = enthalpy
         self.salt = salt
         self.gas = gas
-        self.top_temperature = top_temperature
 
         if pressure is not None:
             self.pressure = pressure
@@ -58,7 +55,6 @@ class StateBCs:
         self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
         self.salt = bc.salt_BCs(state.salt, cfg)
         self.gas = bc.gas_BCs(state.gas, cfg)
-        self.top_temperature = state.top_temperature
 
         if state.pressure is not None:
             self.pressure = bc.pressure_BCs(state.pressure, cfg)
@@ -91,7 +87,6 @@ class Solution:
     def add_state(self, state: State, index: int):
         """add state to stored solution at given time index"""
         self.times[index] = state.time
-        self.top_temperature[index] = state.top_temperature
         self.enthalpy[:, index] = state.enthalpy
         self.salt[:, index] = state.salt
         self.gas[:, index] = state.gas
