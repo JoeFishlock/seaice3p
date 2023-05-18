@@ -84,7 +84,10 @@ class SolverTemplate(ABC):
             state = self.take_timestep(state)
             new_time_index = int(state.time / self.cfg.savefreq)
 
-            print(f"time={state.time:.3f}/{T}, timestep={timestep:.2g} \r", end="")
+            print(
+                f"{self.cfg.name}: time={state.time:.3f}/{T}, timestep={timestep:.2g} \r",
+                end="",
+            )
 
             if np.min(state.salt) < -self.cfg.physical_params.concentration_ratio:
                 raise ValueError("salt crash")
