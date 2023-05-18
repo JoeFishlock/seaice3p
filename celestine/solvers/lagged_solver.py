@@ -4,7 +4,8 @@ from celestine.velocities import (
     solve_pressure_equation,
 )
 from celestine.flux import calculate_heat_flux, calculate_salt_flux, calculate_gas_flux
-from celestine.solvers.template import SolverTemplate, State, StateBCs
+from celestine.state import State, StateBCs
+from celestine.solvers.template import SolverTemplate
 
 
 def take_forward_euler_step(quantity, flux, timestep, D_e):
