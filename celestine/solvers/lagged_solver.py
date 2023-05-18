@@ -8,11 +8,7 @@ from celestine.velocities import (
     calculate_absolute_permeability,
     solve_pressure_equation,
 )
-from celestine.flux import (
-    calculate_advective_heat_flux,
-    calculate_conductive_heat_flux,
-    calculate_frame_advection_heat_flux,
-)
+from celestine.flux import calculate_heat_flux
 from celestine.solvers.template import SolverTemplate, State, StateBCs
 
 
@@ -45,7 +41,6 @@ class LaggedUpwindSolver(SolverTemplate):
         gas_fraction_ghosts = state_BCs.gas_fraction
         gas_ghosts = state_BCs.gas
         liquid_salinity_ghosts = state_BCs.liquid_salinity
-        temperature_ghosts = state_BCs.temperature
         enthalpy_ghosts = state_BCs.enthalpy
         salt_ghosts = state_BCs.salt
 
@@ -57,15 +52,8 @@ class LaggedUpwindSolver(SolverTemplate):
         new_gas = np.zeros((I,))
         new_pressure = np.zeros((I,))
 
-        conductive_heat_flux = calculate_conductive_heat_flux(temperature_ghosts, D_g)
-        advective_heat_flux = calculate_advective_heat_flux(temperature_ghosts, Wl)
-        frame_advection_heat_flux = calculate_frame_advection_heat_flux(
-            enthalpy_ghosts, V
-        )
-        heat_fluxes = (
-            conductive_heat_flux + advective_heat_flux + frame_advection_heat_flux
-        )
-        new_enthalpy = enthalpy_ghosts[1:-1] + timestep * (-np.matmul(D_e, heat_fluxes))
+        heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g)
+        new_enthalpy = enthalpy_ghosts[1:-1] + timestep * (-np.matmul(D_e, heat_flux))
 
         new_salt = salt_ghosts[1:-1] + timestep * (
             (1 / cfg.physical_params.lewis_salt)

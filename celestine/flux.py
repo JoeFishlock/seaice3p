@@ -23,3 +23,14 @@ def calculate_advective_heat_flux(temperature, Wl):
 
 def calculate_frame_advection_heat_flux(enthalpy, V):
     return upwind(enthalpy, V)
+
+
+def calculate_heat_flux(state_BCs, Wl, V, D_g):
+    temperature = state_BCs.temperature
+    enthalpy = state_BCs.enthalpy
+    heat_flux = (
+        calculate_conductive_heat_flux(temperature, D_g)
+        + calculate_advective_heat_flux(temperature, Wl)
+        + calculate_frame_advection_heat_flux(enthalpy, V)
+    )
+    return heat_flux
