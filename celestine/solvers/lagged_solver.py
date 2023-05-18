@@ -30,7 +30,6 @@ class LaggedUpwindSolver(SolverTemplate):
 
     def take_timestep(self, state: State):
         cfg = self.cfg
-        I = self.I
         timestep = cfg.numerical_params.timestep
 
         D_g = self.D_g
@@ -44,11 +43,7 @@ class LaggedUpwindSolver(SolverTemplate):
 
         state_BCs = StateBCs(state, cfg)
 
-        Vg, Wl, V = calculate_velocities(
-            state.liquid_fraction, state.pressure, D_g, cfg
-        )
-
-        new_pressure = np.zeros((I,))
+        Vg, Wl, V = calculate_velocities(state_BCs, D_g, cfg)
 
         heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g)
         salt_flux = calculate_salt_flux(state_BCs, Wl, V, D_g, cfg)
@@ -65,15 +60,11 @@ class LaggedUpwindSolver(SolverTemplate):
             new_gas,
         )
         new_state.calculate_enthalpy_method(cfg)
-        gas_fraction = state.gas_fraction
-
-        new_liquid_fraction = new_state.liquid_fraction
-        new_gas_fraction = new_state.gas_fraction
-        new_permeability = calculate_absolute_permeability(new_liquid_fraction)
+        new_state_BCs = StateBCs(new_state, cfg)
 
         new_pressure = solve_pressure_equation(
-            gas_fraction, new_gas_fraction, new_permeability, timestep, D_e, D_g, cfg
+            state_BCs, new_state_BCs, timestep, D_e, D_g, cfg
         )
-        new_state.pressure = new_pressure
+        new_state.pressure = new_pressure[1:-1]
 
         return new_state
