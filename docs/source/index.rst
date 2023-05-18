@@ -3,13 +3,26 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to celestine's documentation!
+Celestine
 =====================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-
+   
+   boundary_conditions
+   enthalpy_method
+   flux
+   forcing
+   grids
+   logging_config
+   params
+   phase_boundaries
+   run_simulation
+   state
+   velocities
+   lagged_solver
+   template
 
 
 Indices and tables
