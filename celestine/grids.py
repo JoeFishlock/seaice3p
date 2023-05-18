@@ -61,22 +61,3 @@ def add_ghost_cells(centers, bottom, top):
     :return: numpy array on ghost grid (size I+2).
     """
     return np.concatenate((np.array([bottom]), centers, np.array([top])))
-
-
-def centers_to_edges(centers, interpolator=geometric):
-    """Takes quantity on center grid to cell edges.
-
-    Top and bottom values are just top and bottom cell values. Middle values are
-    interpolated. The default method for this is geometric.
-
-    :param centers: numpy array on cell centers (size I).
-    :type centers: Numpy array
-    :param interpolator: function to interpolate cells to edges.
-    :type interpolator: function with signature (ghosts) -> edges.
-    :return: numpy array on cell edges (size I+1).
-    """
-    edges = np.full((centers.size + 1,), np.NaN)
-    edges[0] = centers[0]
-    edges[-1] = centers[-1]
-    edges[1:-1] = interpolator(centers)
-    return edges
