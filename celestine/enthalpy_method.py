@@ -207,7 +207,12 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
         gas_fraction = np.full_like(liquid_fraction, np.NaN)
 
         gas_sat = chi * liquid_fraction
-        gas_fraction = np.where(gas >= gas_sat, gas - gas_sat, 0)
+        is_super_saturated = gas >= gas_sat
+        is_sub_saturated = ~is_super_saturated
+        gas_fraction[is_super_saturated] = (
+            gas[is_super_saturated] - gas_sat[is_super_saturated]
+        )
+        gas_fraction[is_sub_saturated] = 0
         return gas_fraction
 
     def calculate_dissolved_gas(self, gas, liquid_fraction):
@@ -215,7 +220,12 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
         dissolved_gas = np.full_like(gas, np.NaN)
 
         gas_sat = chi * liquid_fraction
-        dissolved_gas = np.where(gas >= gas_sat, 1, gas / gas_sat)
+        is_super_saturated = gas >= gas_sat
+        is_sub_saturated = ~is_super_saturated
+        dissolved_gas[is_super_saturated] = 1
+        dissolved_gas[is_sub_saturated] = (
+            gas[is_sub_saturated] / gas_sat[is_sub_saturated]
+        )
         return dissolved_gas
 
     def calculate_liquid_salinity(self, salt, temperature, phase_masks):
