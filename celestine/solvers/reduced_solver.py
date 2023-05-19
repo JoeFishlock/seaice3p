@@ -38,7 +38,7 @@ def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
 
 
 class ReducedSolver(SolverTemplate):
-    """Take timestep using upwind scheme with liquid velocity calculation lagged."""
+    """Take timestep using forward Euler upwind scheme using reduced model."""
 
     def pre_solve_checks(self):
         self.cfg.check_thermal_Courant_number()
