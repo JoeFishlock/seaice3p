@@ -111,3 +111,38 @@ class FullPhaseBoundaries(PhaseBoundaries):
         s = is_solid & is_sub
         S = is_solid & is_super
         return l, L, m, M, e, E, s, S
+
+
+class ReducedPhaseBoundaries(PhaseBoundaries):
+    r"""calculates the phase boundaries neglecting the gas fraction so that
+
+    .. math:: \phi_s + \phi_l = 1
+
+    """
+
+    def calculate_liquidus(self, salt):
+        return -salt
+
+    def calculate_eutectic(self, salt):
+        C = self.physical_params.concentration_ratio
+        St = self.physical_params.stefan_number
+        return (St * (salt - 1) / (1 + C)) - 1
+
+    def calculate_solidus(self, salt):
+        St = self.physical_params.stefan_number
+        return np.full_like(salt, -1 - St)
+
+    def get_phase_masks(self, state):
+        enthalpy, salt = state.enthalpy, state.salt
+        liquidus = self.calculate_liquidus(salt)
+        eutectic = self.calculate_eutectic(salt)
+        solidus = self.calculate_solidus(salt)
+        is_liquid = enthalpy >= liquidus
+        is_mush = (enthalpy >= eutectic) & (enthalpy < liquidus)
+        is_eutectic = (enthalpy >= solidus) & (enthalpy < eutectic)
+        is_solid = enthalpy < solidus
+        L = is_liquid
+        M = is_mush
+        E = is_eutectic
+        S = is_solid
+        return L, M, E, S
