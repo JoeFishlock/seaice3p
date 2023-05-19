@@ -5,9 +5,6 @@ frames*/
 data/
 benchmarks/
 test_data/*
-*.pdf
-*.svg
-*.nb
 *.prof
 .DS_Store
 *scratch.py
