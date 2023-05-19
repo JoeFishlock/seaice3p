@@ -3,26 +3,14 @@ from celestine.velocities import (
     calculate_velocities,
     solve_pressure_equation,
 )
-from celestine.flux import calculate_heat_flux, calculate_salt_flux, calculate_gas_flux
+from celestine.flux import (
+    calculate_heat_flux,
+    calculate_salt_flux,
+    calculate_gas_flux,
+    take_forward_euler_step,
+)
 from celestine.state import State, StateBCs
 from celestine.solvers.template import SolverTemplate
-
-
-def take_forward_euler_step(quantity, flux, timestep, D_e):
-    r"""Advance the given quantity one forward Euler step using the given flux
-
-    The quantity is given on cell centers and the flux on cell edges.
-
-    Discretise the conservation equation
-
-    .. math:: \frac{\partial Q}{\partial t} = -\frac{\partial F}{\partial z}
-
-    as
-
-    .. math:: Q^{n+1} = Q^n - \Delta t (\frac{\partial F}{\partial z})
-
-    """
-    return quantity - timestep * np.matmul(D_e, flux)
 
 
 class LaggedUpwindSolver(SolverTemplate):

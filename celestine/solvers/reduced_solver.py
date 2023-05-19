@@ -2,10 +2,14 @@ import numpy as np
 from celestine.velocities import (
     calculate_velocities,
 )
-from celestine.flux import calculate_heat_flux, calculate_salt_flux, calculate_gas_flux
+from celestine.flux import (
+    calculate_heat_flux,
+    calculate_salt_flux,
+    calculate_gas_flux,
+    take_forward_euler_step,
+)
 from celestine.state import State, StateBCs
 from celestine.solvers.template import SolverTemplate
-from celestine.solvers.lagged_solver import take_forward_euler_step
 
 
 def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
