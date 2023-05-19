@@ -21,8 +21,10 @@ Celestine
    run_simulation
    state
    velocities
-   lagged_solver
    template
+   lagged_solver
+   reduced_solver
+   scipy
 
 Indices and tables
 ==================

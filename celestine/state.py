@@ -89,7 +89,6 @@ class Solution:
         self.data_path = cfg.data_path
 
         self.times = np.zeros((self.time_length,))
-        self.top_temperature = np.zeros_like(self.times)
 
         self.enthalpy = np.zeros((cfg.numerical_params.I, self.time_length))
         self.salt = np.zeros_like(self.enthalpy)

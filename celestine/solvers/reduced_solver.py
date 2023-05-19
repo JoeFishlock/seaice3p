@@ -1,6 +1,6 @@
+import numpy as np
 from celestine.velocities import (
     calculate_velocities,
-    solve_pressure_equation,
 )
 from celestine.flux import (
     calculate_heat_flux,
@@ -12,8 +12,33 @@ from celestine.state import State, StateBCs
 from celestine.solvers.template import SolverTemplate
 
 
-class LaggedUpwindSolver(SolverTemplate):
-    """Take timestep using upwind scheme with liquid velocity calculation lagged."""
+def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
+    """Modify the gas interstitial velocity to prevent bubble rise into a cell which
+    is already theoretically saturated with gas.
+
+    From the state with boundary conditions calculate the gas and solid fraction in the
+    cells (except at lower ghost cell). If any of these are such that there is more gas
+    fraction than pore space available then set gas insterstitial velocity to zero on
+    the edge below. Make sure the very top boundary velocity is not changed as we want
+    to always alow flux to the atmosphere regardless of the boundary conditions imposed.
+
+    :param Vg: gas insterstitial velocity on cell edges
+    :type Vg: Numpy array (size I+1)
+    :param state_BCs: state of system with boundary conditions
+    :type state_BCs: celestine.state.StateBCs
+    :return: filtered gas interstitial velocities on edges to prevent gas rise into a
+        fully gas saturated cell
+
+    """
+    gas_fraction_above = state_BCs.gas_fraction[1:]
+    solid_fraction_above = 1 - state_BCs.liquid_fraction[1:]
+    filtered_Vg = np.where(gas_fraction_above + solid_fraction_above >= 1, 0, Vg)
+    filtered_Vg[-1] = Vg[-1]
+    return filtered_Vg
+
+
+class ReducedSolver(SolverTemplate):
+    """Take timestep using forward Euler upwind scheme using reduced model."""
 
     def pre_solve_checks(self):
         self.cfg.check_thermal_Courant_number()
@@ -33,6 +58,7 @@ class LaggedUpwindSolver(SolverTemplate):
         state_BCs = StateBCs(state)  # Add boundary conditions
 
         Vg, Wl, V = calculate_velocities(state_BCs, D_g, cfg)
+        Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
         heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g)
         salt_flux = calculate_salt_flux(state_BCs, Wl, V, D_g, cfg)
@@ -49,11 +75,4 @@ class LaggedUpwindSolver(SolverTemplate):
             new_salt,
             new_gas,
         )
-        new_state.calculate_enthalpy_method()
-        new_state_BCs = StateBCs(new_state)
-        new_pressure = solve_pressure_equation(
-            state_BCs, new_state_BCs, timestep, D_e, D_g, cfg
-        )
-        new_state.pressure = new_pressure[1:-1]
-
         return new_state

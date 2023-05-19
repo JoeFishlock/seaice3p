@@ -20,7 +20,7 @@ base = Config(
     savefreq=5e-2,
     darcy_law_params=DarcyLawParams(bubble_radius_scaled=0.1),
     forcing_config=ForcingConfig(temperature_forcing_choice="yearly"),
-    numerical_params=NumericalParams(solver="LU"),
+    numerical_params=NumericalParams(solver="RED"),
 )
 base.save()
 status, duration = solve(base)

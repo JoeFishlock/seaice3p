@@ -1,22 +1,24 @@
 from celestine.params import Config
 from celestine.logging_config import logger, log_time
 from celestine.solvers.lagged_solver import LaggedUpwindSolver
+from celestine.solvers.reduced_solver import ReducedSolver
+from celestine.solvers.scipy import ScipySolver
 
 
 def solve(cfg: Config):
     SOLVER_OPTIONS = {
         "LU": LaggedUpwindSolver,
+        "RED": ReducedSolver,
+        "SCI": ScipySolver,
     }
     solver_choice = cfg.numerical_params.solver
     if solver_choice in SOLVER_OPTIONS.keys():
         solver_class = SOLVER_OPTIONS[solver_choice]
         solver_instance = solver_class(cfg)
         return solver_instance.solve()
-    else:
-        logger.error(
-            f"config {cfg.name} solver choice {solver_choice} is not an option"
-        )
-        raise KeyError(f"solver choice {solver_choice} is not an option")
+
+    logger.error(f"config {cfg.name} solver choice {solver_choice} is not an option")
+    raise KeyError(f"solver choice {solver_choice} is not an option")
 
 
 def run_batch(list_of_cfg):
