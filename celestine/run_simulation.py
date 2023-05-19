@@ -16,11 +16,9 @@ def solve(cfg: Config):
         solver_class = SOLVER_OPTIONS[solver_choice]
         solver_instance = solver_class(cfg)
         return solver_instance.solve()
-    else:
-        logger.error(
-            f"config {cfg.name} solver choice {solver_choice} is not an option"
-        )
-        raise KeyError(f"solver choice {solver_choice} is not an option")
+
+    logger.error(f"config {cfg.name} solver choice {solver_choice} is not an option")
+    raise KeyError(f"solver choice {solver_choice} is not an option")
 
 
 def run_batch(list_of_cfg):

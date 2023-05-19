@@ -1,4 +1,3 @@
-import numpy as np
 from celestine.velocities import (
     calculate_velocities,
     solve_pressure_equation,
