@@ -1,7 +1,7 @@
 # Testing #
 
-- Run generate_tests.py to add all test simulation yaml files to `test/data` directory.
-- Run run_tests.py to run all test configurations.
+- Run `python -m tests.generate_tests` to add all test simulation yaml files to `test_data/` directory.
+- Run `python -m tests.run_tests` to run all test configurations.
 - Those that run or crash will be in the logs.
 - Record simulation crashes as C.
 - Record tests that ran as P (note these still could have garbage output).
