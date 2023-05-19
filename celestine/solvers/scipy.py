@@ -15,7 +15,21 @@ import celestine.logging_config as logs
 
 
 class ScipySolver(SolverTemplate):
-    """Solve reduced model using scipy solve_ivp."""
+    """Solve reduced model using scipy solve_ivp using RK23 solver. This is the "SCI"
+    solver option.
+
+    Impose a maximum timestep constraint using courant number for thermal diffusion
+    as this is an explicit method.
+
+    This solver uses adaptive timestepping which makes it a good choice for running
+    simulations with large buoyancy driven gas bubble velocities and we save the output
+    at intervals given by the savefreq parameter in configuration.
+
+    The interface of this class is a little different as we overwrite the solve method
+    from the template and must provide a function to calculate the ode forcing for
+    solve_ivp. However the solve function still saves the data in the same format using
+    the `celestine.state.Solution` class.
+    """
 
     def take_timestep(self, state: State):
         pass
@@ -49,13 +63,19 @@ class ScipySolver(SolverTemplate):
 
     @logs.time_function
     def solve(self):
-        self.pre_solve_checks()  # optional method
         state = self.generate_initial_solution()
         initial = np.hstack((state.enthalpy, state.salt, state.gas))
         T = self.cfg.total_time
         t_eval = np.arange(0, T, self.cfg.savefreq)
 
-        sol = solve_ivp(self.ode_fun, [0, T], initial, t_eval=t_eval)
+        sol = solve_ivp(
+            self.ode_fun,
+            [0, T],
+            initial,
+            t_eval=t_eval,
+            max_step=0.4 * self.cfg.numerical_params.step**2,
+            method="RK23",
+        )
 
         sol_enthalpy, sol_salt, sol_gas = np.split(sol.y, 3)
 
