@@ -1,15 +1,11 @@
 from celestine.params import Config
-from celestine.logging_config import logger
-from celestine.solvers.lax_friedrich_solver import LXFSolver
+from celestine.logging_config import logger, log_time
 from celestine.solvers.lagged_solver import LaggedUpwindSolver
-from celestine.solvers.implicit_lax_friedrich_solver import LXFImplicitSolver
 
 
 def solve(cfg: Config):
     SOLVER_OPTIONS = {
-        "LXF": LXFSolver,
         "LU": LaggedUpwindSolver,
-        "LXFImplicit": LXFImplicitSolver,
     }
     solver_choice = cfg.numerical_params.solver
     if solver_choice in SOLVER_OPTIONS.keys():
@@ -21,3 +17,23 @@ def solve(cfg: Config):
             f"config {cfg.name} solver choice {solver_choice} is not an option"
         )
         raise KeyError(f"solver choice {solver_choice} is not an option")
+
+
+def run_batch(list_of_cfg):
+    """Run a batch of simulations from a list of configurations.
+
+    Each simulation name is logged, as well as if it successfully runs or crashes.
+    Output from each simulation is saved in a .npz file.
+
+    :param list_of_cfg: list of configurations
+    :type list_of_cfg: List[celestine.params.Config]
+
+    """
+    for cfg in list_of_cfg:
+        logger.info(f"Running {cfg.name}")
+        try:
+            status, duration = solve(cfg)
+            log_time(logger, duration, message=f"{cfg.name} ran in ")
+        except Exception as e:
+            logger.error(f"{cfg.name} crashed")
+            logger.error(f"{e}")

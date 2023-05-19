@@ -1,6 +1,88 @@
 # Changelog
 
+## v0.6.0 (2023-05-18) ##
+
+## Summary ##
+
+Can run only the lagged upwind solver (LU) for the full enthalpy method with constant or
+yearly surface temperature forcing with given initial state. A lot of broken or redundant
+code was removed from v0.5.0 and refactored to make it easier to extend adding reduced model
+as another enthalpy method and new solvers and boundary conditions.
+
+### Added ###
+
+- Helper function for grids to add ghost cells to a quantity on cell centers. This is very
+useful for applying boundary conditions.
+- Module called flux to calculate fluxes for heat, salt and gas. This should make
+implementing new solvers easier and more reliable.
+- Function for lagged upwind solver to take forward euler timestep given fluxes.
+- State module for working with solution state at each timestep. Contains the State
+class for working with the solution on cell centers at each timestep and running the
+appropriate enthalpy method. StateBCs is responsible for adding the boundary conditions.
+Solution is responsible for storing the timesteps to be saved.
+- Class interface for enthalpy method so we can implement different versions. The
+enthalpy method is picked from the solver choice in the configuration.
+- Class interface for phase boundary calculation so we can implement difference versions.
+
+### Changed ###
+
+- Refactor solver template and enthalpy method to use a state class. 
+This contains all the variables needed at a timestep so makes writing solvers more concise.
+- Solver template uses solution class to store variables to be saved in a numpy array of
+fixed dimensions. This has better performance than appending to an array each time we
+want to save new data.
+- Simplify boundary conditions module to just add a fixed condition to each variable we may
+need on the ghost grid. Then the StateBCs class handles adding these to the state at each
+timestep.
+- Before boundary conditions were calculated by inverting the enthalpy method. Now we just
+impose appropriate values of temperature, dissolved gas etc... I have chosen to extrapolate
+the liquid fraction to the ghost cells as being equal to the top and bottom cell centers.
+- Solution output of simulation is now given on the cell centers but can be easily extended
+to the ghost cells by using the StateBCs class.
+- Initial solution is now uniform profile of enthalpy, bulk salt and bulk gas given by their
+given values at the bottom of the domain.
+- Lagged Upwind solver uses new template solver interface.
+- Velocities module now takes stateBCs object.
+
+### Docs ###
+
+- Auto generate docstring documentation for each module using sphinx as `docs/manual.pdf`.
+
+### Tests ###
+
+- Put tests in their own package `tests/`.
+- Run different bubble sizes and constant/yearly forcing for only lagged upwind solver as
+test case. Record if the simulation runs or crashes.
+
+### Removed ###
+
+- Implicit lax friedrich solver (LXFImplicit).
+- Lax Friedrich solver (LXF).
+- Other partially written solvers that I wasn't using.
+- Adaptive timestepping option. This wasn't really being utilised and was making the code
+more opaque.
+- Checks on initial timestep and grid size. Now just log a warning if Courant number for
+thermal diffusion exceeds 0.5 in the lagged upwind solver as this treats the diffusive term
+explicitly.
+- Code to plot full enthalpy method phase space diagram from `celestine.phase_boundaries.py`.
+- Code to plot enthalpy method quantities from `celestine.enthalpy_method.py`.
+- Scripts to plot benchmark case for comparing the three solvers in v0.5.0.
+
 ## v0.5.0 (2023-04-27) ##
+
+## Summary ##
+
+Runs full enthalpy method with three different solvers:
+- LU (forward euler explicit upwind scheme, calculate velocity from previous timestep)
+- LXF (forward euler explicit lax-friedrich scheme)
+- LXFImplicit (same as LXF but calculate heat diffusion implictly for better resolution)
+
+Contains benchmark scripts to compare these solvers during yearly temperature forcing run.
+
+Contains code in enthalpy_method and phase_boundaries to plot phase space diagrams.
+
+Contained artificial cut off in liquid darcy velocity calculation and all of the solvers
+suffer the same instability during melting part of yearly cycle.
 
 ### Added ###
 
