@@ -99,3 +99,20 @@ def calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg):
         + calculate_frame_advection_gas_flux(gas, V)
     )
     return gas_flux
+
+
+def take_forward_euler_step(quantity, flux, timestep, D_e):
+    r"""Advance the given quantity one forward Euler step using the given flux
+
+    The quantity is given on cell centers and the flux on cell edges.
+
+    Discretise the conservation equation
+
+    .. math:: \frac{\partial Q}{\partial t} = -\frac{\partial F}{\partial z}
+
+    as
+
+    .. math:: Q^{n+1} = Q^n - \Delta t (\frac{\partial F}{\partial z})
+
+    """
+    return quantity - timestep * np.matmul(D_e, flux)
