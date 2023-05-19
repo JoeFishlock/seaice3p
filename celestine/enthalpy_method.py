@@ -250,5 +250,5 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
 
 def get_enthalpy_method(cfg):
     solver_choice = cfg.numerical_params.solver
-    options = {"LU": FullEnthalpyMethod}
+    options = {"LU": FullEnthalpyMethod, "RED": ReducedEnthalpyMethod}
     return options[solver_choice]
