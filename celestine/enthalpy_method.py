@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 from celestine.params import PhysicalParams
-from celestine.phase_boundaries import FullPhaseBoundaries
+from celestine.phase_boundaries import FullPhaseBoundaries, ReducedPhaseBoundaries
 
 
 class EnthalpyMethod(ABC):
@@ -154,6 +154,90 @@ class FullEnthalpyMethod(EnthalpyMethod):
             salt, gas, temperature, phase_masks
         )
         dissolved_gas = self.calculate_dissolved_gas(gas, liquid_fraction, phase_masks)
+        return (
+            temperature,
+            liquid_fraction,
+            gas_fraction,
+            solid_fraction,
+            liquid_salinity,
+            dissolved_gas,
+        )
+
+
+class ReducedEnthalpyMethod(EnthalpyMethod):
+    def __init__(self, physical_params: PhysicalParams):
+        """initialise with physical parameters and the full phase boundaries calculator"""
+        self.physical_params = physical_params
+        self.phase_boundaries = ReducedPhaseBoundaries(physical_params)
+
+    def calculate_solid_fraction(self, enthalpy, salt, phase_masks):
+        solid_fraction = np.full_like(enthalpy, np.NaN)
+        L, M, E, S = phase_masks
+        St = self.physical_params.stefan_number
+        conc = self.physical_params.concentration_ratio
+
+        A = St
+        B = enthalpy[M] - St - conc
+        C = -(enthalpy[M] + salt[M])
+
+        solid_fraction[L] = 0
+        solid_fraction[M] = (1 / (2 * A)) * (-B - np.sqrt(B**2 - 4 * A * C))
+        solid_fraction[E] = -(1 + enthalpy[E]) / St
+        solid_fraction[S] = 1
+
+        return solid_fraction
+
+    def calculate_temperature(self, enthalpy, solid_fraction, phase_masks):
+        L, M, E, S = phase_masks
+        St = self.physical_params.stefan_number
+
+        temperature = np.full_like(enthalpy, np.NaN)
+        temperature[L] = enthalpy[L]
+        temperature[M] = enthalpy[M] + solid_fraction[M] * St
+        temperature[E] = -1
+        temperature[S] = enthalpy[S] + St
+
+        return temperature
+
+    def calculate_liquid_fraction(self, solid_fraction):
+        return 1 - solid_fraction
+
+    def calculate_gas_fraction(self, gas, liquid_fraction):
+        chi = self.physical_params.expansion_coefficient
+        gas_fraction = np.full_like(liquid_fraction, np.NaN)
+
+        gas_sat = chi * liquid_fraction
+        gas_fraction = np.where(gas >= gas_sat, gas - gas_sat, 0)
+        return gas_fraction
+
+    def calculate_dissolved_gas(self, gas, liquid_fraction):
+        chi = self.physical_params.expansion_coefficient
+        dissolved_gas = np.full_like(gas, np.NaN)
+
+        gas_sat = chi * liquid_fraction
+        dissolved_gas = np.where(gas >= gas_sat, 1, gas / gas_sat)
+        return dissolved_gas
+
+    def calculate_liquid_salinity(self, salt, temperature, phase_masks):
+        liquid_salinity = np.full_like(salt, np.NaN)
+        L, M, E, S = phase_masks
+
+        liquid_salinity[L] = salt[L]
+        liquid_salinity[M] = -temperature[M]
+        liquid_salinity[E] = 1
+        liquid_salinity[S] = 1
+
+        return liquid_salinity
+
+    def calculate_enthalpy_method(self, state):
+        phase_masks = self.phase_boundaries.get_phase_masks(state)
+        enthalpy, salt, gas = state.enthalpy, state.salt, state.gas
+        solid_fraction = self.calculate_solid_fraction(enthalpy, salt, phase_masks)
+        liquid_fraction = self.calculate_liquid_fraction(solid_fraction)
+        temperature = self.calculate_temperature(enthalpy, solid_fraction, phase_masks)
+        gas_fraction = self.calculate_gas_fraction(gas, liquid_fraction)
+        liquid_salinity = self.calculate_liquid_salinity(salt, temperature, phase_masks)
+        dissolved_gas = self.calculate_dissolved_gas(gas, liquid_fraction)
         return (
             temperature,
             liquid_fraction,
