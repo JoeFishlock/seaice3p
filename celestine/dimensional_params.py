@@ -215,7 +215,7 @@ class DimensionalParams:
         )
 
     def save(self):
-        with open(f"{self.data_path}{self.name}.yml", "w") as outfile:
+        with open(f"{self.data_path}{self.name}_dimensional.yml", "w") as outfile:
             dump(asdict(self), outfile)
 
     @classmethod

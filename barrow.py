@@ -16,6 +16,7 @@ logger.info(f"Celestine version {__version__}")
 run the config and save data to data/base.npz
 """
 barrow_dimensional_params = DimensionalParams(name="barrow", bubble_radius=1e-3)
+barrow_dimensional_params.save()
 barrow = barrow_dimensional_params.get_config(
     forcing_config=ForcingConfig(
         temperature_forcing_choice="yearly", period=barrow_dimensional_params.total_time
@@ -42,7 +43,7 @@ with np.load("data/barrow.npz") as data:
     pressure = data["pressure"]
     times = data["times"]
 cfg = Config.load("data/barrow.yml")
-scales = barrow_dimensional_params.get_scales()
+scales = DimensionalParams.load("data/barrow_dimensional.yml").get_scales()
 
 for n, time in enumerate(times):
     state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
