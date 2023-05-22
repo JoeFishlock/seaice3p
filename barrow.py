@@ -1,7 +1,12 @@
 """Script to run a simulation starting with dimensional parameters"""
 
 import numpy as np
-from celestine.params import Config, ForcingConfig, NumericalParams
+from celestine.params import (
+    Config,
+    ForcingConfig,
+    NumericalParams,
+    BoundaryConditionsConfig,
+)
 from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
 import matplotlib.pyplot as plt
@@ -16,12 +21,19 @@ logger.info(f"Celestine version {__version__}")
 run the config and save data to data/base.npz
 """
 barrow_dimensional_params = DimensionalParams(
-    name="barrow", total_time_in_days=164, savefreq_in_days=3, bubble_radius=1e-3
+    name="barrow",
+    total_time_in_days=164,
+    savefreq_in_days=3,
+    bubble_radius=0.2e-3,
+    lengthscale=2.4,
 )
 barrow_dimensional_params.save()
 barrow = barrow_dimensional_params.get_config(
     forcing_config=ForcingConfig(temperature_forcing_choice="barrow_2009"),
-    numerical_params=NumericalParams(solver="SCI", I=50),
+    numerical_params=NumericalParams(solver="SCI", I=24),
+    boundary_conditions_config=BoundaryConditionsConfig(
+        initial_conditions_choice="barrow_2009"
+    ),
 )
 barrow.save()
 status, duration = solve(barrow)
@@ -48,10 +60,12 @@ scales = DimensionalParams.load("data/barrow_dimensional.yml").get_scales()
 for n, time in enumerate(times):
     state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
     state.calculate_enthalpy_method()
+    dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
+
     plt.figure(figsize=(5, 5))
     plt.plot(
         state.gas_fraction,
-        state.grid,
+        dimensional_grid,
         "g*--",
     )
     plt.savefig(f"frames/gas_fraction/gas_fraction{n}.pdf")
@@ -61,7 +75,6 @@ for n, time in enumerate(times):
     dimensional_temperature = scales.convert_to_dimensional_temperature(
         state.temperature
     )
-    dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
     plt.plot(
         dimensional_temperature,
         dimensional_grid,
@@ -73,8 +86,21 @@ for n, time in enumerate(times):
     plt.figure(figsize=(5, 5))
     plt.plot(
         state.solid_fraction,
-        state.grid,
+        dimensional_grid,
         "m*--",
     )
     plt.savefig(f"frames/solid_fraction/solid_fraction{n}.pdf")
+    plt.close()
+
+    plt.figure(figsize=(5, 5))
+    dimensional_bulk_air = scales.convert_to_dimensional_bulk_gas(state.gas)
+    argon_micromole_per_liter = scales.convert_dimensional_bulk_air_to_argon_content(
+        dimensional_bulk_air
+    )
+    plt.plot(
+        argon_micromole_per_liter,
+        dimensional_grid,
+        "m*--",
+    )
+    plt.savefig(f"frames/bulk_air/bulk_air{n}.pdf")
     plt.close()

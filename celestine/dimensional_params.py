@@ -293,6 +293,18 @@ class Scales:
         """Convert dimensionless bulk gas content to kg/m3"""
         return self.gas_density * bulk_gas
 
+    def convert_dimensional_bulk_air_to_argon_content(self, dimensional_bulk_gas):
+        """Convert kg/m3 of air to micromole of Argon per Liter of ice"""
+        mass_ratio_of_argon_in_air = 0.01288
+        micromoles_of_argon_in_a_kilogram_of_argon = 1 / (3.9948e-8)
+        liters_in_a_meter_cubed = 1e3
+        return (
+            dimensional_bulk_gas
+            * mass_ratio_of_argon_in_air
+            * micromoles_of_argon_in_a_kilogram_of_argon
+            / liters_in_a_meter_cubed
+        )
+
     def convert_from_dimensional_dissolved_gas(self, dimensional_dissolved_gas):
         """convert from dissolved gas in kg(gas)/kg(liquid) to dimensionless"""
         return dimensional_dissolved_gas / self.saturation_concentration
