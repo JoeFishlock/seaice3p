@@ -16,13 +16,11 @@ logger.info(f"Celestine version {__version__}")
 run the config and save data to data/base.npz
 """
 barrow_dimensional_params = DimensionalParams(
-    name="barrow", savefreq_in_days=15, bubble_radius=1e-3
+    name="barrow", total_time_in_days=164, savefreq_in_days=3, bubble_radius=1e-3
 )
 barrow_dimensional_params.save()
 barrow = barrow_dimensional_params.get_config(
-    forcing_config=ForcingConfig(
-        temperature_forcing_choice="yearly", period=barrow_dimensional_params.total_time
-    ),
+    forcing_config=ForcingConfig(temperature_forcing_choice="barrow_2009"),
     numerical_params=NumericalParams(solver="SCI", I=50),
 )
 barrow.save()

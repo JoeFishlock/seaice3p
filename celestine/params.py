@@ -83,6 +83,7 @@ class Config:
     darcy_law_params: DarcyLawParams = DarcyLawParams()
     forcing_config: ForcingConfig = ForcingConfig()
     numerical_params: NumericalParams = NumericalParams()
+    scales: int = None
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
     data_path: str = "data/"

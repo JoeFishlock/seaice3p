@@ -197,6 +197,7 @@ class DimensionalParams:
             darcy_law_params=darcy_law_params,
             forcing_config=forcing_config,
             numerical_params=numerical_params,
+            scales=self.get_scales(),
             total_time=self.total_time,
             savefreq=self.savefreq,
             data_path=self.data_path,
