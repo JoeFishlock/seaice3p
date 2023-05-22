@@ -202,6 +202,18 @@ class DimensionalParams:
             data_path=self.data_path,
         )
 
+    def get_scales(self):
+        return Scales(
+            self.lengthscale,
+            self.thermal_diffusivity,
+            self.ocean_salinity,
+            self.salinity_difference,
+            self.ocean_freezing_temperature,
+            self.temperature_difference,
+            self.gas_density,
+            self.saturation_concentration,
+        )
+
     def save(self):
         with open(f"{self.data_path}{self.name}.yml", "w") as outfile:
             dump(asdict(self), outfile)
@@ -211,3 +223,45 @@ class DimensionalParams:
         with open(path, "r") as infile:
             dictionary = safe_load(infile)
         return cls(**dictionary)
+
+
+@dataclass
+class Scales:
+    lengthscale: float  # domain height in m
+    thermal_diffusivity: float  # m2/s
+    ocean_salinity: float  # g/kg
+    salinity_difference: float  # g/kg
+    ocean_freezing_temperature: float  # deg C
+    temperature_difference: float  # deg C
+    gas_density: float  # kg/m3
+    saturation_concentration: float  # kg(gas)/kg(liquid)
+
+    @property
+    def timescale_in_days(self):
+        return calculate_timescale_in_days(self.lengthscale, self.thermal_diffusivity)
+
+    @property
+    def velocity_scale_in_m_per_day(self):
+        return calculate_velocity_scale_in_m_day(
+            self.lengthscale, self.thermal_diffusivity
+        )
+
+    def convert_from_dimensional_temperature(self, dimensional_temperature):
+        """Non dimensionalise temperature in deg C"""
+        return (
+            dimensional_temperature - self.ocean_freezing_temperature
+        ) / self.temperature_difference
+
+    def convert_to_dimensional_temperature(self, temperature):
+        """get temperature in deg C from non dimensional temperature"""
+        return (
+            self.temperature_difference * temperature + self.ocean_freezing_temperature
+        )
+
+    def convert_from_dimensional_grid(self, dimensional_grid):
+        """Non dimensionalise domain depths in meters"""
+        return dimensional_grid / self.lengthscale
+
+    def convert_to_dimensional_grid(self, grid):
+        """Get domain depths in meters from non dimensional values"""
+        return self.lengthscale * grid

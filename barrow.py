@@ -15,12 +15,12 @@ logger.info(f"Celestine version {__version__}")
 """Generate one simulation config and save to data/base.yml
 run the config and save data to data/base.npz
 """
-barrow_dimensional_params = DimensionalParams(name="barrow", bubble_radius=0.1e-3)
+barrow_dimensional_params = DimensionalParams(name="barrow", bubble_radius=1e-3)
 barrow = barrow_dimensional_params.get_config(
     forcing_config=ForcingConfig(
         temperature_forcing_choice="yearly", period=barrow_dimensional_params.total_time
     ),
-    numerical_params=NumericalParams(solver="SCI", I=100),
+    numerical_params=NumericalParams(solver="SCI", I=50),
 )
 barrow.save()
 status, duration = solve(barrow)
@@ -42,6 +42,7 @@ with np.load("data/barrow.npz") as data:
     pressure = data["pressure"]
     times = data["times"]
 cfg = Config.load("data/barrow.yml")
+scales = barrow_dimensional_params.get_scales()
 
 for n, time in enumerate(times):
     state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
@@ -56,9 +57,13 @@ for n, time in enumerate(times):
     plt.close()
 
     plt.figure(figsize=(5, 5))
+    dimensional_temperature = scales.convert_to_dimensional_temperature(
+        state.temperature
+    )
+    dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
     plt.plot(
-        state.temperature,
-        state.grid,
+        dimensional_temperature,
+        dimensional_grid,
         "r*--",
     )
     plt.savefig(f"frames/temperature/temperature{n}.pdf")
