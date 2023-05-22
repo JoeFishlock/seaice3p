@@ -265,3 +265,38 @@ class Scales:
     def convert_to_dimensional_grid(self, grid):
         """Get domain depths in meters from non dimensional values"""
         return self.lengthscale * grid
+
+    def convert_from_dimensional_time(self, dimensional_time):
+        """Non dimensionalise time in days"""
+        return dimensional_time / self.timescale_in_days
+
+    def convert_to_dimensional_time(self, time):
+        """Convert non dimensional time into time in days since start of simulation"""
+        return self.timescale_in_days * time
+
+    def convert_from_dimensional_bulk_salinity(self, dimensional_bulk_salinity):
+        """Non dimensionalise bulk salinity in g/kg"""
+        return (
+            dimensional_bulk_salinity - self.ocean_salinity
+        ) / self.salinity_difference
+
+    def convert_to_dimensional_bulk_salinity(self, bulk_salinity):
+        """Convert non dimensional bulk salinity to g/kg"""
+        return self.salinity_difference * bulk_salinity + self.ocean_salinity
+
+    def convert_from_dimensional_bulk_gas(self, dimensional_bulk_gas):
+        """Non dimensionalise bulk gas content in kg/m3"""
+        return dimensional_bulk_gas / self.gas_density
+
+    def convert_to_dimensional_bulk_gas(self, bulk_gas):
+        """Convert dimensionless bulk gas content to kg/m3"""
+        return self.gas_density * bulk_gas
+
+    def convert_from_dimensional_dissolved_gas(self, dimensional_dissolved_gas):
+        """convert from dissolved gas in kg(gas)/kg(liquid) to dimensionless"""
+        return dimensional_dissolved_gas / self.saturation_concentration
+
+    def convert_to_dimensional_dissolved_gas(self, dissolved_gas):
+        """convert from non dimensional dissolved gas to dimensional dissolved gas in
+        kg(gas)/kg(liquid)"""
+        return self.saturation_concentration * dissolved_gas
