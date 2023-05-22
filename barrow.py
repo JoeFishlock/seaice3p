@@ -15,7 +15,9 @@ logger.info(f"Celestine version {__version__}")
 """Generate one simulation config and save to data/base.yml
 run the config and save data to data/base.npz
 """
-barrow_dimensional_params = DimensionalParams(name="barrow", bubble_radius=1e-3)
+barrow_dimensional_params = DimensionalParams(
+    name="barrow", savefreq_in_days=15, bubble_radius=1e-3
+)
 barrow_dimensional_params.save()
 barrow = barrow_dimensional_params.get_config(
     forcing_config=ForcingConfig(
