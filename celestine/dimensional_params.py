@@ -1,4 +1,4 @@
-"""Physical (dimensional) parameters required to run a simulation and convert output
+"""Dimensional parameters required to run a simulation and convert output
 to dimensional variables.
 
 The DimensionalParams class contains all the dimensional parameters needed to produce

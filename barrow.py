@@ -2,7 +2,7 @@
 
 import numpy as np
 from celestine.params import Config, ForcingConfig, NumericalParams
-from celestine.physical_params import DimensionalParams
+from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
 import matplotlib.pyplot as plt
 from celestine.logging_config import logger, log_time
