@@ -25,6 +25,7 @@ class PhysicalParams:
 class BoundaryConditionsConfig:
     """values for bottom (ocean) boundary"""
 
+    initial_conditions_choice: str = "uniform"
     far_gas_sat: float = 1.0
     far_temp: float = 0.1
     far_bulk_salinity: float = 0
