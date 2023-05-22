@@ -4,6 +4,7 @@ simulation.
 import numpy as np
 from celestine.params import Config
 from celestine.state import State
+from celestine.grids import initialise_grids
 
 
 def get_initial_conditions(cfg: Config):
@@ -34,6 +35,48 @@ def get_uniform_initial_conditions(cfg):
     return initial_state
 
 
+def apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
+    output = np.where(grid > -depth_of_ice, ice_value, liquid_value)
+    return output
+
+
+def get_barrow_initial_conditions(cfg: Config):
+    ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
+    SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
+    BOTTOM_TEMP = cfg.boundary_conditions_config.far_temp
+    BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
+    TEMP_IN_ICE = cfg.scales.convert_from_dimensional_temperature(-8.15)
+
+    chi = cfg.physical_params.expansion_coefficient
+
+    _, centers, _, _ = initialise_grids(cfg.numerical_params.I)
+    salt = apply_value_in_ice_layer(
+        ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
+    )
+    gas = apply_value_in_ice_layer(
+        ICE_DEPTH, ice_value=(1 / 5) * chi, liquid_value=chi, grid=centers
+    )
+    pressure = np.full_like(salt, 0)
+
+    temp = apply_value_in_ice_layer(
+        ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers
+    )
+    solid_fraction_in_mush = (salt + temp) / (
+        temp - cfg.physical_params.concentration_ratio
+    )
+    enthalpy = apply_value_in_ice_layer(
+        ICE_DEPTH,
+        ice_value=temp - solid_fraction_in_mush * cfg.physical_params.stefan_number,
+        liquid_value=temp,
+        grid=centers,
+    )
+
+    initial_state = State(cfg, 0, enthalpy, salt, gas, pressure)
+
+    return initial_state
+
+
 INITIAL_CONDITIONS = {
     "uniform": get_uniform_initial_conditions,
+    "barrow_2009": get_barrow_initial_conditions,
 }
