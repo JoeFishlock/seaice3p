@@ -11,10 +11,12 @@ Celestine
    :caption: Contents:
    
    boundary_conditions
+   dimensional_params
    enthalpy_method
    flux
    forcing
    grids
+   initial_conditions
    logging_config
    params
    phase_boundaries

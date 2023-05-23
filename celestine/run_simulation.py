@@ -1,3 +1,6 @@
+"""Module to run the simulation on the given configuration with the appropriate solver.
+"""
+
 from celestine.params import Config
 from celestine.logging_config import logger, log_time
 from celestine.solvers.lagged_solver import LaggedUpwindSolver
@@ -6,6 +9,7 @@ from celestine.solvers.scipy import ScipySolver
 
 
 def solve(cfg: Config):
+    """Solve simulation choosing appropriate solver from the choice in the config."""
     SOLVER_OPTIONS = {
         "LU": LaggedUpwindSolver,
         "RED": ReducedSolver,

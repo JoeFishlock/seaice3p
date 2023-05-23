@@ -63,6 +63,10 @@ class ScipySolver(SolverTemplate):
 
     @logs.time_function
     def solve(self):
+
+        # for the barrow forcing you need to load external data to the forcing config
+        self.load_forcing_data_if_needed()
+
         state = self.generate_initial_solution()
         initial = np.hstack((state.enthalpy, state.salt, state.gas))
         T = self.cfg.total_time

@@ -1,9 +1,9 @@
+"""Module to calculate Darcy velocities.
+"""
+
 import numpy as np
 from celestine.grids import upwind, geometric
 from celestine.params import Config
-
-"""To prevent flow into a partially completely frozen region we must cut off
-permeability if a cell becomes eutectic. I.e if H<H_E set perm=0 smoothly"""
 
 
 def calculate_frame_velocity(cfg: Config):
@@ -11,6 +11,11 @@ def calculate_frame_velocity(cfg: Config):
 
 
 def calculate_absolute_permeability(liquid_fraction):
+    r"""calculate absolute permeability as
+
+    .. math:: \Pi = \phi_l^3
+
+    """
     return liquid_fraction**3
 
 

@@ -7,6 +7,7 @@ import celestine.params as cp
 import celestine.grids as grids
 import celestine.logging_config as logs
 from celestine.state import State, Solution
+from celestine.initial_conditions import get_initial_conditions
 
 
 class SolverTemplate(ABC):
@@ -28,22 +29,7 @@ class SolverTemplate(ABC):
 
         :returns: initial solution arrays on ghost grid (enthalpy, salt, gas, pressure)
         """
-        chi = self.cfg.physical_params.expansion_coefficient
-
-        bottom_temp = self.cfg.boundary_conditions_config.far_temp
-        bottom_bulk_salinity = self.cfg.boundary_conditions_config.far_bulk_salinity
-        bottom_dissolved_gas = self.cfg.boundary_conditions_config.far_gas_sat
-        bottom_bulk_gas = bottom_dissolved_gas * chi
-
-        # Initialise uniform enthalpy assuming completely liquid initial domain
-        enthalpy = np.full((self.I,), bottom_temp)
-        salt = np.full_like(enthalpy, bottom_bulk_salinity)
-        gas = np.full_like(enthalpy, bottom_bulk_gas)
-        pressure = np.full_like(enthalpy, 0)
-
-        initial_state = State(self.cfg, 0, enthalpy, salt, gas, pressure)
-
-        return initial_state
+        return get_initial_conditions(self.cfg)
 
     @abstractmethod
     def take_timestep(self, state: State) -> State:
@@ -68,9 +54,17 @@ class SolverTemplate(ABC):
         """
         pass
 
+    def load_forcing_data_if_needed(self):
+        if self.cfg.forcing_config.temperature_forcing_choice == "barrow_2009":
+            self.cfg.forcing_config.load_forcing_data()
+
     @logs.time_function
     def solve(self):
         self.pre_solve_checks()  # optional method
+
+        # for the barrow forcing you need to load external data to the forcing config
+        self.load_forcing_data_if_needed()
+
         state = self.generate_initial_solution()
         T = self.cfg.total_time
         timestep = self.cfg.numerical_params.timestep

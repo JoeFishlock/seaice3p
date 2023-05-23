@@ -7,6 +7,7 @@ from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
 import numpy as np
 from celestine.logging_config import logger
+from typing import ClassVar
 
 
 @dataclass
@@ -21,10 +22,17 @@ class PhysicalParams:
     frame_velocity: float = 0
 
 
+def filter_missing_values(air_temp, days):
+    """Filter out missing values are recorded as 9999"""
+    is_missing = np.abs(air_temp) > 100
+    return air_temp[~is_missing], days[~is_missing]
+
+
 @dataclass
 class BoundaryConditionsConfig:
     """values for bottom (ocean) boundary"""
 
+    initial_conditions_choice: str = "uniform"
     far_gas_sat: float = 1.0
     far_temp: float = 0.1
     far_bulk_salinity: float = 0
@@ -50,6 +58,28 @@ class ForcingConfig:
     offset: float = -1.0
     amplitude: float = 0.75
     period: float = 4.0
+
+    # class variables with barrow forcing data hard coded in
+    AIR_TEMP_INDEX: ClassVar[int] = 8
+    TIME_INDEX: ClassVar[int] = 0
+    BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
+
+    def load_forcing_data(self):
+        """populate class attributes with barrow dimensional air temperature
+        and time in days (with missing values filtered out).
+
+        Note the metadata explaining how to use the barrow temperature data is also
+        in celestine/forcing_data. The indices corresponding to days and air temp are
+        hard coded in as class variables.
+        """
+        data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
+        barrow_air_temp = data[:, self.AIR_TEMP_INDEX]
+        barrow_days = data[:, self.TIME_INDEX] - data[0, self.TIME_INDEX]
+        barrow_air_temp, barrow_days = filter_missing_values(
+            barrow_air_temp, barrow_days
+        )
+        self.barrow_air_temp = barrow_air_temp
+        self.barrow_days = barrow_days
 
 
 @dataclass
@@ -83,6 +113,7 @@ class Config:
     darcy_law_params: DarcyLawParams = DarcyLawParams()
     forcing_config: ForcingConfig = ForcingConfig()
     numerical_params: NumericalParams = NumericalParams()
+    scales: int = None
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
     data_path: str = "data/"
@@ -110,5 +141,8 @@ class Config:
         )
 
     def check_thermal_Courant_number(self):
+        """Check if courant number for thermal diffusion term is low enough for
+        explicit method and if it isn't log a warning.
+        """
         if self.numerical_params.Courant > 0.5:
             logger.warning(f"Courant number is {self.numerical_params.Courant}")

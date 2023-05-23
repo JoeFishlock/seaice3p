@@ -1,3 +1,6 @@
+"""Module for calculating the phase boundaries needed for the enthalpy method.
+"""
+
 import numpy as np
 from abc import ABC, abstractmethod
 from celestine.params import PhysicalParams
