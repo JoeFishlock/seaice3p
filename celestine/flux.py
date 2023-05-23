@@ -1,3 +1,4 @@
+"""Module for calculating the fluxes using upwind scheme"""
 import numpy as np
 from celestine.grids import upwind, geometric
 

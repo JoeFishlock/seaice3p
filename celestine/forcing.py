@@ -1,12 +1,18 @@
+"""Module for providing surface temperature forcing to simulation.
+
+Note that the barrow temperature data is read in from a file if needed by the
+simulation configuration.
+"""
 import numpy as np
 from celestine.params import Config
 
-"""indices of each data variable for Barrow 2009 data are in the metadata
-celestine/forcing_data/BRW09_MBS_metadata.txt
-"""
-
 
 def get_temperature_forcing(time, cfg: Config):
+    TEMPERATURE_FORCINGS = {
+        "constant": constant_temperature_forcing,
+        "yearly": yearly_temperature_forcing,
+        "barrow_2009": barrow_temperature_forcing,
+    }
     choice = cfg.forcing_config.temperature_forcing_choice
     return TEMPERATURE_FORCINGS[choice](time, cfg)
 
@@ -44,10 +50,3 @@ def barrow_temperature_forcing(time, cfg):
         dimensional_temperature
     )
     return temperature
-
-
-TEMPERATURE_FORCINGS = {
-    "constant": constant_temperature_forcing,
-    "yearly": yearly_temperature_forcing,
-    "barrow_2009": barrow_temperature_forcing,
-}

@@ -1,4 +1,4 @@
-"""Provide initial state of bulk enthalpy, bulk salinity and bulk gas for the
+"""Module to provide initial state of bulk enthalpy, bulk salinity and bulk gas for the
 simulation.
 """
 import numpy as np
@@ -8,6 +8,10 @@ from celestine.grids import initialise_grids
 
 
 def get_initial_conditions(cfg: Config):
+    INITIAL_CONDITIONS = {
+        "uniform": get_uniform_initial_conditions,
+        "barrow_2009": get_barrow_initial_conditions,
+    }
     choice = cfg.boundary_conditions_config.initial_conditions_choice
     return INITIAL_CONDITIONS[choice](cfg)
 
@@ -36,11 +40,29 @@ def get_uniform_initial_conditions(cfg):
 
 
 def apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
+    """assume that top part of domain contains mushy ice of given depth and lower part
+    of domain is liquid. This function returns output on the given grid where the ice
+    part of the domain takes one value and the liquid a different.
+
+    This is useful for initialising the barrow simulation where we have an initial ice
+    layer.
+    """
     output = np.where(grid > -depth_of_ice, ice_value, liquid_value)
     return output
 
 
 def get_barrow_initial_conditions(cfg: Config):
+    """initialise domain with an initial ice layer of given temperature and bulk
+    salinity. These values are hard coded in from Moreau paper to match barrow study.
+    They also assume that the initial ice layer has 1/5 the saturation amount in pure
+    liquid of dissolved gas to account for previous gas loss.
+
+    Initialise with bulk gas being (1/5) in ice and saturation in liquid.
+    Bulk salinity is 5.92 g/kg in ice and ocean value in liquid.
+    Enthalpy is calculated by inverting temperature relation in ice and ocean.
+    Ice temperature is given as -8.15 degC and ocean is the far value from boundary
+    config.
+    """
     ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
     SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
     BOTTOM_TEMP = cfg.boundary_conditions_config.far_temp
@@ -74,9 +96,3 @@ def get_barrow_initial_conditions(cfg: Config):
     initial_state = State(cfg, 0, enthalpy, salt, gas, pressure)
 
     return initial_state
-
-
-INITIAL_CONDITIONS = {
-    "uniform": get_uniform_initial_conditions,
-    "barrow_2009": get_barrow_initial_conditions,
-}

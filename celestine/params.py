@@ -65,6 +65,13 @@ class ForcingConfig:
     BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
 
     def load_forcing_data(self):
+        """populate class attributes with barrow dimensional air temperature
+        and time in days (with missing values filtered out).
+
+        Note the metadata explaining how to use the barrow temperature data is also
+        in celestine/forcing_data. The indices corresponding to days and air temp are
+        hard coded in as class variables.
+        """
         data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
         barrow_air_temp = data[:, self.AIR_TEMP_INDEX]
         barrow_days = data[:, self.TIME_INDEX] - data[0, self.TIME_INDEX]
@@ -134,5 +141,8 @@ class Config:
         )
 
     def check_thermal_Courant_number(self):
+        """Check if courant number for thermal diffusion term is low enough for
+        explicit method and if it isn't log a warning.
+        """
         if self.numerical_params.Courant > 0.5:
             logger.warning(f"Courant number is {self.numerical_params.Courant}")
