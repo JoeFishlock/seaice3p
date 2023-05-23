@@ -54,9 +54,17 @@ class SolverTemplate(ABC):
         """
         pass
 
+    def load_forcing_data_if_needed(self):
+        if self.cfg.forcing_config.temperature_forcing_choice == "barrow_2009":
+            self.cfg.forcing_config.load_forcing_data()
+
     @logs.time_function
     def solve(self):
         self.pre_solve_checks()  # optional method
+
+        # for the barrow forcing you need to load external data to the forcing config
+        self.load_forcing_data_if_needed()
+
         state = self.generate_initial_solution()
         T = self.cfg.total_time
         timestep = self.cfg.numerical_params.timestep

@@ -7,6 +7,7 @@ from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
 import numpy as np
 from celestine.logging_config import logger
+from typing import ClassVar
 
 
 @dataclass
@@ -19,6 +20,12 @@ class PhysicalParams:
     lewis_salt: float = np.inf
     lewis_gas: float = np.inf
     frame_velocity: float = 0
+
+
+def filter_missing_values(air_temp, days):
+    """Filter out missing values are recorded as 9999"""
+    is_missing = np.abs(air_temp) > 100
+    return air_temp[~is_missing], days[~is_missing]
 
 
 @dataclass
@@ -51,6 +58,21 @@ class ForcingConfig:
     offset: float = -1.0
     amplitude: float = 0.75
     period: float = 4.0
+
+    # class variables with barrow forcing data hard coded in
+    AIR_TEMP_INDEX: ClassVar[int] = 8
+    TIME_INDEX: ClassVar[int] = 0
+    BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
+
+    def load_forcing_data(self):
+        data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
+        barrow_air_temp = data[:, self.AIR_TEMP_INDEX]
+        barrow_days = data[:, self.TIME_INDEX] - data[0, self.TIME_INDEX]
+        barrow_air_temp, barrow_days = filter_missing_values(
+            barrow_air_temp, barrow_days
+        )
+        self.barrow_air_temp = barrow_air_temp
+        self.barrow_days = barrow_days
 
 
 @dataclass
