@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.8.0 (2023-05-23) ##
+
+### Summary ###
+
+This code can now generate a simulation configuration from dimensional parameter inputs.
+It can also convert the output to dimensional units for plots.
+It can also now run simulations with the "barrow_2009" forcing and initial conditions option
+which uses surface temperature data from the Barrow field station in 2009 to compare our
+simulation data to the field data of Zhou and Tison.
+
+### Added ###
+
+- Dimensional parameters module to handle input of dimensional parameters and converting
+between non dimensional and dimensional variables.
+- Example script to run a simulation with Barrow 2009 Jan-Jun configuration called `barrow.py`.
+- Barrow field station temperature data and metadata in `celestine/forcing_data/`. Must be read
+in to use "barrow_2009" temperature forcing option.
+- Initial conditions module so we can use different initial conditions chosen in configuration.
+- Method in Scales class to convert bulk air content into mircro moles of Argon per Liter of ice,
+under some assumptions that mass ratio of Argon in air is the same as in the atmosphere. This lets
+us compare to the field data for Argon of Zhou and Tison.
+
+### Docs ###
+
+- Document explaining numerical methods used. 
+- README containing install instructions, how to run the tests, a breakdown of the documentation
+and checklist for creating a new release.
+
 ## v0.7.0 (2023-05-19) ##
 
 ### Summary ###
