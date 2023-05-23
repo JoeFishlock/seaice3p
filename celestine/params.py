@@ -25,6 +25,7 @@ class PhysicalParams:
 class BoundaryConditionsConfig:
     """values for bottom (ocean) boundary"""
 
+    initial_conditions_choice: str = "uniform"
     far_gas_sat: float = 1.0
     far_temp: float = 0.1
     far_bulk_salinity: float = 0
@@ -83,6 +84,7 @@ class Config:
     darcy_law_params: DarcyLawParams = DarcyLawParams()
     forcing_config: ForcingConfig = ForcingConfig()
     numerical_params: NumericalParams = NumericalParams()
+    scales: int = None
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
     data_path: str = "data/"
