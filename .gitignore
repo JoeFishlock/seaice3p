@@ -12,3 +12,11 @@ test_data/*
 
 # Sphinx
 docs/build
+
+# Latex document for numerical method
+docs/numerical_method/*
+!docs/numerical_method/*.sty
+!docs/numerical_method/*.bst
+!docs/numerical_method/*.tex
+!docs/numerical_method/*.jpg
+!docs/numerical_method/*.pdf

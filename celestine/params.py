@@ -7,6 +7,7 @@ from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
 import numpy as np
 from celestine.logging_config import logger
+from typing import ClassVar
 
 
 @dataclass
@@ -19,6 +20,12 @@ class PhysicalParams:
     lewis_salt: float = np.inf
     lewis_gas: float = np.inf
     frame_velocity: float = 0
+
+
+def filter_missing_values(air_temp, days):
+    """Filter out missing values are recorded as 9999"""
+    is_missing = np.abs(air_temp) > 100
+    return air_temp[~is_missing], days[~is_missing]
 
 
 @dataclass
@@ -51,6 +58,28 @@ class ForcingConfig:
     offset: float = -1.0
     amplitude: float = 0.75
     period: float = 4.0
+
+    # class variables with barrow forcing data hard coded in
+    AIR_TEMP_INDEX: ClassVar[int] = 8
+    TIME_INDEX: ClassVar[int] = 0
+    BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
+
+    def load_forcing_data(self):
+        """populate class attributes with barrow dimensional air temperature
+        and time in days (with missing values filtered out).
+
+        Note the metadata explaining how to use the barrow temperature data is also
+        in celestine/forcing_data. The indices corresponding to days and air temp are
+        hard coded in as class variables.
+        """
+        data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
+        barrow_air_temp = data[:, self.AIR_TEMP_INDEX]
+        barrow_days = data[:, self.TIME_INDEX] - data[0, self.TIME_INDEX]
+        barrow_air_temp, barrow_days = filter_missing_values(
+            barrow_air_temp, barrow_days
+        )
+        self.barrow_air_temp = barrow_air_temp
+        self.barrow_days = barrow_days
 
 
 @dataclass
@@ -112,5 +141,8 @@ class Config:
         )
 
     def check_thermal_Courant_number(self):
+        """Check if courant number for thermal diffusion term is low enough for
+        explicit method and if it isn't log a warning.
+        """
         if self.numerical_params.Courant > 0.5:
             logger.warning(f"Courant number is {self.numerical_params.Courant}")

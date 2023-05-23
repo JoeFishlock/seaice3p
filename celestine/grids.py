@@ -1,3 +1,7 @@
+"""Module providing functions to initialise the different grids and interpolate
+quantities between them.
+"""
+
 import numpy as np
 
 

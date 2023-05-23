@@ -36,12 +36,26 @@ def calculate_timescale_in_days(lengthscale, thermal_diffusivity):
 
 
 def calculate_velocity_scale_in_m_day(lengthscale, thermal_diffusivity):
+    """calculate the velocity scale given domain height and thermal diffusivity
+
+    :param lengthscale: domain height in m
+    :type lengthscale: float
+    :param thermal_diffusivity: thermal diffusivity in m2/s
+    :type thermal_diffusivity: float
+    :return: velocity scale in m/day
+    """
     timescale_in_days = calculate_timescale_in_days(lengthscale, thermal_diffusivity)
     return lengthscale / timescale_in_days
 
 
 @dataclass
 class DimensionalParams:
+    """Contains all dimensional parameters needed to calculate non dimensional numbers.
+
+    To see the units each input should have look at the comment next to the default
+    value.
+    """
+
     name: str
     total_time_in_days: float = 365  # days
     savefreq_in_days: float = 1  # save data after this amount of time in days
@@ -71,26 +85,57 @@ class DimensionalParams:
 
     @property
     def expansion_coefficient(self):
+        r"""calculate
+
+        .. math:: \chi = \rho_l \xi_{\text{sat}} / \rho_g
+
+        """
         return self.liquid_density * self.saturation_concentration / self.gas_density
 
     @property
     def salinity_difference(self):
+        r"""calculate difference between eutectic salinity and typical ocean salinity
+
+        .. math:: \Delta S = S_E - S_i
+
+        """
         return self.eutectic_salinity - self.ocean_salinity
 
     @property
     def ocean_freezing_temperature(self):
+        """calculate salinity dependent freezing temperature using liquidus for typical
+        ocean salinity
+
+        .. math:: T_i = T_L(S_i) = T_E S_i / S_E
+
+        """
         return self.eutectic_temperature * self.ocean_salinity / self.eutectic_salinity
 
     @property
     def temperature_difference(self):
+        r"""calculate
+
+        .. math:: \Delta T = T_i - T_E
+
+        """
         return self.ocean_freezing_temperature - self.eutectic_temperature
 
     @property
     def concentration_ratio(self):
+        r"""Calculate concentration ratio as
+
+        .. math:: \mathcal{C} = S_i / \Delta S
+
+        """
         return self.ocean_salinity / self.salinity_difference
 
     @property
     def stefan_number(self):
+        r"""calculate Stefan number
+
+        .. math:: \text{St} = L / c_p \Delta T
+
+        """
         return self.latent_heat / (
             self.temperature_difference * self.specific_heat_capacity
         )
@@ -108,6 +153,12 @@ class DimensionalParams:
 
     @property
     def lewis_salt(self):
+        r"""Calculate the lewis number for salt, return np.inf if there is no salt
+        diffusion.
+
+        .. math:: \text{Le}_S = \kappa / D_s
+
+        """
         if self.salt_diffusivity == 0:
             return np.inf
 
@@ -115,6 +166,12 @@ class DimensionalParams:
 
     @property
     def lewis_gas(self):
+        r"""Calculate the lewis number for dissolved gas, return np.inf if there is no
+        dissolved gas diffusion.
+
+        .. math:: \text{Le}_\xi = \kappa / D_\xi
+
+        """
         if self.gas_diffusivity == 0:
             return np.inf
 
@@ -122,6 +179,7 @@ class DimensionalParams:
 
     @property
     def total_time(self):
+        """calculate the total time in non dimensional units for the simulation"""
         timescale = calculate_timescale_in_days(
             self.lengthscale, self.thermal_diffusivity
         )
@@ -129,6 +187,7 @@ class DimensionalParams:
 
     @property
     def savefreq(self):
+        """calculate the save frequency in non dimensional time"""
         timescale = calculate_timescale_in_days(
             self.lengthscale, self.thermal_diffusivity
         )
@@ -136,6 +195,7 @@ class DimensionalParams:
 
     @property
     def frame_velocity(self):
+        """calculate the frame velocity in non dimensional units"""
         velocity_scale = calculate_velocity_scale_in_m_day(
             self.lengthscale, self.thermal_diffusivity
         )
@@ -143,6 +203,11 @@ class DimensionalParams:
 
     @property
     def B(self):
+        r"""calculate the non dimensional rise velocity of the gas bubbles as
+
+        .. math:: \mathcal{B} = \frac{\rho_l g R_B^2 h}{3 \mu \kappa}
+
+        """
         stokes_velocity = (
             self.liquid_density
             * self.gravity
@@ -154,16 +219,23 @@ class DimensionalParams:
 
     @property
     def bubble_radius_scaled(self):
+        r"""calculate the bubble radius divided by the pore scale
+
+        .. math:: \Lambda = R_B / R_0
+
+        """
         return self.bubble_radius / self.pore_radius
 
     @property
     def liquid_velocity(self):
+        """convert given liquid velocity into non dimensional units"""
         velocity_scale_in_m_per_day = calculate_velocity_scale_in_m_day(
             self.lengthscale, self.thermal_diffusivity
         )
         return self.liquid_velocity_dimensional / velocity_scale_in_m_per_day
 
     def get_physical_params(self):
+        """return a PhysicalParams object"""
         return PhysicalParams(
             expansion_coefficient=self.expansion_coefficient,
             concentration_ratio=self.concentration_ratio,
@@ -174,6 +246,7 @@ class DimensionalParams:
         )
 
     def get_darcy_law_params(self):
+        """return a DarcyLawParams object"""
         return DarcyLawParams(
             B=self.B,
             bubble_radius_scaled=self.bubble_radius_scaled,
@@ -188,6 +261,11 @@ class DimensionalParams:
         forcing_config: ForcingConfig = ForcingConfig(),
         numerical_params: NumericalParams = NumericalParams(),
     ):
+        """Return a Config object for the simulation.
+
+        physical parameters and Darcy law parameters are calculated from the dimensional
+        input. You can modify the numerical parameters and boundary conditions and
+        forcing provided for the simulation."""
         physical_params = self.get_physical_params()
         darcy_law_params = self.get_darcy_law_params()
         return Config(
@@ -204,6 +282,8 @@ class DimensionalParams:
         )
 
     def get_scales(self):
+        """return a Scales object used for converting between dimensional and non
+        dimensional variables."""
         return Scales(
             self.lengthscale,
             self.thermal_diffusivity,
@@ -216,11 +296,16 @@ class DimensionalParams:
         )
 
     def save(self):
+        """save this object to a yaml file in the specified data path.
+
+        The name will be the name given with _dimensional appended to distinguish it
+        from a saved non-dimensional configuration."""
         with open(f"{self.data_path}{self.name}_dimensional.yml", "w") as outfile:
             dump(asdict(self), outfile)
 
     @classmethod
     def load(cls, path):
+        """load this object from a yaml configuration file."""
         with open(path, "r") as infile:
             dictionary = safe_load(infile)
         return cls(**dictionary)

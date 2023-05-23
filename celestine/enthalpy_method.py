@@ -1,3 +1,6 @@
+"""Module containing enthalpy method to calculate state variables from bulk enthalpy,
+bulk salinity and bulk gas."""
+
 import numpy as np
 from abc import ABC, abstractmethod
 from celestine.params import PhysicalParams
@@ -259,6 +262,14 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
 
 
 def get_enthalpy_method(cfg):
+    """Return the enthalpy method object required depending on solver choice
+
+    LU: Full
+    RED: Reduced
+    SCI: Reduced
+
+    :param cfg: configuration for simulation
+    """
     solver_choice = cfg.numerical_params.solver
     options = {
         "LU": FullEnthalpyMethod,

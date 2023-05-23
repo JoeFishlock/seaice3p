@@ -1,3 +1,4 @@
+"""Module to create logger for simulation"""
 import logging
 from datetime import datetime
 from pathlib import Path
