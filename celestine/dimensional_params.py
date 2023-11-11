@@ -203,15 +203,15 @@ class DimensionalParams:
 
     @property
     def B(self):
-        r"""calculate the non dimensional rise velocity of the gas bubbles as
+        r"""calculate the non dimensional scale for buoyant rise of gas bubbles as
 
-        .. math:: \mathcal{B} = \frac{\rho_l g R_B^2 h}{3 \mu \kappa}
+        .. math:: \mathcal{B} = \frac{\rho_l g R_0^2 h}{3 \mu \kappa}
 
         """
         stokes_velocity = (
             self.liquid_density
             * self.gravity
-            * self.bubble_radius**2
+            * self.pore_radius**2
             / (3 * self.liquid_viscosity)
         )
         velocity_scale_in_m_per_second = self.thermal_diffusivity / self.lengthscale
