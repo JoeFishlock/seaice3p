@@ -93,19 +93,29 @@ def calculate_drag(bubble_radius, cfg: Config):
 
 
 def calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, cfg: Config):
-    """Calculate Vg from liquid fraction and pressure on ghost grid
+    r"""Calculate Vg from liquid fraction and pressure on ghost grid
+
+    .. math:: V_g = \mathcal{B} (\phi_l^{2q} \frac{\lambda^2}{K(\lambda)}) + U_0 G(\lambda)
 
     Return Vg on edge grid"""
     B = cfg.darcy_law_params.B
 
     bubble_radius = calculate_bubble_radius(geometric(liquid_fraction), cfg)
     drag = calculate_drag(bubble_radius, cfg)
+    pore_throat_scaling = cfg.darcy_law_params.pore_throat_scaling
 
     # reg = cfg.numerical_params.regularisation
     # lag = calculate_lag(bubble_radius)
     # Wl = calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g)
-    # return B * drag + 2 * lag * Wl / (geometric(liquid_fraction) + reg)
-    return B * drag
+    # return B * drag * (
+    #     geometric(liquid_fraction) ** (2 * pore_throat_scaling)
+    # ) * bubble_radius**2 + 2 * lag * Wl / (geometric(liquid_fraction) + reg)
+    return (
+        B
+        * drag
+        * (geometric(liquid_fraction) ** (2 * pore_throat_scaling))
+        * bubble_radius**2
+    )
 
 
 def calculate_velocities(state_BCs, D_g, cfg: Config):
