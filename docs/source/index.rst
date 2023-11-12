@@ -24,7 +24,6 @@ Celestine
    state
    velocities
    template
-   lagged_solver
    reduced_solver
    scipy
 
