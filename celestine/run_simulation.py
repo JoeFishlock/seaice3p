@@ -3,7 +3,6 @@
 
 from celestine.params import Config
 from celestine.logging_config import logger, log_time
-from celestine.solvers.lagged_solver import LaggedUpwindSolver
 from celestine.solvers.reduced_solver import ReducedSolver
 from celestine.solvers.scipy import ScipySolver
 
@@ -11,7 +10,6 @@ from celestine.solvers.scipy import ScipySolver
 def solve(cfg: Config):
     """Solve simulation choosing appropriate solver from the choice in the config."""
     SOLVER_OPTIONS = {
-        "LU": LaggedUpwindSolver,
         "RED": ReducedSolver,
         "SCI": ScipySolver,
     }

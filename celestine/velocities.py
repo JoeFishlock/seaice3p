@@ -1,8 +1,18 @@
 """Module to calculate Darcy velocities.
+
+The liquid Darcy velocity must be parameterised.
+
+The gas Darcy velocity is calculated as gas_fraction x interstitial bubble velocity
+
+Interstitial bubble velocity is found by a steady state Stoke's flow calculation.
+We have implemented two cases
+mono: All bubbles nucleate and remain the same size
+power_law: A power law bubble size distribution with fixed max and min.
 """
 
 import numpy as np
-from celestine.grids import upwind, geometric
+from scipy.integrate import quad
+from celestine.grids import geometric
 from celestine.params import Config
 
 
@@ -10,109 +20,287 @@ def calculate_frame_velocity(cfg: Config):
     return np.full((cfg.numerical_params.I + 1,), cfg.physical_params.frame_velocity)
 
 
-def calculate_absolute_permeability(liquid_fraction):
-    r"""calculate absolute permeability as
-
-    .. math:: \Pi = \phi_l^3
-
-    """
-    return liquid_fraction**3
-
-
-def calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g):
+def calculate_liquid_darcy_velocity(liquid_fraction, cfg: Config):
     r"""Calculate liquid Darcy velocity as
 
-    .. math:: W_l = -\Pi(\phi_l) \frac{\partial p}{\partial z}
+    .. math:: W_l = \frac{\phi_l U_0}{2}
+
+    This assumes that we are given the non dimensional maximum interstitial liquid
+    velocity.
 
     :param liquid_fraction: liquid fraction on ghost grid
     :type liquid_fraction: Numpy Array (size I+2)
-    :param pressure: pressure on ghost grid
-    :type pressure: Numpy Array (size I+2)
-    :param D_g: difference matrix for ghost grid
-    :type D_g: Numpy Array (size I+2)
+    :param cfg: simulation configuration object
+    :type D_g: celestine.params.Config
     :return: liquid darcy velocity on edge grid
     """
-    absolute_permeability = geometric(calculate_absolute_permeability(liquid_fraction))
-    Wl = -absolute_permeability * np.matmul(D_g, pressure)
+    Wl = geometric(liquid_fraction) * cfg.darcy_law_params.liquid_velocity / 2
     return Wl
 
 
-def solve_pressure_equation(state_BCs, new_state_BCs, timestep, D_e, D_g, cfg: Config):
-    """Calculate pressure on ghost grid from current and new state on ghost grid
+def calculate_bubble_size_fraction(bubble_radius_scaled, liquid_fraction, cfg: Config):
+    r"""Takes bubble radius scaled and liquid fraction on edges and calculates the
+    bubble size fraction as
 
-    Return new pressure on centers but easy to add boundary conditions"""
-    I = cfg.numerical_params.I
-    V = cfg.physical_params.frame_velocity
+    .. math:: \lambda = \Lambda / (\phi_l^q + \text{reg})
 
-    permeability = geometric(
-        calculate_absolute_permeability(new_state_BCs.liquid_fraction)
-    )
-
-    pressure_matrix = np.zeros((I + 2, I + 2))
-    perm_matrix = np.zeros((I + 1, I + 1))
-    pressure_forcing = np.zeros((I + 2,))
-
-    new_gas_fraction = new_state_BCs.gas_fraction
-    gas_fraction = state_BCs.gas_fraction
-    pressure_forcing[1:-1] = (1 / timestep) * (
-        new_gas_fraction[1:-1] - gas_fraction[1:-1]
-    ) + np.matmul(D_e, upwind(new_gas_fraction, V))
-
-    np.fill_diagonal(perm_matrix, permeability + 1e-4)
-    pressure_matrix[1:-1, :] = np.matmul(D_e, np.matmul(-perm_matrix, D_g))
-    pressure_matrix[0, 0] = 1
-    pressure_matrix[-1, -1] = 1
-    pressure_matrix[-1, -2] = -1
-
-    new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
-
-    # return the new pressure on centers
-    return new_pressure
-
-
-def calculate_bubble_radius(liquid_fraction, cfg: Config):
-    """Takes liquid fraction on edges and returns bubble radius parameter on edges"""
+    Returns the bubble size fraction on the edge grid.
+    """
     exponent = cfg.darcy_law_params.pore_throat_scaling
     reg = cfg.numerical_params.regularisation
     effective_tube_radius = liquid_fraction**exponent + reg
-    return cfg.darcy_law_params.bubble_radius_scaled / effective_tube_radius
+    return bubble_radius_scaled / effective_tube_radius
 
 
-def calculate_lag(bubble_radius):
-    lag = np.where(bubble_radius < 0, 1, 1 - 0.5 * bubble_radius)
-    lag = np.where(bubble_radius > 1, 0.5, lag)
+#######################################################################
+#             Calculation for power law size distribution             #
+#######################################################################
+
+
+def calculate_wall_drag_integrand(bubble_size_fraction: float, cfg: Config):
+    r"""Scalar function to calculate wall drag integrand for polydispersive case.
+
+    Bubble size fraction is given as a scalar input to calculate
+
+    .. math:: \frac{\lambda^{5-p}}{K(\lambda)}
+
+    """
+    drag_exponent = cfg.darcy_law_params.drag_exponent
+    power_law = cfg.darcy_law_params.bubble_distribution_power
+    if bubble_size_fraction < 0:
+        return 0
+    elif (bubble_size_fraction >= 0) and (bubble_size_fraction < 1):
+        return ((1 - bubble_size_fraction) ** drag_exponent) * (
+            bubble_size_fraction ** (5 - power_law)
+        )
+    else:
+        return 0
+
+
+def calculate_lag_integrand(bubble_size_fraction: float, cfg: Config):
+    r"""Scalar function to calculate lag integrand for polydispersive case.
+
+    Bubble size fraction is given as a scalar input to calculate
+
+    .. math:: \lambda^{3-p} G(\lambda)
+
+    """
+    drag_exponent = cfg.darcy_law_params.drag_exponent
+    power_law = cfg.darcy_law_params.bubble_distribution_power
+    if bubble_size_fraction < 0:
+        return 0
+    elif (bubble_size_fraction >= 0) and (bubble_size_fraction < 1):
+        return (1 - 0.5 * bubble_size_fraction) * (
+            bubble_size_fraction ** (3 - power_law)
+        )
+    else:
+        return 0.5
+
+
+def calculate_volume_integrand(bubble_size_fraction: float, cfg: Config):
+    r"""Scalar function to calculate the integrand for volume under a power law
+    bubble size distribution given as
+
+    .. math:: \lambda^{3-p}
+
+    in terms of the bubble size fraction.
+    """
+    p = cfg.darcy_law_params.bubble_distribution_power
+    return bubble_size_fraction ** (3 - p)
+
+
+def calculate_wall_drag_integral(
+    bubble_size_fraction_min: float, bubble_size_fraction_max: float, cfg: Config
+):
+    numerator = quad(
+        lambda x: calculate_wall_drag_integrand(x, cfg),
+        bubble_size_fraction_min,
+        bubble_size_fraction_max,
+    )[0]
+    denominator = quad(
+        lambda x: calculate_volume_integrand(x, cfg),
+        bubble_size_fraction_min,
+        bubble_size_fraction_max,
+    )[0]
+    return numerator / denominator
+
+
+def calculate_lag_integral(
+    bubble_size_fraction_min: float, bubble_size_fraction_max: float, cfg: Config
+):
+    numerator = quad(
+        lambda x: calculate_lag_integrand(x, cfg),
+        bubble_size_fraction_min,
+        bubble_size_fraction_max,
+    )[0]
+    denominator = quad(
+        lambda x: calculate_volume_integrand(x, cfg),
+        bubble_size_fraction_min,
+        bubble_size_fraction_max,
+    )[0]
+    return numerator / denominator
+
+
+def calculate_power_law_wall_drag_factor(liquid_fraction, cfg: Config):
+    r"""Take liquid fraction on the ghost grid and calculate the wall drag factor
+    for power law bubble size distribution.
+
+    Return on edge grid
+    """
+    minimum_size_fractions = calculate_bubble_size_fraction(
+        cfg.darcy_law_params.minimum_bubble_radius_scaled,
+        geometric(liquid_fraction),
+        cfg,
+    )
+    maximum_size_fractions = calculate_bubble_size_fraction(
+        cfg.darcy_law_params.maximum_bubble_radius_scaled,
+        geometric(liquid_fraction),
+        cfg,
+    )
+    drag_factor = np.full_like(minimum_size_fractions, np.NaN)
+    for i, (min, max) in enumerate(zip(minimum_size_fractions, maximum_size_fractions)):
+        drag_factor[i] = calculate_wall_drag_integral(min, max, cfg)
+    return drag_factor
+
+
+def calculate_power_law_lag_factor(liquid_fraction, cfg: Config):
+    r"""Take liquid fraction on the ghost grid and calculate the lag factor
+    for power law bubble size distribution.
+
+    Return on edge grid
+    """
+    minimum_size_fractions = calculate_bubble_size_fraction(
+        cfg.darcy_law_params.minimum_bubble_radius_scaled,
+        geometric(liquid_fraction),
+        cfg,
+    )
+    maximum_size_fractions = calculate_bubble_size_fraction(
+        cfg.darcy_law_params.maximum_bubble_radius_scaled,
+        geometric(liquid_fraction),
+        cfg,
+    )
+    lag_factor = np.full_like(minimum_size_fractions, np.NaN)
+    for i, (min, max) in enumerate(zip(minimum_size_fractions, maximum_size_fractions)):
+        lag_factor[i] = calculate_lag_integral(min, max, cfg)
+    return lag_factor
+
+
+#######################################################################
+#                 Calculation for single bubble size                  #
+#######################################################################
+
+
+def calculate_lag_function(bubble_size_fraction):
+    r"""Calculate lag function from bubble size fraction on edge grid as
+
+    .. math:: G(\lambda) = 1 - \lambda / 2
+
+    for 0<lambda<1. Edge cases are given by G(0)=1 and G(1) = 0.5 for values outside
+    this range.
+    """
+    lag = np.full_like(bubble_size_fraction, np.NaN)
+    intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
+    large = bubble_size_fraction >= 1
+    lag[bubble_size_fraction < 0] = 1
+    lag[intermediate] = 1 - 0.5 * bubble_size_fraction[intermediate]
+    lag[large] = 0.5
     return lag
 
 
-def calculate_drag(bubble_radius, cfg: Config):
+def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
+    r"""Calculate wall drag function from bubble size fraction on edge grid as
+
+    .. math:: \frac{1}{K(\lambda)} = (1 - \lambda)^r
+
+    for 0<lambda<1. Edge cases are given by K(0)=1 and K(1) = 0 for values outside
+    this range.
+    """
     exponent = cfg.darcy_law_params.drag_exponent
-    """release of gas during warming is sensitive to this exponent at least at lower buoyancy"""
-    drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** exponent)
-    drag = np.where(bubble_radius > 1, 0, drag)
+    drag = np.full_like(bubble_size_fraction, np.NaN)
+    intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
+    large = bubble_size_fraction >= 1
+    drag[bubble_size_fraction < 0] = 1
+    drag[intermediate] = (1 - bubble_size_fraction[intermediate]) ** exponent
+    drag[large] = 0
     return drag
 
 
-def calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, cfg: Config):
-    """Calculate Vg from liquid fraction and pressure on ghost grid
+def calculate_mono_wall_drag_factor(liquid_fraction, cfg: Config):
+    r"""Take liquid fraction on the ghost grid and calculate the wall drag factor
+    for a mono bubble size distribution as
 
-    Return Vg on edge grid"""
+    .. math:: I_1 = \frac{\lambda^2}{K(\lambda)}
+
+    returns wall drag factor on the edge grid
+    """
+    bubble_radius_scaled = cfg.darcy_law_params.bubble_radius_scaled
+    bubble_size_fraction = calculate_bubble_size_fraction(
+        bubble_radius_scaled, geometric(liquid_fraction), cfg
+    )
+    drag_function = calculate_wall_drag_function(bubble_size_fraction, cfg)
+    drag_factor = drag_function * bubble_size_fraction**2
+    return drag_factor
+
+
+def calculate_mono_lag_factor(liquid_fraction, cfg: Config):
+    r"""Take liquid fraction on the ghost grid and calculate the lag factor
+    for a mono bubble size distribution as
+
+    .. math:: I_2 = G(\lambda)
+
+    returns lag factor on the edge grid
+    """
+    bubble_radius_scaled = cfg.darcy_law_params.bubble_radius_scaled
+    bubble_size_fraction = calculate_bubble_size_fraction(
+        bubble_radius_scaled, geometric(liquid_fraction), cfg
+    )
+    return calculate_lag_function(bubble_size_fraction)
+
+
+# -------------------------------------------------------------------------------------
+
+
+def calculate_gas_interstitial_velocity(
+    liquid_fraction,
+    liquid_interstitial_velocity,
+    wall_drag_factor,
+    lag_factor,
+    cfg: Config,
+):
+    r"""Calculate Vg from liquid fraction on the ghost frid and liquid interstitial velocity
+
+    .. math:: V_g = \mathcal{B} (\phi_l^{2q} I_1) + U_0 I_2
+
+    Return Vg on edge grid
+    """
     B = cfg.darcy_law_params.B
+    exponent = cfg.darcy_law_params.pore_throat_scaling
 
-    bubble_radius = calculate_bubble_radius(geometric(liquid_fraction), cfg)
-    drag = calculate_drag(bubble_radius, cfg)
-
-    # reg = cfg.numerical_params.regularisation
-    # lag = calculate_lag(bubble_radius)
-    # Wl = calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g)
-    # return B * drag + 2 * lag * Wl / (geometric(liquid_fraction) + reg)
-    return B * drag
+    return (
+        B * wall_drag_factor * geometric(liquid_fraction) ** (2 * exponent)
+        + liquid_interstitial_velocity * lag_factor
+    )
 
 
-def calculate_velocities(state_BCs, D_g, cfg: Config):
+def calculate_velocities(state_BCs, cfg: Config):
     "Inputs on ghost grid, outputs on edge grid" ""
     liquid_fraction = state_BCs.liquid_fraction
-    pressure = state_BCs.pressure
-    Vg = calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, cfg)
-    Wl = calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g)
+    liquid_interstitial_velocity = cfg.darcy_law_params.liquid_velocity
+
+    if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
+        wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)
+        lag_factor = calculate_mono_lag_factor(liquid_fraction, cfg)
+    elif cfg.darcy_law_params.bubble_size_distribution_type == "power_law":
+        wall_drag_factor = calculate_power_law_wall_drag_factor(liquid_fraction, cfg)
+        lag_factor = calculate_power_law_lag_factor(liquid_fraction, cfg)
+    else:
+        raise ValueError(
+            f"Bubble size distribution of type {cfg.darcy_law_params.bubble_size_distribution_type} not recognised"
+        )
+
+    Vg = calculate_gas_interstitial_velocity(
+        liquid_fraction, liquid_interstitial_velocity, wall_drag_factor, lag_factor, cfg
+    )
+    Wl = calculate_liquid_darcy_velocity(liquid_fraction, cfg)
     V = calculate_frame_velocity(cfg)
     return Vg, Wl, V

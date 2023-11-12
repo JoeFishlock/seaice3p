@@ -83,6 +83,11 @@ class DimensionalParams:
     drag_exponent: float = 6.0
     liquid_velocity_dimensional: float = 0.0  # liquid darcy velocity in m/day
 
+    bubble_size_distribution_type: str = "mono"
+    bubble_distribution_power: float = 1.5
+    minimum_bubble_radius: float = 1e-6
+    maximum_bubble_radius: float = 1e-3
+
     @property
     def expansion_coefficient(self):
         r"""calculate
@@ -203,15 +208,15 @@ class DimensionalParams:
 
     @property
     def B(self):
-        r"""calculate the non dimensional rise velocity of the gas bubbles as
+        r"""calculate the non dimensional scale for buoyant rise of gas bubbles as
 
-        .. math:: \mathcal{B} = \frac{\rho_l g R_B^2 h}{3 \mu \kappa}
+        .. math:: \mathcal{B} = \frac{\rho_l g R_0^2 h}{3 \mu \kappa}
 
         """
         stokes_velocity = (
             self.liquid_density
             * self.gravity
-            * self.bubble_radius**2
+            * self.pore_radius**2
             / (3 * self.liquid_viscosity)
         )
         velocity_scale_in_m_per_second = self.thermal_diffusivity / self.lengthscale
@@ -225,6 +230,24 @@ class DimensionalParams:
 
         """
         return self.bubble_radius / self.pore_radius
+
+    @property
+    def minimum_bubble_radius_scaled(self):
+        r"""calculate the bubble radius divided by the pore scale
+
+        .. math:: \Lambda = R_B / R_0
+
+        """
+        return self.minimum_bubble_radius / self.pore_radius
+
+    @property
+    def maximum_bubble_radius_scaled(self):
+        r"""calculate the bubble radius divided by the pore scale
+
+        .. math:: \Lambda = R_B / R_0
+
+        """
+        return self.maximum_bubble_radius / self.pore_radius
 
     @property
     def liquid_velocity(self):
@@ -253,6 +276,10 @@ class DimensionalParams:
             pore_throat_scaling=self.pore_throat_scaling,
             drag_exponent=self.drag_exponent,
             liquid_velocity=self.liquid_velocity,
+            bubble_size_distribution_type=self.bubble_size_distribution_type,
+            bubble_distribution_power=self.bubble_distribution_power,
+            minimum_bubble_radius_scaled=self.minimum_bubble_radius_scaled,
+            maximum_bubble_radius_scaled=self.maximum_bubble_radius_scaled,
         )
 
     def get_config(

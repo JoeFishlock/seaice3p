@@ -1,5 +1,45 @@
 # Changelog
 
+## v0.9.0 (2023-11-12) ##
+
+### Summary ###
+This version adds the funcitonality to calculate the gas Darcy flux using the interstitial
+terminal rise velocity of a bubble averaged over a power law bubble size distribution.
+The default behaviour remains to use a single bubble size but parameters now exist for
+the power law case. The velocities module has also been refactored and in anticipation
+of parameterising the liquid flow instead of direct calculation the lagged upwind solver
+and funcitons for solving the pressure ODE are removed here.
+
+### Added ###
+- script called plot_gas_velocity.py to plot different versions of the calculated gas
+interstitial velocity against liquid fraction.
+- Functions in the velocities module to calculate the gas interstitial velocity
+averaged over a power law distribution of bubble sizes.
+- Parameters needed (dimesnional and non dimensional) to select either a single bubble size
+or power law distribution case. In the power law case added the maximum and minimum bubble
+sizes and the power law slope as parameters.
+
+## Changed ##
+- Refactor calculation of gas interstitial velocity to make it possible to add options
+to calculate this with a monodispersed bubble size distribution or a power law distribution.
+- The definition of the non dimensional buoyancy parameter B is changed to use the pore
+length scale as this doesn't change as we integrate over bubble size distributions.
+
+### Removed ###
+- For simplicity we remove the functions which calculate liquid Darcy velocity from
+solving an ODE for the pressure at each timestep. These are not necessary for the
+reduced model approximation.
+- Remove the lagged upwind solver which was the only one to attempt to use the pressure
+solve.
+
+### Docs ###
+- Equation for calculation of gas bubble interstitial velocity is updated in the numerical
+method documentation.
+
+### Tests ###
+- Remove test cases that use the now removed lagged upwind solver.
+
+
 ## v0.8.0 (2023-05-23) ##
 
 ### Summary ###

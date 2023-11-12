@@ -16,7 +16,6 @@ if __name__ == "__main__":
     medium_bubbles = celestine.params.DarcyLawParams(bubble_radius_scaled=0.5)
     micro_bubbles = celestine.params.DarcyLawParams(bubble_radius_scaled=0.1)
 
-    LU_solver = celestine.params.NumericalParams(solver="LU")
     RED_solver = celestine.params.NumericalParams(solver="RED")
     SCI_solver = celestine.params.NumericalParams(solver="SCI")
 
@@ -30,7 +29,6 @@ if __name__ == "__main__":
         "Micro": micro_bubbles,
     }
     solvers = {
-        "LU": LU_solver,
         "RED": RED_solver,
         "SCI": SCI_solver,
     }

@@ -37,7 +37,7 @@ The liquid Darcy velocity ($W_l$ ) is obtained in the full model by conservation
 In the reduced model it is free to be imposed as a forcing from a brine convection model.
 In both models gas Darcy velocity is calculated as
 \begin{equation}\label{eq:Gas-Darcy-Velocity}
-W_g = \phi_g V_g = \phi_g \left( \frac{\mathcal{B}}{K(\lambda)} + 2 G(\lambda) \frac{W_l}{\phi_l} \right),
+  W_g = \phi_g V_g = \phi_g \left( \mathcal{B} \phi_l^{2q}\frac{\lambda^2}{K(\lambda)} + 2 G(\lambda) \frac{W_l}{\phi_l} \right),
 \end{equation}
 where $\lambda$ is the ratio of bubble size to tube size.
 If we assume a scaling for tube size of the form $R_T = R_0 \phi_l^q$,
