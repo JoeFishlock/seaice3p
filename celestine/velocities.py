@@ -28,12 +28,18 @@ def calculate_liquid_darcy_velocity(liquid_fraction, cfg: Config):
     return Wl
 
 
-def calculate_bubble_radius(liquid_fraction, cfg: Config):
-    """Takes liquid fraction on edges and returns bubble radius parameter on edges"""
+def calculate_bubble_size_fraction(bubble_radius_scaled, liquid_fraction, cfg: Config):
+    r"""Takes bubble radius scaled and liquid fraction on edges and calculates the
+    bubble size fraction as
+
+    .. math:: \lambda = \Lambda / (\phi_l^q + \text{reg})
+
+    Returns the bubble size fraction on the edge grid.
+    """
     exponent = cfg.darcy_law_params.pore_throat_scaling
     reg = cfg.numerical_params.regularisation
     effective_tube_radius = liquid_fraction**exponent + reg
-    return cfg.darcy_law_params.bubble_radius_scaled / effective_tube_radius
+    return bubble_radius_scaled / effective_tube_radius
 
 
 def calculate_lag(bubble_radius):
@@ -58,7 +64,10 @@ def calculate_gas_interstitial_velocity(liquid_fraction, cfg: Config):
     Return Vg on edge grid"""
     B = cfg.darcy_law_params.B
 
-    bubble_radius = calculate_bubble_radius(geometric(liquid_fraction), cfg)
+    single_bubble_scaled = cfg.darcy_law_params.bubble_radius_scaled
+    bubble_radius = calculate_bubble_size_fraction(
+        single_bubble_scaled, geometric(liquid_fraction), cfg
+    )
     drag = calculate_drag(bubble_radius, cfg)
     pore_throat_scaling = cfg.darcy_law_params.pore_throat_scaling
 
