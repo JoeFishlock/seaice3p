@@ -2,7 +2,7 @@
 """
 
 import numpy as np
-from celestine.grids import upwind, geometric
+from celestine.grids import geometric
 from celestine.params import Config
 
 
@@ -10,64 +10,22 @@ def calculate_frame_velocity(cfg: Config):
     return np.full((cfg.numerical_params.I + 1,), cfg.physical_params.frame_velocity)
 
 
-def calculate_absolute_permeability(liquid_fraction):
-    r"""calculate absolute permeability as
-
-    .. math:: \Pi = \phi_l^3
-
-    """
-    return liquid_fraction**3
-
-
-def calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g):
+def calculate_liquid_darcy_velocity(liquid_fraction, cfg: Config):
     r"""Calculate liquid Darcy velocity as
 
-    .. math:: W_l = -\Pi(\phi_l) \frac{\partial p}{\partial z}
+    .. math:: W_l = \frac{\phi_l U_0}{2}
+
+    This assumes that we are given the non dimensional maximum interstitial liquid
+    velocity.
 
     :param liquid_fraction: liquid fraction on ghost grid
     :type liquid_fraction: Numpy Array (size I+2)
-    :param pressure: pressure on ghost grid
-    :type pressure: Numpy Array (size I+2)
-    :param D_g: difference matrix for ghost grid
-    :type D_g: Numpy Array (size I+2)
+    :param cfg: simulation configuration object
+    :type D_g: celestine.params.Config
     :return: liquid darcy velocity on edge grid
     """
-    absolute_permeability = geometric(calculate_absolute_permeability(liquid_fraction))
-    Wl = -absolute_permeability * np.matmul(D_g, pressure)
+    Wl = geometric(liquid_fraction) * cfg.darcy_law_params.liquid_velocity / 2
     return Wl
-
-
-def solve_pressure_equation(state_BCs, new_state_BCs, timestep, D_e, D_g, cfg: Config):
-    """Calculate pressure on ghost grid from current and new state on ghost grid
-
-    Return new pressure on centers but easy to add boundary conditions"""
-    I = cfg.numerical_params.I
-    V = cfg.physical_params.frame_velocity
-
-    permeability = geometric(
-        calculate_absolute_permeability(new_state_BCs.liquid_fraction)
-    )
-
-    pressure_matrix = np.zeros((I + 2, I + 2))
-    perm_matrix = np.zeros((I + 1, I + 1))
-    pressure_forcing = np.zeros((I + 2,))
-
-    new_gas_fraction = new_state_BCs.gas_fraction
-    gas_fraction = state_BCs.gas_fraction
-    pressure_forcing[1:-1] = (1 / timestep) * (
-        new_gas_fraction[1:-1] - gas_fraction[1:-1]
-    ) + np.matmul(D_e, upwind(new_gas_fraction, V))
-
-    np.fill_diagonal(perm_matrix, permeability + 1e-4)
-    pressure_matrix[1:-1, :] = np.matmul(D_e, np.matmul(-perm_matrix, D_g))
-    pressure_matrix[0, 0] = 1
-    pressure_matrix[-1, -1] = 1
-    pressure_matrix[-1, -2] = -1
-
-    new_pressure = np.linalg.solve(pressure_matrix, pressure_forcing)
-
-    # return the new pressure on centers
-    return new_pressure
 
 
 def calculate_bubble_radius(liquid_fraction, cfg: Config):
@@ -92,8 +50,8 @@ def calculate_drag(bubble_radius, cfg: Config):
     return drag
 
 
-def calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, cfg: Config):
-    r"""Calculate Vg from liquid fraction and pressure on ghost grid
+def calculate_gas_interstitial_velocity(liquid_fraction, cfg: Config):
+    r"""Calculate Vg from liquid fraction and liquid Darcy velocity
 
     .. math:: V_g = \mathcal{B} (\phi_l^{2q} \frac{\lambda^2}{K(\lambda)}) + U_0 G(\lambda)
 
@@ -118,11 +76,10 @@ def calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, cfg: Con
     )
 
 
-def calculate_velocities(state_BCs, D_g, cfg: Config):
+def calculate_velocities(state_BCs, cfg: Config):
     "Inputs on ghost grid, outputs on edge grid" ""
     liquid_fraction = state_BCs.liquid_fraction
-    pressure = state_BCs.pressure
-    Vg = calculate_gas_interstitial_velocity(liquid_fraction, pressure, D_g, cfg)
-    Wl = calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g)
+    Vg = calculate_gas_interstitial_velocity(liquid_fraction, cfg)
+    Wl = calculate_liquid_darcy_velocity(liquid_fraction, cfg)
     V = calculate_frame_velocity(cfg)
     return Vg, Wl, V

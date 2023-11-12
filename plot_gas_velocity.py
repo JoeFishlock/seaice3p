@@ -25,7 +25,6 @@ liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
 D_g = get_difference_matrix(cfg.numerical_params.I + 1, cfg.numerical_params.step)
 Vg, Wl, V = vel.calculate_velocities(
     state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
-    D_g=D_g,
     cfg=cfg,
 )
 plt.figure()

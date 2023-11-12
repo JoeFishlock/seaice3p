@@ -57,7 +57,7 @@ class ReducedSolver(SolverTemplate):
         state.calculate_enthalpy_method()
         state_BCs = StateBCs(state)  # Add boundary conditions
 
-        Vg, Wl, V = calculate_velocities(state_BCs, D_g, cfg)
+        Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
         heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g)
