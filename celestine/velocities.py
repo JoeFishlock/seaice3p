@@ -59,11 +59,21 @@ def calculate_lag_function(bubble_size_fraction):
     return lag
 
 
-def calculate_drag(bubble_radius, cfg: Config):
+def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
+    r"""Calculate wall drag function from bubble size fraction on edge grid as
+
+    .. math:: \frac{1}{K(\lambda)} = (1 - \lambda)^r
+
+    for 0<lambda<1. Edge cases are given by K(0)=1 and K(1) = 0 for values outside
+    this range.
+    """
     exponent = cfg.darcy_law_params.drag_exponent
-    """release of gas during warming is sensitive to this exponent at least at lower buoyancy"""
-    drag = np.where(bubble_radius < 0, 1, (1 - bubble_radius) ** exponent)
-    drag = np.where(bubble_radius > 1, 0, drag)
+    drag = np.full_like(bubble_size_fraction, np.NaN)
+    intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
+    large = bubble_size_fraction >= 1
+    drag[bubble_size_fraction < 0] = 1
+    drag[intermediate] = (1 - bubble_size_fraction[intermediate]) ** exponent
+    drag[large] = 0
     return drag
 
 
@@ -79,7 +89,7 @@ def calculate_gas_interstitial_velocity(liquid_fraction, cfg: Config):
     bubble_size_fraction = calculate_bubble_size_fraction(
         single_bubble_scaled, geometric(liquid_fraction), cfg
     )
-    drag = calculate_drag(bubble_size_fraction, cfg)
+    drag = calculate_wall_drag_function(bubble_size_fraction, cfg)
     pore_throat_scaling = cfg.darcy_law_params.pore_throat_scaling
 
     # reg = cfg.numerical_params.regularisation
