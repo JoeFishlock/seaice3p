@@ -42,9 +42,20 @@ def calculate_bubble_size_fraction(bubble_radius_scaled, liquid_fraction, cfg: C
     return bubble_radius_scaled / effective_tube_radius
 
 
-def calculate_lag(bubble_radius):
-    lag = np.where(bubble_radius < 0, 1, 1 - 0.5 * bubble_radius)
-    lag = np.where(bubble_radius > 1, 0.5, lag)
+def calculate_lag_function(bubble_size_fraction):
+    r"""Calculate lag function from bubble size fraction on edge grid as
+
+    .. math:: G(\lambda) = 1 - \lambda / 2
+
+    for 0<lambda<1. Edge cases are given by G(0)=1 and G(1) = 0.5 for values outside
+    this range.
+    """
+    lag = np.full_like(bubble_size_fraction, np.NaN)
+    intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
+    large = bubble_size_fraction >= 1
+    lag[bubble_size_fraction < 0] = 1
+    lag[intermediate] = 1 - 0.5 * bubble_size_fraction[intermediate]
+    lag[large] = 0.5
     return lag
 
 
@@ -65,14 +76,14 @@ def calculate_gas_interstitial_velocity(liquid_fraction, cfg: Config):
     B = cfg.darcy_law_params.B
 
     single_bubble_scaled = cfg.darcy_law_params.bubble_radius_scaled
-    bubble_radius = calculate_bubble_size_fraction(
+    bubble_size_fraction = calculate_bubble_size_fraction(
         single_bubble_scaled, geometric(liquid_fraction), cfg
     )
-    drag = calculate_drag(bubble_radius, cfg)
+    drag = calculate_drag(bubble_size_fraction, cfg)
     pore_throat_scaling = cfg.darcy_law_params.pore_throat_scaling
 
     # reg = cfg.numerical_params.regularisation
-    # lag = calculate_lag(bubble_radius)
+    # lag = calculate_lag(bubble_size_fraction)
     # Wl = calculate_liquid_darcy_velocity(liquid_fraction, pressure, D_g)
     # return B * drag * (
     #     geometric(liquid_fraction) ** (2 * pore_throat_scaling)
@@ -81,7 +92,7 @@ def calculate_gas_interstitial_velocity(liquid_fraction, cfg: Config):
         B
         * drag
         * (geometric(liquid_fraction) ** (2 * pore_throat_scaling))
-        * bubble_radius**2
+        * bubble_size_fraction**2
     )
 
 
