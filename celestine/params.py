@@ -43,10 +43,18 @@ class DarcyLawParams:
     """non dimensional parameters for calculating liquid and gas darcy velocities"""
 
     B: float = 100
-    bubble_radius_scaled: float = 1.0
     pore_throat_scaling: float = 1 / 2
     drag_exponent: float = 6.0
     liquid_velocity: float = 0.0
+    bubble_size_distribution_type: str = "mono"
+
+    # for mono size distribution
+    bubble_radius_scaled: float = 1.0
+
+    # for power law size distribution
+    bubble_distribution_power: float = 1.5
+    minimum_bubble_radius_scaled: float = 1e-3
+    maximum_bubble_radius_scaled: float = 1
 
 
 @dataclass
