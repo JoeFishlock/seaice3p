@@ -84,6 +84,7 @@ class DimensionalParams:
     liquid_velocity_dimensional: float = 0.0  # liquid darcy velocity in m/day
 
     bubble_size_distribution_type: str = "mono"
+    wall_drag_law_choice: str = "power"
     bubble_distribution_power: float = 1.5
     minimum_bubble_radius: float = 1e-6
     maximum_bubble_radius: float = 1e-3
@@ -277,6 +278,7 @@ class DimensionalParams:
             drag_exponent=self.drag_exponent,
             liquid_velocity=self.liquid_velocity,
             bubble_size_distribution_type=self.bubble_size_distribution_type,
+            wall_drag_law_choice=self.wall_drag_law_choice,
             bubble_distribution_power=self.bubble_distribution_power,
             minimum_bubble_radius_scaled=self.minimum_bubble_radius_scaled,
             maximum_bubble_radius_scaled=self.maximum_bubble_radius_scaled,
