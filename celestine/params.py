@@ -44,9 +44,12 @@ class DarcyLawParams:
 
     B: float = 100
     pore_throat_scaling: float = 1 / 2
-    drag_exponent: float = 6.0
     liquid_velocity: float = 0.0
     bubble_size_distribution_type: str = "mono"
+    wall_drag_law_choice: str = "power"
+
+    # needed for power fit wall drag function
+    drag_exponent: float = 6.0
 
     # for mono size distribution
     bubble_radius_scaled: float = 1.0

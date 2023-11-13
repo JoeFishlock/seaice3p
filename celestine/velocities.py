@@ -64,15 +64,30 @@ def calculate_wall_drag_integrand(bubble_size_fraction: float, cfg: Config):
 
     .. math:: \frac{\lambda^{5-p}}{K(\lambda)}
 
+    where the wall drag enhancement funciton K can be given by a power law fit
+    or taken from the Haberman paper.
     """
     drag_exponent = cfg.darcy_law_params.drag_exponent
     power_law = cfg.darcy_law_params.bubble_distribution_power
     if bubble_size_fraction < 0:
         return 0
     elif (bubble_size_fraction >= 0) and (bubble_size_fraction < 1):
-        return ((1 - bubble_size_fraction) ** drag_exponent) * (
-            bubble_size_fraction ** (5 - power_law)
-        )
+        if cfg.darcy_law_params.wall_drag_law_choice == "power":
+            return ((1 - bubble_size_fraction) ** drag_exponent) * (
+                bubble_size_fraction ** (5 - power_law)
+            )
+        elif cfg.darcy_law_params.wall_drag_law_choice == "Haberman":
+            return (
+                (
+                    1
+                    - 1.5 * bubble_size_fraction
+                    + 1.5 * bubble_size_fraction**5
+                    - bubble_size_fraction**6
+                )
+                / (1 + 1.5 * bubble_size_fraction**5)
+            ) * (bubble_size_fraction ** (5 - power_law))
+        else:
+            raise KeyError("Wrong choice for wall drag law")
     else:
         return 0
 
@@ -212,6 +227,10 @@ def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
 
     .. math:: \frac{1}{K(\lambda)} = (1 - \lambda)^r
 
+    in the power law case or in the Haberman case from the paper
+
+    .. math:: \frac{1}{K(\lambda)} = \frac{1 -1.5\lambda + 1.5\lambda^5 - \lambda^6}{1+1.5\lambda^5}
+
     for 0<lambda<1. Edge cases are given by K(0)=1 and K(1) = 0 for values outside
     this range.
     """
@@ -220,7 +239,17 @@ def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
     intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
     large = bubble_size_fraction >= 1
     drag[bubble_size_fraction < 0] = 1
-    drag[intermediate] = (1 - bubble_size_fraction[intermediate]) ** exponent
+    if cfg.darcy_law_params.wall_drag_law_choice == "power":
+        drag[intermediate] = (1 - bubble_size_fraction[intermediate]) ** exponent
+    elif cfg.darcy_law_params.wall_drag_law_choice == "Haberman":
+        drag[intermediate] = (
+            1
+            - 1.5 * bubble_size_fraction[intermediate]
+            + 1.5 * bubble_size_fraction[intermediate] ** 5
+            - bubble_size_fraction[intermediate] ** 6
+        ) / (1 + 1.5 * bubble_size_fraction[intermediate] ** 5)
+    else:
+        raise KeyError("Wrong choice for wall drag law")
     drag[large] = 0
     return drag
 

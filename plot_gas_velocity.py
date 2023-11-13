@@ -39,6 +39,32 @@ if __name__ == "__main__":
             minimum_bubble_radius_scaled=1e-3,
         ),
     )
+    mono_Haberman = Config(
+        "mono-disperse-Haberman",
+        darcy_law_params=DarcyLawParams(
+            B=2e7,
+            bubble_radius_scaled=0.5,
+            pore_throat_scaling=0.5,
+            drag_exponent=2.5,
+            liquid_velocity=0.0,
+            wall_drag_law_choice="Haberman",
+        ),
+    )
+
+    power_law_Haberman = Config(
+        "poly-disperse-Haberman",
+        darcy_law_params=DarcyLawParams(
+            B=2e7,
+            bubble_size_distribution_type="power_law",
+            pore_throat_scaling=0.5,
+            drag_exponent=2.5,
+            liquid_velocity=0.0,
+            bubble_distribution_power=1.5,
+            maximum_bubble_radius_scaled=1,
+            minimum_bubble_radius_scaled=1e-3,
+            wall_drag_law_choice="Haberman",
+        ),
+    )
     liquid_fraction = np.linspace(0, 1, mono.numerical_params.I + 2)
     D_g = get_difference_matrix(mono.numerical_params.I + 1, mono.numerical_params.step)
     mono_vel, _, _ = vel.calculate_velocities(
@@ -49,7 +75,25 @@ if __name__ == "__main__":
         state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
         cfg=power_law,
     )
+    mono_vel_Haberman, _, _ = vel.calculate_velocities(
+        state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
+        cfg=mono_Haberman,
+    )
+    poly_vel_Haberman, _, _ = vel.calculate_velocities(
+        state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
+        cfg=power_law_Haberman,
+    )
     plt.figure()
-    plt.plot(geometric(liquid_fraction), mono_vel, "r*--")
-    plt.plot(geometric(liquid_fraction), poly_vel, "b*--")
+    plt.plot(geometric(liquid_fraction), mono_vel, "r*-", label=mono.name)
+    plt.plot(geometric(liquid_fraction), poly_vel, "b*-", label=power_law.name)
+    plt.plot(
+        geometric(liquid_fraction), mono_vel_Haberman, "r*--", label=mono_Haberman.name
+    )
+    plt.plot(
+        geometric(liquid_fraction),
+        poly_vel_Haberman,
+        "b*--",
+        label=power_law_Haberman.name,
+    )
+    plt.legend()
     plt.show()
