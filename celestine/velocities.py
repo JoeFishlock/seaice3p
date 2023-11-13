@@ -64,6 +64,8 @@ def calculate_wall_drag_integrand(bubble_size_fraction: float, cfg: Config):
 
     .. math:: \frac{\lambda^{5-p}}{K(\lambda)}
 
+    where the wall drag enhancement funciton K can be given by a power law fit
+    or taken from the Haberman paper.
     """
     drag_exponent = cfg.darcy_law_params.drag_exponent
     power_law = cfg.darcy_law_params.bubble_distribution_power
@@ -224,6 +226,10 @@ def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
     r"""Calculate wall drag function from bubble size fraction on edge grid as
 
     .. math:: \frac{1}{K(\lambda)} = (1 - \lambda)^r
+
+    in the power law case or in the Haberman case from the paper
+
+    .. math:: \frac{1}{K(\lambda)} = \frac{1 -1.5\lambda + 1.5\lambda^5 - \lambda^6}{1+1.5\lambda^5}
 
     for 0<lambda<1. Edge cases are given by K(0)=1 and K(1) = 0 for values outside
     this range.
