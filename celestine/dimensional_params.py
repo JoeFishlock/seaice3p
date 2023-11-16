@@ -89,6 +89,9 @@ class DimensionalParams:
     minimum_bubble_radius: float = 1e-6
     maximum_bubble_radius: float = 1e-3
 
+    porosity_threshold: bool = False
+    porosity_threshold_value: float = 0.024
+
     @property
     def expansion_coefficient(self):
         r"""calculate
@@ -282,6 +285,8 @@ class DimensionalParams:
             bubble_distribution_power=self.bubble_distribution_power,
             minimum_bubble_radius_scaled=self.minimum_bubble_radius_scaled,
             maximum_bubble_radius_scaled=self.maximum_bubble_radius_scaled,
+            porosity_threshold=self.porosity_threshold,
+            porosity_threshold_value=self.porosity_threshold_value,
         )
 
     def get_config(
