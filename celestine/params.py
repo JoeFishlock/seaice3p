@@ -59,6 +59,9 @@ class DarcyLawParams:
     minimum_bubble_radius_scaled: float = 1e-3
     maximum_bubble_radius_scaled: float = 1
 
+    porosity_threshold: bool = False
+    porosity_threshold_value: float = 0.024
+
 
 @dataclass
 class ForcingConfig:

@@ -305,10 +305,20 @@ def calculate_gas_interstitial_velocity(
     B = cfg.darcy_law_params.B
     exponent = cfg.darcy_law_params.pore_throat_scaling
 
-    return (
+    Vg = (
         B * wall_drag_factor * geometric(liquid_fraction) ** (2 * exponent)
         + liquid_interstitial_velocity * lag_factor
     )
+
+    # apply a porosity cutoff to the gas interstitial velocity if necking occurs below
+    # critical porosity.
+    if cfg.darcy_law_params.porosity_threshold:
+        return Vg * np.heaviside(
+            geometric(liquid_fraction) - cfg.darcy_law_params.porosity_threshold_value,
+            0,
+        )
+
+    return Vg
 
 
 def calculate_velocities(state_BCs, cfg: Config):
