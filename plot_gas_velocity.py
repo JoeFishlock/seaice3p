@@ -11,8 +11,8 @@ from celestine.dimensional_params import DimensionalParams
 
 
 if __name__ == "__main__":
-    MAUS_THROAT = 3.95e-4
-    MAUS_THROAT_POWER = 0.466
+    MAUS_THROAT = 3.89e-4 / 2
+    MAUS_THROAT_POWER = 0.46
 
     class MockStateBCs:
         def __init__(self, liquid_fraction):
@@ -24,89 +24,6 @@ if __name__ == "__main__":
             (4 - p) * (min ** (1 - p) - max ** (1 - p))
         )
         return cubed_radius ** (1 / 3)
-
-    # mono = Config(
-    #     "mono-disperse",
-    #     darcy_law_params=DarcyLawParams(
-    #         B=2e7,
-    #         bubble_radius_scaled=0.5,
-    #         pore_throat_scaling=0.5,
-    #         drag_exponent=2.5,
-    #         liquid_velocity=0.0,
-    #     ),
-    # )
-
-    # power_law = Config(
-    #     "poly-disperse",
-    #     darcy_law_params=DarcyLawParams(
-    #         B=2e7,
-    #         bubble_size_distribution_type="power_law",
-    #         pore_throat_scaling=0.5,
-    #         drag_exponent=2.5,
-    #         liquid_velocity=0.0,
-    #         bubble_distribution_power=1.5,
-    #         maximum_bubble_radius_scaled=1,
-    #         minimum_bubble_radius_scaled=1e-3,
-    #     ),
-    # )
-    # mono_Haberman = Config(
-    #     "mono-disperse-Haberman",
-    #     darcy_law_params=DarcyLawParams(
-    #         B=2e7,
-    #         bubble_radius_scaled=0.5,
-    #         pore_throat_scaling=0.5,
-    #         drag_exponent=2.5,
-    #         liquid_velocity=0.0,
-    #         wall_drag_law_choice="Haberman",
-    #     ),
-    # )
-
-    # power_law_Haberman = Config(
-    #     "poly-disperse-Haberman",
-    #     darcy_law_params=DarcyLawParams(
-    #         B=2e7,
-    #         bubble_size_distribution_type="power_law",
-    #         pore_throat_scaling=0.5,
-    #         drag_exponent=2.5,
-    #         liquid_velocity=0.0,
-    #         bubble_distribution_power=1.5,
-    #         maximum_bubble_radius_scaled=1,
-    #         minimum_bubble_radius_scaled=1e-3,
-    #         wall_drag_law_choice="Haberman",
-    #     ),
-    # )
-    # liquid_fraction = np.linspace(0, 1, mono.numerical_params.I + 2)
-    # D_g = get_difference_matrix(mono.numerical_params.I + 1, mono.numerical_params.step)
-    # mono_vel, _, _ = vel.calculate_velocities(
-    #     state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
-    #     cfg=mono,
-    # )
-    # poly_vel, _, _ = vel.calculate_velocities(
-    #     state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
-    #     cfg=power_law,
-    # )
-    # mono_vel_Haberman, _, _ = vel.calculate_velocities(
-    #     state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
-    #     cfg=mono_Haberman,
-    # )
-    # poly_vel_Haberman, _, _ = vel.calculate_velocities(
-    #     state_BCs=MockStateBCs(liquid_fraction=liquid_fraction),
-    #     cfg=power_law_Haberman,
-    # )
-    # plt.figure()
-    # plt.plot(geometric(liquid_fraction), mono_vel, "r*-", label=mono.name)
-    # plt.plot(geometric(liquid_fraction), poly_vel, "b*-", label=power_law.name)
-    # plt.plot(
-    #     geometric(liquid_fraction), mono_vel_Haberman, "r*--", label=mono_Haberman.name
-    # )
-    # plt.plot(
-    #     geometric(liquid_fraction),
-    #     poly_vel_Haberman,
-    #     "b*--",
-    #     label=power_law_Haberman.name,
-    # )
-    # plt.legend()
-    # plt.show()
 
     def define_test_configurations(
         pore_radius,
@@ -134,9 +51,11 @@ if __name__ == "__main__":
             bubble_distribution_power=bubble_distribution_power,
             maximum_bubble_radius=maxmimum_bubble_radius,
             minimum_bubble_radius=minimum_bubble_radius,
+            porosity_threshold=True,
+            porosity_threshold_value=0.024,
         )
         cfg = dimensional_cfg.get_config(
-            numerical_params=NumericalParams(solver="SCI", I=100),
+            numerical_params=NumericalParams(solver="SCI", I=1000),
         )
         return cfg, dimensional_cfg
 
@@ -294,31 +213,12 @@ if __name__ == "__main__":
         plt.legend()
         plt.xlabel("Liquid Fraction")
         plt.ylabel("Interstitial Gas Velocity (m/hour)")
+        plt.yscale("log")
+        plt.xscale("log")
         plt.title(
             f"p={BUBBLE_DISTRIBUTION_POWER}, max radius = {1000*MAX_BUBBLE_SIZE:.2g}mm, min radius = {1000*MIN_BUBBLE_SIZE:.2g}"
         )
         plt.savefig(name + ".pdf")
 
-    generate_interstitial_gas_velocity_plot("throat_power1.5", 1e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_power1.2", 1e-3, 1e-5, 1.2)
-    generate_interstitial_gas_velocity_plot("throat_power1.7", 1e-3, 1e-5, 1.7)
-
-    generate_interstitial_gas_velocity_plot("throat_max01", 0.1e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max02", 0.2e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max03", 0.3e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max04", 0.4e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max05", 0.5e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max06", 0.6e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max07", 0.7e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max08", 0.8e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max09", 0.9e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max1", 1e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max11", 1.1e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max12", 1.2e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max13", 1.3e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max14", 1.4e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_max15", 1.5e-3, 1e-5, 1.5)
-
-    generate_interstitial_gas_velocity_plot("throat_min5", 1e-3, 1e-5, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_min55", 1e-3, 5e-6, 1.5)
-    generate_interstitial_gas_velocity_plot("throat_min6", 1e-3, 1e-6, 1.5)
+    generate_interstitial_gas_velocity_plot("Light Sizes", 1e-3, 1e-6, 1.5)
+    generate_interstitial_gas_velocity_plot("Crabeck Sizes", 5e-4, 4.5e-5, 1.5)
