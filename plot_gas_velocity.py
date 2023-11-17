@@ -103,7 +103,7 @@ if __name__ == "__main__":
     def generate_interstitial_gas_velocity_plot(
         name, MAX_BUBBLE_SIZE, MIN_BUBBLE_SIZE, BUBBLE_DISTRIBUTION_POWER
     ):
-        plt.figure()
+        plt.figure(figsize=(8, 8))
         LABELS = [
             "power law r=1.5",
             "power law r=2",
@@ -148,36 +148,36 @@ if __name__ == "__main__":
             )
 
         # mono distributed bubble with average volume bubble size
-        # for type, drag_exponent, LABEL, LINE in zip(
-        #     3 * ["power"] + ["Haberman"], [1.5, 2.0, 2.5, None], LABELS, LINES
-        # ):
-        #     cfg, dimensional_cfg = define_test_configurations(
-        #         MAUS_THROAT,
-        #         MAUS_THROAT_POWER,
-        #         AVR_BUBBLE_SIZE,
-        #         drag_exponent,
-        #         "mono",
-        #         type,
-        #         BUBBLE_DISTRIBUTION_POWER,
-        #         MAX_BUBBLE_SIZE,
-        #         MIN_BUBBLE_SIZE,
-        #     )
-        #     liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-        #     mock_state = MockStateBCs(liquid_fraction)
-        #     Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+        for type, drag_exponent, LABEL, LINE in zip(
+            3 * ["power"] + ["Haberman"], [1.5, 2.0, 2.5, None], LABELS, LINES
+        ):
+            cfg, dimensional_cfg = define_test_configurations(
+                MAUS_THROAT,
+                MAUS_THROAT_POWER,
+                AVR_BUBBLE_SIZE,
+                drag_exponent,
+                "mono",
+                type,
+                BUBBLE_DISTRIBUTION_POWER,
+                MAX_BUBBLE_SIZE,
+                MIN_BUBBLE_SIZE,
+            )
+            liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
+            mock_state = MockStateBCs(liquid_fraction)
+            Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
 
-        #     # convert Vg to be in m/day
-        #     scales = dimensional_cfg.get_scales()
-        #     conversion_factor = scales.velocity_scale_in_m_per_day / 24
-        #     Vg = Vg * conversion_factor
+            # convert Vg to be in m/day
+            scales = dimensional_cfg.get_scales()
+            conversion_factor = scales.velocity_scale_in_m_per_day / 24
+            Vg = Vg * conversion_factor
 
-        #     plt.plot(
-        #         geometric(liquid_fraction),
-        #         Vg,
-        #         "k" + LINE,
-        #         label=LABEL
-        #         + f" Single average bubble volume size ={1000*AVR_BUBBLE_SIZE:.2g}mm",
-        #     )
+            plt.plot(
+                geometric(liquid_fraction),
+                Vg,
+                "k" + LINE,
+                label=LABEL
+                + f" Single average bubble volume size ={1000*AVR_BUBBLE_SIZE:.2g}mm",
+            )
 
         # power law distributed bubble size
         for type, drag_exponent, LABEL, LINE in zip(
@@ -210,7 +210,7 @@ if __name__ == "__main__":
                 label=LABEL + f" power law bubble size distribution",
             )
 
-        plt.legend()
+        plt.legend(prop={"size": 7})
         plt.xlabel("Liquid Fraction")
         plt.ylabel("Interstitial Gas Velocity (m/hour)")
         plt.yscale("log")
@@ -219,6 +219,7 @@ if __name__ == "__main__":
             f"p={BUBBLE_DISTRIBUTION_POWER}, max radius = {1000*MAX_BUBBLE_SIZE:.2g}mm, min radius = {1000*MIN_BUBBLE_SIZE:.2g}"
         )
         plt.savefig(name + ".pdf")
+        plt.close()
 
     generate_interstitial_gas_velocity_plot("Light Sizes", 1e-3, 1e-6, 1.5)
     generate_interstitial_gas_velocity_plot("Crabeck Sizes", 5e-4, 4.5e-5, 1.5)
