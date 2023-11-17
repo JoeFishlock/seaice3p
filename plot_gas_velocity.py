@@ -223,3 +223,48 @@ if __name__ == "__main__":
 
     generate_interstitial_gas_velocity_plot("Light Sizes", 1e-3, 1e-6, 1.5)
     generate_interstitial_gas_velocity_plot("Crabeck Sizes", 5e-4, 4.5e-5, 1.5)
+
+    def calculate_terminal_bubble_velocity_moreau_2014(bubble_radius):
+        """This accounts for transitiion to turbulent drag and they use a slightly
+        different value for kinematic viscosity than my liquid density and dynamic
+        viscosity"""
+        chi = 9.81 * bubble_radius**3 / (2.7e-6**2)
+        y = 10.82 / chi
+        return ((2 * bubble_radius**2 * 9.81) / (9 * 2.7e-6)) * (
+            np.sqrt(y**2 + 2 * y) - y
+        )
+
+    def calculate_free_slip_terminal_bubble_velocity(bubble_radius):
+        return (bubble_radius**2 * 9.81) / (3 * 2.7e-6)
+
+    def Haberman_function(L):
+        output = (1 - 1.5 * L + 1.5 * L**5 - L**6) / (1 + 1.5 * L**5)
+        output = np.where(L <= 0, 1, output)
+        output = np.where(L >= 1, 0, output)
+        return output
+
+    def calculate_terminal_bubble_with_wall_drag(bubble_radius, liquid_fraction):
+        tube_radius = MAUS_THROAT * liquid_fraction**MAUS_THROAT_POWER
+        L = bubble_radius / tube_radius
+        return calculate_free_slip_terminal_bubble_velocity(
+            bubble_radius
+        ) * Haberman_function(L)
+
+    bubble_radius = np.linspace(1e-6, 5e-3, 1000)
+    moreau = calculate_terminal_bubble_velocity_moreau_2014(bubble_radius)
+    free_slip = calculate_free_slip_terminal_bubble_velocity(bubble_radius)
+    plt.figure(figsize=(8, 8))
+    plt.loglog(bubble_radius, moreau * 3600, "r", label="Moreau et al 2014")
+    plt.loglog(bubble_radius, free_slip * 3600, "b", label="Free slip Stoke's")
+    for phi in np.linspace(0.1, 1, 10):
+        free_slip_drag = calculate_terminal_bubble_with_wall_drag(
+            bubble_radius, liquid_fraction=phi
+        )
+        plt.loglog(
+            bubble_radius, free_slip_drag * 3600, label=f"liquid fraction = {phi:.2f}"
+        )
+    plt.legend(prop={"size": 7})
+    plt.xlabel("bubble radius (m)")
+    plt.ylabel("terminal rise velocity (m/hour)")
+    plt.savefig("terminal_velocity.pdf")
+    plt.close()
