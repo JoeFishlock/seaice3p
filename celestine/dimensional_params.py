@@ -76,7 +76,11 @@ class DimensionalParams:
     frame_velocity_dimensional: float = 0  # velocity of frame in m/day
 
     gravity: float = 9.81  # m/s2
-    liquid_viscosity: float = 8.9e-4  # Pa.s = N.s/m2 = kg/m.s
+
+    # calculated from moreau et al 2014 value of kinematic viscosity for sewater 2.7e-6
+    # dynamic liquid_viscosity = 2.7e-6 * liquid_density
+    liquid_viscosity: float = 2.78e-3  # dynamic liquid viscosity in Pa.s
+
     bubble_radius: float = 1e-3  # bubble radius in m
     pore_radius: float = 1e-3  # pore throat size scale in m
     pore_throat_scaling: float = 1 / 2
