@@ -268,3 +268,135 @@ if __name__ == "__main__":
     plt.ylabel("terminal rise velocity (m/hour)")
     plt.savefig("terminal_velocity.pdf")
     plt.close()
+
+    """Plot haberman drag power law bubble distribution interstitial velocities against
+    liquid fraction for different parameter values"""
+    BUBBLE_DISTRIBUTION_POWER = 1.5
+    MINIMUM_BUBBLE_SIZE = 4.5e-5
+    MAXIMUM_BUBBLE_SIZE = 5.5e-4
+    plt.figure(figsize=(8, 8))
+    maximum_bubble_sizes = np.geomspace(1e-4, 5e-3, 15)
+    color_indices = np.linspace(0, 1, maximum_bubble_sizes.shape[0])
+    # power law distributed bubble size
+    for maximum_bubble_size, color_index in zip(maximum_bubble_sizes, color_indices):
+        cfg, dimensional_cfg = define_test_configurations(
+            MAUS_THROAT,
+            MAUS_THROAT_POWER,
+            maximum_bubble_size,
+            2.0,
+            "power_law",
+            "Haberman",
+            BUBBLE_DISTRIBUTION_POWER,
+            maximum_bubble_size,
+            MINIMUM_BUBBLE_SIZE,
+        )
+        liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
+        mock_state = MockStateBCs(liquid_fraction)
+        Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+
+        # convert Vg to be in m/day
+        scales = dimensional_cfg.get_scales()
+        conversion_factor = scales.velocity_scale_in_m_per_day / 24
+        Vg = Vg * conversion_factor
+
+        plt.plot(
+            geometric(liquid_fraction),
+            Vg,
+            label=f"max bubble radius == {1000*maximum_bubble_size:.2e}mm",
+            color=plt.cm.viridis(color_index),
+        )
+
+    plt.legend(prop={"size": 7})
+    plt.xlabel("Liquid Fraction")
+    plt.ylabel("Interstitial Gas Velocity (m/hour)")
+    plt.yscale("log")
+    plt.xscale("log")
+    plt.title("Changing interstitial gas velocity curves with maximum bubble size")
+    plt.savefig("Changing_maximum.pdf")
+    plt.close()
+
+    plt.figure(figsize=(8, 8))
+    minimum_bubble_sizes = np.geomspace(1e-6, 1e-4, 15)
+    color_indices = np.linspace(0, 1, minimum_bubble_sizes.shape[0])
+    # power law distributed bubble size
+    for minimum_bubble_size, color_index in zip(minimum_bubble_sizes, color_indices):
+        cfg, dimensional_cfg = define_test_configurations(
+            MAUS_THROAT,
+            MAUS_THROAT_POWER,
+            MAXIMUM_BUBBLE_SIZE,
+            2.0,
+            "power_law",
+            "Haberman",
+            BUBBLE_DISTRIBUTION_POWER,
+            MAXIMUM_BUBBLE_SIZE,
+            minimum_bubble_size,
+        )
+        liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
+        mock_state = MockStateBCs(liquid_fraction)
+        Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+
+        # convert Vg to be in m/day
+        scales = dimensional_cfg.get_scales()
+        conversion_factor = scales.velocity_scale_in_m_per_day / 24
+        Vg = Vg * conversion_factor
+
+        plt.plot(
+            geometric(liquid_fraction),
+            Vg,
+            label=f"min bubble radius == {1000*minimum_bubble_size:.2e}mm",
+            color=plt.cm.viridis(color_index),
+        )
+
+    plt.legend(prop={"size": 7})
+    plt.xlabel("Liquid Fraction")
+    plt.ylabel("Interstitial Gas Velocity (m/hour)")
+    plt.yscale("log")
+    plt.xscale("log")
+    plt.title("Changing interstitial gas velocity curves with minimum bubble size")
+    plt.savefig("Changing_minimum.pdf")
+    plt.close()
+
+    plt.figure(figsize=(8, 8))
+    bubble_distribution_powers = np.linspace(1.1, 1.9, 9)
+    color_indices = np.linspace(0, 1, bubble_distribution_powers.shape[0])
+    # power law distributed bubble size
+    for bubble_distribution_power, color_index in zip(
+        bubble_distribution_powers, color_indices
+    ):
+        cfg, dimensional_cfg = define_test_configurations(
+            MAUS_THROAT,
+            MAUS_THROAT_POWER,
+            MAXIMUM_BUBBLE_SIZE,
+            2.0,
+            "power_law",
+            "Haberman",
+            bubble_distribution_power,
+            MAXIMUM_BUBBLE_SIZE,
+            MINIMUM_BUBBLE_SIZE,
+        )
+        liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
+        mock_state = MockStateBCs(liquid_fraction)
+        Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+
+        # convert Vg to be in m/day
+        scales = dimensional_cfg.get_scales()
+        conversion_factor = scales.velocity_scale_in_m_per_day / 24
+        Vg = Vg * conversion_factor
+
+        plt.plot(
+            geometric(liquid_fraction),
+            Vg,
+            label=f"bubble distribution power == {bubble_distribution_power:.1f}",
+            color=plt.cm.viridis(color_index),
+        )
+
+    plt.legend(prop={"size": 7})
+    plt.xlabel("Liquid Fraction")
+    plt.ylabel("Interstitial Gas Velocity (m/hour)")
+    plt.yscale("log")
+    plt.xscale("log")
+    plt.title(
+        "Changing interstitial gas velocity curves with bubble distribution power"
+    )
+    plt.savefig("Changing_power.pdf")
+    plt.close()
