@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.10.0 (2023-11-24) ##
+
+### Summary ###
+To calculation of gas velocity we add options to use a different fit for wall drag enhancement
+function taken from a paper by Haberman. We also add the option to use a critical liquid
+velocity percolation threshold to cut off gas motion. We add some plots comparing different
+gas rise parameterisations.
+
+### Added ###
+- Alternative fit for wall drag enhancement as a function of scaled bubble radius taken from
+a paper by Haberman.
+- parameters in config and non dimensional config to choose the type of wall drag funciton used.
+- plot of different wall drag enhancement functions and bubble rise velocities against liquid
+fraction for different bubble distributions and drag laws.
+- Add critical liquid fraction porosity cutoff of 2.4% from Maus paper.
+- Add options to enable this cutoff, leave the default behaviour the same.
+- Gas velocity plots comparing different bubble terminal rise velocities to Moreau 2014 paper.
+
+## Changed ##
+- Values for pore throat radius and scaling taken from Maus paper for gas velocity plots.
+Before we were wrongly using diameter instead of radius.
+- Change default value of dynamic liquid viscosity used in dimensional configuration to
+match the value of kinematic viscosity used in Moreau 2014 paper.
+
 ## v0.9.0 (2023-11-12) ##
 
 ### Summary ###
