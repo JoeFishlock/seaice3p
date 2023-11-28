@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from celestine.brine_drainage import (
     calculate_ice_ocean_boundary_depth,
     calculate_integrated_mean_permeability,
+    calculate_Rayleigh,
 )
 from celestine.params import Config, NumericalParams, DarcyLawParams
 
@@ -22,7 +23,6 @@ plt.figure()
 plt.plot(liquid_fraction, center_grid, "b*--", label="liquid fraction")
 plt.axhline(-h, label="ice depth")
 plt.legend()
-plt.show()
 
 """Print values of average permeability in ice"""
 cfg = Config(
@@ -56,3 +56,15 @@ integrated_perm = np.array(
     ]
 )
 print("integrated permeability", integrated_perm)
+
+"""Plot Rayleigh Number with Depth"""
+liquid_salinity = [0] * int(I / 2) + list(np.linspace(0, 1, int(I / 2)))
+liquid_salinity = np.array(liquid_salinity)
+Rayleigh = calculate_Rayleigh(
+    center_grid, edge_grid, liquid_salinity, liquid_fraction, cfg
+)
+plt.figure()
+plt.plot(Rayleigh, center_grid, "r*--")
+plt.xlabel("Rayleigh Number")
+plt.ylabel("depth")
+plt.show()
