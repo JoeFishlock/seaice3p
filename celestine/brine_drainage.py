@@ -6,20 +6,15 @@ import numpy as np
 from scipy.stats import hmean
 from celestine.params import Config
 
-# in squared meters from ReesJones and Worster 2014
-REFERENCE_PERMEABILITY = 1e-8
-
 
 def calculate_permeability(liquid_fraction, cfg: Config):
     r"""Calculate the absolute permeability as a function of liquid fraction
 
-    .. math:: \Pi(\phi_l) = K_0 \phi_l^3
+    .. math:: \Pi(\phi_l) = \phi_l^3
 
     Alternatively if the porosity threshold flag is true
 
-    .. math:: \Pi(\phi_l) = K_0 \phi_l^2 (\phi_l - \phi_c)
-
-    NOTE: this is using dimensional units
+    .. math:: \Pi(\phi_l) = \phi_l^2 (\phi_l - \phi_c)
 
     :param liquid_fraction: liquid fraction
     :type liquid_fraction: Numpy Array
@@ -30,13 +25,8 @@ def calculate_permeability(liquid_fraction, cfg: Config):
     if cfg.darcy_law_params.porosity_threshold:
         cutoff = cfg.darcy_law_params.porosity_threshold_value
         step_function = np.heaviside(liquid_fraction - cutoff, 0)
-        return (
-            REFERENCE_PERMEABILITY
-            * liquid_fraction**2
-            * (liquid_fraction - cutoff)
-            * step_function
-        )
-    return REFERENCE_PERMEABILITY * liquid_fraction**3
+        return liquid_fraction**2 * (liquid_fraction - cutoff) * step_function
+    return liquid_fraction**3
 
 
 def calculate_integrated_mean_permeability(
@@ -46,8 +36,6 @@ def calculate_integrated_mean_permeability(
     cell containing the specified z value using the expression of ReesJones2014.
 
     .. math:: K(z) = (\frac{1}{h+z}\int_{-h}^{z} \frac{1}{\Pi(\phi_l(z'))}dz')^{-1}
-
-    NOTE: This is using dimensional units.
 
     :param z: height to integrate permeability up to
     :type z: float
@@ -105,3 +93,44 @@ def calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid):
     # ice interface is at bottom edge of first frozen cell
     depth = (-1) * edge_grid[index]
     return depth
+
+
+def calculate_Rayleigh(
+    cell_centers, edge_grid, liquid_salinity, liquid_fraction, cfg: Config
+):
+    r"""Calculate the local Rayleigh number for brine convection as
+
+    .. math:: \text{Ra}(z) = \text{Ra}_S K(z) (z+h) \Theta_l
+
+    :param cell_centers: The vertical coordinates of cell centers.
+    :type cell_centers: Numpy Array shape (I,)
+    :param edge_grid: The vertical coordinate positions of the edge grid.
+    :type edge_grid: Numpy Array (size I+1)
+    :param liquid_salinity: liquid salinity on center grid
+    :type liquid_salinity: Numpy Array shape (I,)
+    :param liquid_fraction: liquid fraction on center grid
+    :type liquid_fraction: Numpy Array (size I)
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: Array of shape (I,) of Rayleigh number at cell centers
+    """
+    Rayleigh_salt = cfg.darcy_law_params.Rayleigh_salt
+    ice_depth = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
+    averaged_permeabilities = np.array(
+        [
+            calculate_integrated_mean_permeability(
+                z=z,
+                liquid_fraction=liquid_fraction,
+                ice_depth=ice_depth,
+                cell_centers=cell_centers,
+                cfg=cfg,
+            )
+            for z in cell_centers
+        ]
+    )
+    return (
+        Rayleigh_salt
+        * (ice_depth + cell_centers)
+        * averaged_permeabilities
+        * liquid_salinity
+    )
