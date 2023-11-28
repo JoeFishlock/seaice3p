@@ -134,3 +134,20 @@ def calculate_Rayleigh(
         * averaged_permeabilities
         * liquid_salinity
     )
+
+
+def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
+    Rayleigh_critical = cfg.darcy_law_params.Rayleigh_critical
+    if np.all(Rayleigh_number - Rayleigh_critical < 0):
+        return np.NaN
+    indices = np.where(Rayleigh_number >= Rayleigh_critical)
+    return edge_grid[indices[0][-1] + 1]
+
+
+def get_effective_Rayleigh_number(Rayleigh_number, cfg: Config):
+    Rayleigh_critical = cfg.darcy_law_params.Rayleigh_critical
+    return np.max(
+        np.where(
+            Rayleigh_number >= Rayleigh_critical, Rayleigh_number - Rayleigh_critical, 0
+        )
+    )
