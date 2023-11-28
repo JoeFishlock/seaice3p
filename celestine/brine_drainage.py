@@ -137,6 +137,23 @@ def calculate_Rayleigh(
 
 
 def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
+    r"""Calculate the height of the convecting region as the top edge of the highest
+    cell in the domain for which the quantity
+
+    .. math:: \text{Ra}(z) - \text{Ra}_c
+
+    is greater than or equal to zero.
+
+    NOTE: if no convecting region exists return np.NaN
+
+    :param Rayleigh_number: local rayleigh number on center grid
+    :type Rayleigh_number: Numpy Array of shape (I,)
+    :param edge_grid: The vertical coordinate positions of the edge grid.
+    :type edge_grid: Numpy Array (size I+1)
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: Edge grid value at convecting boundary.
+    """
     Rayleigh_critical = cfg.darcy_law_params.Rayleigh_critical
     if np.all(Rayleigh_number - Rayleigh_critical < 0):
         return np.NaN
@@ -145,6 +162,20 @@ def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
 
 
 def get_effective_Rayleigh_number(Rayleigh_number, cfg: Config):
+    r"""Calculate the effective Rayleigh Number as the maximum of
+
+    .. math:: \text{Ra}(z) - \text{Ra}_c
+
+    in the convecting region.
+
+    NOTE: if no convecting region exists returns 0.
+
+    :param Rayleigh_number: local rayleigh number on center grid
+    :type Rayleigh_number: Numpy Array of shape (I,)
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: Effective Rayleigh number.
+    """
     Rayleigh_critical = cfg.darcy_law_params.Rayleigh_critical
     return np.max(
         np.where(
