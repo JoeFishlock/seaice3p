@@ -62,6 +62,8 @@ class DarcyLawParams:
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
 
+    Rayleigh_salt: float = 44105
+
 
 @dataclass
 class ForcingConfig:
