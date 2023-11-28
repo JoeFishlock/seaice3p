@@ -4,6 +4,8 @@ from celestine.brine_drainage import (
     calculate_ice_ocean_boundary_depth,
     calculate_integrated_mean_permeability,
     calculate_Rayleigh,
+    get_convecting_region_height,
+    get_effective_Rayleigh_number,
 )
 from celestine.params import Config, NumericalParams, DarcyLawParams
 
@@ -58,13 +60,18 @@ integrated_perm = np.array(
 print("integrated permeability", integrated_perm)
 
 """Plot Rayleigh Number with Depth"""
+liquid_fraction = [1] * int(I / 2) + list(np.linspace(1, 0, int(I / 2)))
+liquid_fraction = np.array(liquid_fraction)
 liquid_salinity = [0] * int(I / 2) + list(np.linspace(0, 1, int(I / 2)))
 liquid_salinity = np.array(liquid_salinity)
 Rayleigh = calculate_Rayleigh(
     center_grid, edge_grid, liquid_salinity, liquid_fraction, cfg
 )
+top_boundary = get_convecting_region_height(Rayleigh, edge_grid, cfg)
+print("effective Rayleigh", get_effective_Rayleigh_number(Rayleigh, cfg))
 plt.figure()
 plt.plot(Rayleigh, center_grid, "r*--")
+plt.axhline(top_boundary)
 plt.xlabel("Rayleigh Number")
 plt.ylabel("depth")
 plt.show()
