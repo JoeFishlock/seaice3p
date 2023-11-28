@@ -3,7 +3,74 @@ parameterisation for brine convection velocity and the corresponding
 fluxes of heat, salt, dissolved and free phase gas"""
 
 import numpy as np
-import matplotlib.pyplot as plt
+from scipy.stats import hmean
+from celestine.params import Config
+
+# in squared meters from ReesJones and Worster 2014
+REFERENCE_PERMEABILITY = 1e-8
+
+
+def calculate_permeability(liquid_fraction, cfg: Config):
+    r"""Calculate the absolute permeability as a function of liquid fraction
+
+    .. math:: \Pi(\phi_l) = K_0 \phi_l^3
+
+    Alternatively if the porosity threshold flag is true
+
+    .. math:: \Pi(\phi_l) = K_0 \phi_l^2 (\phi_l - \phi_c)
+
+    NOTE: this is using dimensional units
+
+    :param liquid_fraction: liquid fraction
+    :type liquid_fraction: Numpy Array
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: permeability on the same grid as liquid fraction
+    """
+    if cfg.darcy_law_params.porosity_threshold:
+        cutoff = cfg.darcy_law_params.porosity_threshold_value
+        step_function = np.heaviside(liquid_fraction - cutoff, 0)
+        return (
+            REFERENCE_PERMEABILITY
+            * liquid_fraction**2
+            * (liquid_fraction - cutoff)
+            * step_function
+        )
+    return REFERENCE_PERMEABILITY * liquid_fraction**3
+
+
+def calculate_integrated_mean_permeability(
+    z, liquid_fraction, ice_depth, cell_centers, cfg: Config
+):
+    r"""Calculate the harmonic mean permeability from the base of the ice up to the
+    cell containing the specified z value using the expression of ReesJones2014.
+
+    .. math:: K(z) = (\frac{1}{h+z}\int_{-h}^{z} \frac{1}{\Pi(\phi_l(z'))}dz')^{-1}
+
+    NOTE: This is using dimensional units.
+
+    :param z: height to integrate permeability up to
+    :type z: float
+    :param liquid_fraction: liquid fraction on the center grid
+    :type liquid_fraction: Numpy Array shape (I,)
+    :param ice_depth: positive depth position of ice ocean interface
+    :type ice_depth: float
+    :param cell_centers: cell center positions
+    :type cell_centers: Numpy Array of shape (I,)
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: permeability averaged from base of the ice up to given z value
+    """
+    if z < -ice_depth:
+        return 0
+    step = cfg.numerical_params.step
+    ice_mask = (cell_centers > -ice_depth) & (cell_centers <= z)
+    permeabilities = (
+        calculate_permeability(liquid_fraction[ice_mask], cfg)
+        / liquid_fraction[ice_mask].size
+    )
+    harmonic_mean = hmean(permeabilities)
+    return (ice_depth + z + step / 2) * harmonic_mean / step
 
 
 def calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid):
@@ -29,7 +96,6 @@ def calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid):
 
     # if domain is completely liquid set h=0
     if np.all(liquid_fraction == 1):
-        print("fired")
         index = edge_grid.size - 1
 
     # raise error if bottom of domain freezes
@@ -39,22 +105,3 @@ def calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid):
     # ice interface is at bottom edge of first frozen cell
     depth = (-1) * edge_grid[index]
     return depth
-
-
-if __name__ == "__main__":
-    I = 20
-    liquid_fraction = [0.8] * int(I / 2) + [0.2] * int(I / 2)
-    liquid_fraction = np.array(liquid_fraction)
-
-    # liquid_fraction = np.linspace(1, 0.8, I)
-
-    edge_grid = np.linspace(-1, 0, I + 1)
-    first_center = 0.5 * (edge_grid[0] + edge_grid[1])
-    last_center = 0.5 * (edge_grid[-1] + edge_grid[-2])
-    center_grid = np.linspace(first_center, last_center, I)
-    h = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
-    plt.figure()
-    plt.plot(liquid_fraction, center_grid, "b*--", label="liquid fraction")
-    plt.axhline(-h, label="ice depth")
-    plt.legend()
-    plt.show()
