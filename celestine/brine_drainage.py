@@ -275,3 +275,60 @@ def calculate_brine_convection_liquid_velocity(
     Wl[is_liquid] = ocean_velocity
 
     return Wl
+
+
+def calculate_brine_channel_sink(
+    liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg: Config
+):
+    r"""Calculate the sink term due to brine channels.
+
+    .. math:: \text{sink} = \mathcal{A}
+
+    in the convecting region. Zero elsewhere.
+
+    NOTE: If no ice is present or if no convecting region exists returns zero
+
+    :param liquid_fraction: liquid fraction on center grid
+    :type liquid_fraction: Numpy Array of shape (I,)
+    :param liquid_salinity: liquid salinity on center grid
+    :type liquid_salinity: Numpy Array of shape (I,)
+    :param center_grid: vertical coordinate of center grid
+    :type center_grid: Numpy Array of shape (I,)
+    :param edge_grid: Vertical coordinates of cell edges
+    :type edge_grid: Numpy Array of shape (I+1,)
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: Strength of the sink term due to brine channels on the center grid.
+    """
+    ice_depth = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
+    Rayleigh_number = calculate_Rayleigh(
+        center_grid, edge_grid, liquid_salinity, liquid_fraction, cfg
+    )
+    convecting_region_height = get_convecting_region_height(
+        Rayleigh_number, edge_grid, cfg
+    )
+    brine_channel_strength = calculate_brine_channel_strength(
+        Rayleigh_number, ice_depth, convecting_region_height, cfg
+    )
+
+    sink = np.zeros_like(center_grid)
+
+    # No ice present
+    if ice_depth == 0:
+        return sink
+
+    # ice present but no convection occuring
+    if convecting_region_height == np.NaN:
+        return sink
+
+    # Make liquid vertical velocity continuous at bottom of the ice
+
+    is_convecting_ice = (center_grid >= -ice_depth) & (
+        center_grid <= convecting_region_height
+    )
+    is_liquid = center_grid < -ice_depth
+
+    sink[is_convecting_ice] = brine_channel_strength
+    sink[is_liquid] = 0
+
+    return sink
