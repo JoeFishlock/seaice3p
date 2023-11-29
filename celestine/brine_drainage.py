@@ -200,6 +200,7 @@ def calculate_brine_channel_strength(
     :type ice_depth: float
     :param convecting_region_height: position of the convecting region boundary (negative)
     :type convecting_region_height: float
+    :param cfg: Configuration object for the simulation.
     :type cfg: celestine.params.Config
     :return: Brine channel strength parameter
     """
@@ -213,3 +214,64 @@ def calculate_brine_channel_strength(
     convecting_layer_thickness = ice_depth + convecting_region_height
     effective_Rayleigh = get_effective_Rayleigh_number(Rayleigh_number, cfg)
     return convection_strength * effective_Rayleigh / convecting_layer_thickness**2
+
+
+def calculate_brine_convection_liquid_velocity(
+    liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg: Config
+):
+    r"""Calculate the vertical liquid Darcy velocity from Rees Jones and Worster 2014
+
+    .. math:: W_l = \mathcal{A} (z_c - z)
+
+    in the convecting region. The velocity is stagnant above the convecting region.
+    The velocity is constant in the liquid region and continuous at the interface.
+
+    NOTE: If no ice is present or if no convecting region exists returns zero velocity
+
+    :param liquid_fraction: liquid fraction on center grid
+    :type liquid_fraction: Numpy Array of shape (I,)
+    :param liquid_salinity: liquid salinity on center grid
+    :type liquid_salinity: Numpy Array of shape (I,)
+    :param center_grid: vertical coordinate of center grid
+    :type center_grid: Numpy Array of shape (I,)
+    :param edge_grid: Vertical coordinates of cell edges
+    :type edge_grid: Numpy Array of shape (I+1,)
+    :param cfg: Configuration object for the simulation.
+    :type cfg: celestine.params.Config
+    :return: Liquid darcy velocity on the edge grid.
+    """
+    ice_depth = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
+    Rayleigh_number = calculate_Rayleigh(
+        center_grid, edge_grid, liquid_salinity, liquid_fraction, cfg
+    )
+    convecting_region_height = get_convecting_region_height(
+        Rayleigh_number, edge_grid, cfg
+    )
+    brine_channel_strength = calculate_brine_channel_strength(
+        Rayleigh_number, ice_depth, convecting_region_height, cfg
+    )
+
+    Wl = np.zeros_like(edge_grid)
+
+    # No ice present
+    if ice_depth == 0:
+        return Wl
+
+    # ice present but no convection occuring
+    if convecting_region_height == np.NaN:
+        return Wl
+
+    # Make liquid vertical velocity continuous at bottom of the ice
+    ocean_velocity = brine_channel_strength * (ice_depth + convecting_region_height)
+
+    is_convecting_ice = (edge_grid >= -ice_depth) & (
+        edge_grid <= convecting_region_height
+    )
+    is_liquid = edge_grid < -ice_depth
+
+    Wl[is_convecting_ice] = brine_channel_strength * (
+        convecting_region_height - edge_grid[is_convecting_ice]
+    )
+    Wl[is_liquid] = ocean_velocity
+
+    return Wl

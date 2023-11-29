@@ -7,6 +7,7 @@ from celestine.brine_drainage import (
     get_convecting_region_height,
     get_effective_Rayleigh_number,
     calculate_brine_channel_strength,
+    calculate_brine_convection_liquid_velocity,
 )
 from celestine.params import Config, NumericalParams, DarcyLawParams
 
@@ -81,4 +82,14 @@ plt.plot(Rayleigh, center_grid, "r*--")
 plt.axhline(top_boundary)
 plt.xlabel("Rayleigh Number")
 plt.ylabel("depth")
+
+
+"""Plot the liquid velocity"""
+Wl = calculate_brine_convection_liquid_velocity(
+    liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg
+)
+plt.figure()
+plt.plot(Wl, edge_grid, "m*--")
+plt.xlabel("Liquid Darcy Velocity")
+plt.ylabel("Depth")
 plt.show()
