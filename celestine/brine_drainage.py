@@ -1,6 +1,16 @@
 """Module to calculate the Rees Jones and Worster 2014
-parameterisation for brine convection velocity and the corresponding
-fluxes of heat, salt, dissolved and free phase gas"""
+parameterisation for brine convection velocity and the strenght of the sink term.
+
+Exports the functions:
+
+calculate_brine_convection_liquid_velocity
+To be used in velocities module when using brine convection parameterisation.
+
+calculate_brine_channel_sink
+To be used to add sink terms to conservation equations when using brine convection
+parameterisation.
+"""
+
 
 import numpy as np
 from scipy.stats import hmean
