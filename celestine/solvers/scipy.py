@@ -8,6 +8,11 @@ from celestine.flux import (
     calculate_salt_flux,
     calculate_gas_flux,
 )
+from celestine.brine_channel_sink_terms import (
+    calculate_heat_sink,
+    calculate_salt_sink,
+    calculate_gas_sink,
+)
 from celestine.state import State, StateBCs, Solution
 from celestine.solvers.template import SolverTemplate
 from celestine.solvers.reduced_solver import prevent_gas_rise_into_saturated_cell
@@ -55,9 +60,13 @@ class ScipySolver(SolverTemplate):
         salt_flux = calculate_salt_flux(state_BCs, Wl, V, D_g, cfg)
         gas_flux = calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg)
 
-        enthalpy_function = -np.matmul(D_e, heat_flux)
-        salt_function = -np.matmul(D_e, salt_flux)
-        gas_function = -np.matmul(D_e, gas_flux)
+        heat_sink = calculate_heat_sink(state_BCs, cfg)
+        salt_sink = calculate_salt_sink(state_BCs, cfg)
+        gas_sink = calculate_gas_sink(state_BCs, cfg)
+
+        enthalpy_function = -np.matmul(D_e, heat_flux) - heat_sink
+        salt_function = -np.matmul(D_e, salt_flux) - salt_sink
+        gas_function = -np.matmul(D_e, gas_flux) - gas_sink
 
         return np.hstack((enthalpy_function, salt_function, gas_function))
 
