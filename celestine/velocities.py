@@ -356,6 +356,10 @@ def calculate_velocities(state_BCs, cfg: Config):
             f"Bubble size distribution of type {cfg.darcy_law_params.bubble_size_distribution_type} not recognised"
         )
 
+    # check if we want to couple the bubble to fluid motion in the vertical
+    if not cfg.darcy_law_params.couple_bubble_to_vertical_flow:
+        lag_factor = np.zeros_like(wall_drag_factor)
+
     Wl = calculate_liquid_darcy_velocity(
         liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg
     )

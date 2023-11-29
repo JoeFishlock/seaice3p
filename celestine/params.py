@@ -67,6 +67,9 @@ class DarcyLawParams:
     Rayleigh_critical: float = 40
     convection_strength: float = 0.03
 
+    couple_bubble_to_horizontal_flow: bool = True
+    couple_bubble_to_vertical_flow: bool = True
+
 
 @dataclass
 class ForcingConfig:
