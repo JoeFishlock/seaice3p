@@ -62,6 +62,7 @@ class DarcyLawParams:
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
 
+    brine_convection_parameterisation: bool = False
     Rayleigh_salt: float = 44105
     Rayleigh_critical: float = 40
     convection_strength: float = 0.03
