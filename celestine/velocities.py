@@ -302,7 +302,7 @@ def calculate_mono_lag_factor(liquid_fraction, cfg: Config):
 
 def calculate_gas_interstitial_velocity(
     liquid_fraction,
-    liquid_interstitial_velocity,
+    liquid_darcy_velocity,
     wall_drag_factor,
     lag_factor,
     cfg: Config,
@@ -315,6 +315,11 @@ def calculate_gas_interstitial_velocity(
     """
     B = cfg.darcy_law_params.B
     exponent = cfg.darcy_law_params.pore_throat_scaling
+
+    REGULARISATION = 1e-10
+    liquid_interstitial_velocity = (
+        liquid_darcy_velocity * 2 / (geometric(liquid_fraction) + REGULARISATION)
+    )
 
     Vg = (
         B * wall_drag_factor * geometric(liquid_fraction) ** (2 * exponent)
@@ -355,7 +360,7 @@ def calculate_velocities(state_BCs, cfg: Config):
         liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg
     )
     Vg = calculate_gas_interstitial_velocity(
-        liquid_fraction, liquid_interstitial_velocity, wall_drag_factor, lag_factor, cfg
+        liquid_fraction, Wl, wall_drag_factor, lag_factor, cfg
     )
     V = calculate_frame_velocity(cfg)
     return Vg, Wl, V
