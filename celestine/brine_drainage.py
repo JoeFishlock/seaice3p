@@ -182,3 +182,34 @@ def get_effective_Rayleigh_number(Rayleigh_number, cfg: Config):
             Rayleigh_number >= Rayleigh_critical, Rayleigh_number - Rayleigh_critical, 0
         )
     )
+
+
+def calculate_brine_channel_strength(
+    Rayleigh_number, ice_depth, convecting_region_height, cfg: Config
+):
+    r"""Calculate the brine channel strength in the convecting region as
+
+    .. math:: \mathcal{A} = \frac{\alpha \text{Ra}_e}{(h+z_c)^2}
+
+    the effective Rayleigh number multiplied by a tuning parameter (Rees Jones and
+    Worster 2014) over the convecting region thickness squared.
+
+    :param Rayleigh_number: local Rayleigh number on center grid
+    :type Rayleigh_number: Numpy Array of shape (I,)
+    :param ice_depth: depth of ice (positive)
+    :type ice_depth: float
+    :param convecting_region_height: position of the convecting region boundary (negative)
+    :type convecting_region_height: float
+    :type cfg: celestine.params.Config
+    :return: Brine channel strength parameter
+    """
+    convection_strength = cfg.darcy_law_params.convection_strength
+    if ice_depth == 0:
+        return 0
+
+    if convecting_region_height == np.NaN:
+        return 0
+
+    convecting_layer_thickness = ice_depth + convecting_region_height
+    effective_Rayleigh = get_effective_Rayleigh_number(Rayleigh_number, cfg)
+    return convection_strength * effective_Rayleigh / convecting_layer_thickness**2
