@@ -64,6 +64,7 @@ class DarcyLawParams:
 
     Rayleigh_salt: float = 44105
     Rayleigh_critical: float = 40
+    convection_strength: float = 0.03
 
 
 @dataclass
