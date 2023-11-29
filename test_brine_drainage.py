@@ -6,6 +6,7 @@ from celestine.brine_drainage import (
     calculate_Rayleigh,
     get_convecting_region_height,
     get_effective_Rayleigh_number,
+    calculate_brine_channel_strength,
 )
 from celestine.params import Config, NumericalParams, DarcyLawParams
 
@@ -67,8 +68,14 @@ liquid_salinity = np.array(liquid_salinity)
 Rayleigh = calculate_Rayleigh(
     center_grid, edge_grid, liquid_salinity, liquid_fraction, cfg
 )
+h = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
 top_boundary = get_convecting_region_height(Rayleigh, edge_grid, cfg)
 print("effective Rayleigh", get_effective_Rayleigh_number(Rayleigh, cfg))
+print(
+    "brine channel strenght",
+    calculate_brine_channel_strength(Rayleigh, h, top_boundary, cfg),
+)
+print("ice depth", h)
 plt.figure()
 plt.plot(Rayleigh, center_grid, "r*--")
 plt.axhline(top_boundary)
