@@ -41,7 +41,7 @@ def calculate_liquid_darcy_velocity(
     :return: liquid darcy velocity on edge grid
     """
     if not cfg.darcy_law_params.brine_convection_parameterisation:
-        Wl = np.zeros_like(geometric(liquid_fraction))
+        return np.zeros_like(geometric(liquid_fraction))
 
     Wl = calculate_brine_convection_liquid_velocity(
         liquid_fraction[1:-1], liquid_salinity[1:-1], center_grid, edge_grid, cfg
