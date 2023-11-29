@@ -85,7 +85,6 @@ class DimensionalParams:
     pore_radius: float = 1e-3  # pore throat size scale in m
     pore_throat_scaling: float = 1 / 2
     drag_exponent: float = 6.0
-    liquid_velocity_dimensional: float = 0.0  # liquid darcy velocity in m/day
 
     bubble_size_distribution_type: str = "mono"
     wall_drag_law_choice: str = "power"
@@ -257,14 +256,6 @@ class DimensionalParams:
         """
         return self.maximum_bubble_radius / self.pore_radius
 
-    @property
-    def liquid_velocity(self):
-        """convert given liquid velocity into non dimensional units"""
-        velocity_scale_in_m_per_day = calculate_velocity_scale_in_m_day(
-            self.lengthscale, self.thermal_diffusivity
-        )
-        return self.liquid_velocity_dimensional / velocity_scale_in_m_per_day
-
     def get_physical_params(self):
         """return a PhysicalParams object"""
         return PhysicalParams(
@@ -283,7 +274,6 @@ class DimensionalParams:
             bubble_radius_scaled=self.bubble_radius_scaled,
             pore_throat_scaling=self.pore_throat_scaling,
             drag_exponent=self.drag_exponent,
-            liquid_velocity=self.liquid_velocity,
             bubble_size_distribution_type=self.bubble_size_distribution_type,
             wall_drag_law_choice=self.wall_drag_law_choice,
             bubble_distribution_power=self.bubble_distribution_power,

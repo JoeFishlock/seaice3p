@@ -340,7 +340,6 @@ def calculate_gas_interstitial_velocity(
 def calculate_velocities(state_BCs, cfg: Config):
     "Inputs on ghost grid, outputs on edge grid" ""
     liquid_fraction = state_BCs.liquid_fraction
-    liquid_interstitial_velocity = cfg.darcy_law_params.liquid_velocity
     liquid_salinity = state_BCs.liquid_salinity
     center_grid = state_BCs.grid[1:-1]
     edge_grid = state_BCs.edge_grid
