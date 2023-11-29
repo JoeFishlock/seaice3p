@@ -218,7 +218,7 @@ def calculate_brine_channel_strength(
     if ice_depth == 0:
         return 0
 
-    if convecting_region_height == np.NaN:
+    if np.isnan(convecting_region_height):
         return 0
 
     convecting_layer_thickness = ice_depth + convecting_region_height
@@ -268,7 +268,7 @@ def calculate_brine_convection_liquid_velocity(
         return Wl
 
     # ice present but no convection occuring
-    if convecting_region_height == np.NaN:
+    if np.isnan(convecting_region_height):
         return Wl
 
     # Make liquid vertical velocity continuous at bottom of the ice
@@ -328,7 +328,7 @@ def calculate_brine_channel_sink(
         return sink
 
     # ice present but no convection occuring
-    if convecting_region_height == np.NaN:
+    if np.isnan(convecting_region_height):
         return sink
 
     # Make liquid vertical velocity continuous at bottom of the ice
