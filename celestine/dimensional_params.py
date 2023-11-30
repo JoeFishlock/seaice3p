@@ -95,6 +95,16 @@ class DimensionalParams:
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
 
+    brine_convection_parameterisation: bool = False
+    couple_bubble_to_horizontal_flow: bool = True
+    couple_bubble_to_vertical_flow: bool = True
+
+    # Rees Jones and Worster 2014
+    Rayleigh_critical: float = 40
+    convection_strength: float = 0.03
+    haline_contraction_coefficient: float = 7.5e-4
+    reference_permeability: float = 1e-8
+
     @property
     def expansion_coefficient(self):
         r"""calculate
@@ -256,6 +266,23 @@ class DimensionalParams:
         """
         return self.maximum_bubble_radius / self.pore_radius
 
+    @property
+    def Rayleigh_salt(self):
+        r"""Calculate the haline Rayleigh number as
+
+        .. math:: \text{Ra}_S = \frac{\rho_l g \beta \Delta S H K_0}{\kappa \mu}
+
+        """
+        return (
+            self.liquid_density
+            * self.gravity
+            * self.haline_contraction_coefficient
+            * self.salinity_difference
+            * self.lengthscale
+            * self.reference_permeability
+            / (self.thermal_conductivity * self.liquid_viscosity)
+        )
+
     def get_physical_params(self):
         """return a PhysicalParams object"""
         return PhysicalParams(
@@ -281,6 +308,12 @@ class DimensionalParams:
             maximum_bubble_radius_scaled=self.maximum_bubble_radius_scaled,
             porosity_threshold=self.porosity_threshold,
             porosity_threshold_value=self.porosity_threshold_value,
+            brine_convection_parameterisation=self.brine_convection_parameterisation,
+            Rayleigh_salt=self.Rayleigh_salt,
+            Rayleigh_critical=self.Rayleigh_critical,
+            convection_strength=self.convection_strength,
+            couple_bubble_to_horizontal_flow=self.couple_bubble_to_horizontal_flow,
+            couple_bubble_to_vertical_flow=self.couple_bubble_to_vertical_flow,
         )
 
     def get_config(
