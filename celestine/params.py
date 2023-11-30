@@ -110,7 +110,7 @@ class NumericalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    solver: str = "LU"
+    solver: str = "SCI"
 
     @property
     def step(self):
