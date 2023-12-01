@@ -280,7 +280,7 @@ class DimensionalParams:
             * self.salinity_difference
             * self.lengthscale
             * self.reference_permeability
-            / (self.thermal_conductivity * self.liquid_viscosity)
+            / (self.thermal_diffusivity * self.liquid_viscosity)
         )
 
     def get_physical_params(self):
