@@ -102,13 +102,24 @@ class ForcingConfig:
         """
         data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
         top_temp_index = self.DATA_INDEXES[self.Barrow_top_temperature_data_choice]
+        ocean_temp_index = self.DATA_INDEXES["ocean"]
         time_index = self.DATA_INDEXES["time"]
+
         barrow_top_temp = data[:, top_temp_index]
         barrow_days = data[:, time_index] - data[0, time_index]
         barrow_top_temp, barrow_days = filter_missing_values(
             barrow_top_temp, barrow_days
         )
+
+        barrow_bottom_temp = data[:, ocean_temp_index]
+        barrow_ocean_days = data[:, time_index] - data[0, time_index]
+        barrow_bottom_temp, barrow_ocean_days = filter_missing_values(
+            barrow_top_temp, barrow_ocean_days
+        )
+
         self.barrow_top_temp = barrow_top_temp
+        self.barrow_bottom_temp = barrow_bottom_temp
+        self.barrow_ocean_days = barrow_ocean_days
         self.barrow_days = barrow_days
 
 
