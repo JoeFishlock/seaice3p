@@ -65,7 +65,7 @@ def get_barrow_initial_conditions(cfg: Config):
     """
     ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
     SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
-    BOTTOM_TEMP = cfg.boundary_conditions_config.far_temp
+    BOTTOM_TEMP = cfg.scales.convert_from_dimensional_temperature(-1.8)
     BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
     TEMP_IN_ICE = cfg.scales.convert_from_dimensional_temperature(-8.15)
 
