@@ -80,9 +80,17 @@ class ForcingConfig:
     amplitude: float = 0.75
     period: float = 4.0
 
+    Barrow_top_temperature_data_choice: str = "air"
+    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+
     # class variables with barrow forcing data hard coded in
-    AIR_TEMP_INDEX: ClassVar[int] = 8
-    TIME_INDEX: ClassVar[int] = 0
+    DATA_INDEXES: ClassVar[dict[str, int]] = {
+        "time": 0,
+        "air": 8,
+        "bottom_snow": 18,
+        "top_ice": 19,
+        "ocean": 43,
+    }
     BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
 
     def load_forcing_data(self):
@@ -94,12 +102,25 @@ class ForcingConfig:
         hard coded in as class variables.
         """
         data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
-        barrow_air_temp = data[:, self.AIR_TEMP_INDEX]
-        barrow_days = data[:, self.TIME_INDEX] - data[0, self.TIME_INDEX]
-        barrow_air_temp, barrow_days = filter_missing_values(
-            barrow_air_temp, barrow_days
+        top_temp_index = self.DATA_INDEXES[self.Barrow_top_temperature_data_choice]
+        ocean_temp_index = self.DATA_INDEXES["ocean"]
+        time_index = self.DATA_INDEXES["time"]
+
+        barrow_top_temp = data[:, top_temp_index]
+        barrow_days = data[:, time_index] - data[0, time_index]
+        barrow_top_temp, barrow_days = filter_missing_values(
+            barrow_top_temp, barrow_days
         )
-        self.barrow_air_temp = barrow_air_temp
+
+        barrow_bottom_temp = data[:, ocean_temp_index]
+        barrow_ocean_days = data[:, time_index] - data[0, time_index]
+        barrow_bottom_temp, barrow_ocean_days = filter_missing_values(
+            barrow_bottom_temp, barrow_ocean_days
+        )
+
+        self.barrow_top_temp = barrow_top_temp
+        self.barrow_bottom_temp = barrow_bottom_temp
+        self.barrow_ocean_days = barrow_ocean_days
         self.barrow_days = barrow_days
 
 
