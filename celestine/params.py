@@ -81,6 +81,7 @@ class ForcingConfig:
     period: float = 4.0
 
     Barrow_top_temperature_data_choice: str = "air"
+    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
     # class variables with barrow forcing data hard coded in
     DATA_INDEXES: ClassVar[dict[str, int]] = {

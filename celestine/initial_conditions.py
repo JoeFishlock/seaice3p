@@ -82,7 +82,10 @@ def get_barrow_initial_conditions(cfg: Config):
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
     gas = apply_value_in_ice_layer(
-        ICE_DEPTH, ice_value=(1 / 5) * chi, liquid_value=chi, grid=centers
+        ICE_DEPTH,
+        ice_value=cfg.forcing_config.Barrow_initial_bulk_gas_in_ice * chi,
+        liquid_value=chi,
+        grid=centers,
     )
     pressure = np.full_like(salt, 0)
 
