@@ -33,8 +33,8 @@ def dimensional_barrow_temperature_forcing(time_in_days, cfg: Config):
     temperature in degrees Celsius.
     """
     barrow_days = cfg.forcing_config.barrow_days
-    barrow_air_temp = cfg.forcing_config.barrow_air_temp
-    return np.interp(time_in_days, barrow_days, barrow_air_temp, right=np.NaN)
+    barrow_top_temp = cfg.forcing_config.barrow_top_temp
+    return np.interp(time_in_days, barrow_days, barrow_top_temp, right=np.NaN)
 
 
 def barrow_temperature_forcing(time, cfg):
