@@ -114,7 +114,7 @@ class ForcingConfig:
         barrow_bottom_temp = data[:, ocean_temp_index]
         barrow_ocean_days = data[:, time_index] - data[0, time_index]
         barrow_bottom_temp, barrow_ocean_days = filter_missing_values(
-            barrow_top_temp, barrow_ocean_days
+            barrow_bottom_temp, barrow_ocean_days
         )
 
         self.barrow_top_temp = barrow_top_temp
