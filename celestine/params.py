@@ -44,7 +44,6 @@ class DarcyLawParams:
 
     B: float = 100
     pore_throat_scaling: float = 1 / 2
-    liquid_velocity: float = 0.0
     bubble_size_distribution_type: str = "mono"
     wall_drag_law_choice: str = "power"
 
@@ -61,6 +60,14 @@ class DarcyLawParams:
 
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
+
+    brine_convection_parameterisation: bool = False
+    Rayleigh_salt: float = 44105
+    Rayleigh_critical: float = 40
+    convection_strength: float = 0.03
+
+    couple_bubble_to_horizontal_flow: bool = True
+    couple_bubble_to_vertical_flow: bool = True
 
 
 @dataclass
@@ -103,7 +110,7 @@ class NumericalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    solver: str = "LU"
+    solver: str = "SCI"
 
     @property
     def step(self):

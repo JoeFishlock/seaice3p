@@ -14,27 +14,38 @@ import numpy as np
 from scipy.integrate import quad
 from celestine.grids import geometric
 from celestine.params import Config
+from celestine.brine_drainage import calculate_brine_convection_liquid_velocity
 
 
 def calculate_frame_velocity(cfg: Config):
     return np.full((cfg.numerical_params.I + 1,), cfg.physical_params.frame_velocity)
 
 
-def calculate_liquid_darcy_velocity(liquid_fraction, cfg: Config):
-    r"""Calculate liquid Darcy velocity as
+def calculate_liquid_darcy_velocity(
+    liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg: Config
+):
+    r"""Calculate liquid Darcy velocity either using brine convection parameterisation
+    or as stagnant
 
-    .. math:: W_l = \frac{\phi_l U_0}{2}
-
-    This assumes that we are given the non dimensional maximum interstitial liquid
-    velocity.
 
     :param liquid_fraction: liquid fraction on ghost grid
     :type liquid_fraction: Numpy Array (size I+2)
+    :param liquid_salinity: liquid salinity on ghost grid
+    :type liquid_salinity: Numpy Array (size I+2)
+    :param center_grid: vertical coordinates of cell centers
+    :type center_grid: Numpy Array of shape (I,)
+    :param edge_grid: Vertical coordinates of cell edges
+    :type edge_grid: Numpy Array (size I+1)
     :param cfg: simulation configuration object
-    :type D_g: celestine.params.Config
+    :type cfg: celestine.params.Config
     :return: liquid darcy velocity on edge grid
     """
-    Wl = geometric(liquid_fraction) * cfg.darcy_law_params.liquid_velocity / 2
+    if not cfg.darcy_law_params.brine_convection_parameterisation:
+        return np.zeros_like(geometric(liquid_fraction))
+
+    Wl = calculate_brine_convection_liquid_velocity(
+        liquid_fraction[1:-1], liquid_salinity[1:-1], center_grid, edge_grid, cfg
+    )
     return Wl
 
 
@@ -291,7 +302,7 @@ def calculate_mono_lag_factor(liquid_fraction, cfg: Config):
 
 def calculate_gas_interstitial_velocity(
     liquid_fraction,
-    liquid_interstitial_velocity,
+    liquid_darcy_velocity,
     wall_drag_factor,
     lag_factor,
     cfg: Config,
@@ -304,6 +315,11 @@ def calculate_gas_interstitial_velocity(
     """
     B = cfg.darcy_law_params.B
     exponent = cfg.darcy_law_params.pore_throat_scaling
+
+    REGULARISATION = 1e-10
+    liquid_interstitial_velocity = (
+        liquid_darcy_velocity * 2 / (geometric(liquid_fraction) + REGULARISATION)
+    )
 
     Vg = (
         B * wall_drag_factor * geometric(liquid_fraction) ** (2 * exponent)
@@ -324,7 +340,9 @@ def calculate_gas_interstitial_velocity(
 def calculate_velocities(state_BCs, cfg: Config):
     "Inputs on ghost grid, outputs on edge grid" ""
     liquid_fraction = state_BCs.liquid_fraction
-    liquid_interstitial_velocity = cfg.darcy_law_params.liquid_velocity
+    liquid_salinity = state_BCs.liquid_salinity
+    center_grid = state_BCs.grid[1:-1]
+    edge_grid = state_BCs.edge_grid
 
     if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
         wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)
@@ -337,9 +355,15 @@ def calculate_velocities(state_BCs, cfg: Config):
             f"Bubble size distribution of type {cfg.darcy_law_params.bubble_size_distribution_type} not recognised"
         )
 
-    Vg = calculate_gas_interstitial_velocity(
-        liquid_fraction, liquid_interstitial_velocity, wall_drag_factor, lag_factor, cfg
+    # check if we want to couple the bubble to fluid motion in the vertical
+    if not cfg.darcy_law_params.couple_bubble_to_vertical_flow:
+        lag_factor = np.zeros_like(wall_drag_factor)
+
+    Wl = calculate_liquid_darcy_velocity(
+        liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg
     )
-    Wl = calculate_liquid_darcy_velocity(liquid_fraction, cfg)
+    Vg = calculate_gas_interstitial_velocity(
+        liquid_fraction, Wl, wall_drag_factor, lag_factor, cfg
+    )
     V = calculate_frame_velocity(cfg)
     return Vg, Wl, V
