@@ -15,4 +15,4 @@ if __name__ == "__main__":
 
     config_paths = glob(f"{TEST_DATA_DIR}*.yml")
     configs = [Config.load(path) for path in config_paths]
-    run_batch(configs)
+    run_batch(configs, TEST_DATA_DIR)

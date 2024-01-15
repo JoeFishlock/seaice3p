@@ -38,7 +38,7 @@ barrow = barrow_dimensional_params.get_config(
     ),
 )
 barrow.save(DATA_DIRECTORY)
-status, duration = solve(barrow)
+status, duration = solve(barrow, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
 
 

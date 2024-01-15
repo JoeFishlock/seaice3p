@@ -25,7 +25,7 @@ base = Config(
     numerical_params=NumericalParams(solver="RED"),
 )
 base.save(DATA_DIRECTORY)
-status, duration = solve(base)
+status, duration = solve(base, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
 
 

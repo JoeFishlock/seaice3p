@@ -36,7 +36,7 @@ cfg = Config(
     numerical_params=NumericalParams(solver="SCI"),
 )
 cfg.save(DATA_DIRECTORY)
-status, duration = solve(cfg)
+status, duration = solve(cfg, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
 
 
