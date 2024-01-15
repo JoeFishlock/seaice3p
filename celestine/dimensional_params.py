@@ -10,6 +10,7 @@ output between physical and non-dimensional variables.
 
 from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
+from pathlib import Path
 import numpy as np
 from celestine.params import (
     Config,
@@ -59,7 +60,6 @@ class DimensionalParams:
     name: str
     total_time_in_days: float = 365  # days
     savefreq_in_days: float = 1  # save data after this amount of time in days
-    data_path: str = "data/"
 
     lengthscale: float = 1  # domain height in m
     liquid_density: float = 1028  # kg/m3
@@ -339,7 +339,6 @@ class DimensionalParams:
             scales=self.get_scales(),
             total_time=self.total_time,
             savefreq=self.savefreq,
-            data_path=self.data_path,
         )
 
     def get_scales(self):
@@ -356,12 +355,12 @@ class DimensionalParams:
             self.saturation_concentration,
         )
 
-    def save(self):
-        """save this object to a yaml file in the specified data path.
+    def save(self, directory: Path):
+        """save this object to a yaml file in the specified directory.
 
         The name will be the name given with _dimensional appended to distinguish it
         from a saved non-dimensional configuration."""
-        with open(f"{self.data_path}{self.name}_dimensional.yml", "w") as outfile:
+        with open(directory / f"{self.name}_dimensional.yml", "w") as outfile:
             dump(asdict(self), outfile)
 
     @classmethod
