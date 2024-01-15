@@ -1,5 +1,56 @@
 # Changelog
 
+## v0.11.0 (2024-01-15) ##
+
+### Summary ###
+We have added options to the simulation to use a brine convection parameterisation (Rees Jones 2014).
+This desalinates the ice and brings in saturated ocean water, assuming continuity of velocity at the ice interface.
+This seems to work relatively well to desalinate the ice for the barrow simulation if we start with ocean bulk salinity.
+This however also changes the heat balance so to get the ice growth correct we need to use a thermal conductivity value
+that is an average of ice and water. Going forward we could just implement the full heat conduction term for each phase.
+To further improve the barrow simulation we use thermistor data for the ocean to force the bottom of the domain.
+We also give the option to use thermistor data at the ice snow interface to better match temperature evolution of the ice.
+This is better than the air temperature as we do not simulate the insulating layer of snow.
+
+### Added ###
+- Functionality to calculate the liquid velocity associated with brine convection using Rees Jones
+2014 parameterisation by turning the brine_convection_parameterisation to True in the simulation configuration.
+The parameterisation should advect tracers with the broad upward liquid flow and also remove salt, heat and bulk gas
+via a sink term that appears as the downward brine channel flow. There are two more true/false flags that
+decide wether to couple bubble motion to the vertical flow that should move bubbles upward and to the horizontal flow
+which is responsible for transporting bubbles to brine channels where they would be expelled and so this appears in
+the sink term.
+- Added configuration parameters needed for the brine convection parameterisation. The critical Rayleigh number,
+the convection strength tuning parameter and then the dimensional haline contraction coefficient and reference permeability.
+The two tuning parameters are given default values from the Rees Jones 2014 paper but later work (Thomas 2022) suggests
+using lower values of these will work better to desalinate the ice.
+- test_brine_drainage.py This script is useful as it generates some plots illustrating the functions
+used to calculate the ice depth, rayleigh number and convecting liquid velocity.
+This can be used to visually confirm the parameterisation is working as expected and the templates for
+plotting these quantities may come in handy.
+- drainage_test.py This script runs a simulation with the brine drainage parameterisation turned on.
+- celestine/brine_drainage.py This module calculates the quantities needed for the Rees Jones 2014
+brine convection parameterisation and provides the parameterised darcy liquid velocity to the rest of
+the simulation.
+- celestine/brine_channel_sink_terms.py This module implements the loss of heat, salt and bulk gas
+through the downward brine channel flow in the Rees Jones 2014 convective parameterisation.
+This provides the terms in the conservation equations that loose heat, salt and bulk gas to the ocean.
+- Added the option to choose the thermistor temperature data used to force the top of the simulation for the barrow simulation.
+This is important as we don't simulate a snow layer so we can choose via the new option Barrow_top_temperature_data_choice
+in the configuration if we want to use temperature data recorded at the air interface, bottom snow or top of ice.
+- Added option in the barrow configuration to choose the bulk gas content of the initial ice cover.
+
+## Changed ##
+- Make the barrow simulation configuration use recorded ocean temperature to force the bottom of the domain.
+
+### Docs ###
+- Add the modules brine_drainage and brine_channel_sink_terms to the documentation index.
+
+### Bugs ###
+- The brine convection parameterisation seems to work but the option to couple bubbles to the horizontal flow
+and hence remove free gas phase via brine channels does not work as it seems some quantity is calculated on the wrong
+grid. This option currently just breaks the simulation if set to True.
+
 ## v0.10.0 (2023-11-24) ##
 
 ### Summary ###
