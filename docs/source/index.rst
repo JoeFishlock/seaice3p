@@ -23,6 +23,8 @@ Celestine
    run_simulation
    state
    velocities
+   brine_drainage
+   brine_channel_sink_terms
    template
    reduced_solver
    scipy

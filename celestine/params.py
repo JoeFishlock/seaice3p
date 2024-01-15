@@ -44,7 +44,6 @@ class DarcyLawParams:
 
     B: float = 100
     pore_throat_scaling: float = 1 / 2
-    liquid_velocity: float = 0.0
     bubble_size_distribution_type: str = "mono"
     wall_drag_law_choice: str = "power"
 
@@ -62,6 +61,14 @@ class DarcyLawParams:
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
 
+    brine_convection_parameterisation: bool = False
+    Rayleigh_salt: float = 44105
+    Rayleigh_critical: float = 40
+    convection_strength: float = 0.03
+
+    couple_bubble_to_horizontal_flow: bool = True
+    couple_bubble_to_vertical_flow: bool = True
+
 
 @dataclass
 class ForcingConfig:
@@ -73,9 +80,17 @@ class ForcingConfig:
     amplitude: float = 0.75
     period: float = 4.0
 
+    Barrow_top_temperature_data_choice: str = "air"
+    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+
     # class variables with barrow forcing data hard coded in
-    AIR_TEMP_INDEX: ClassVar[int] = 8
-    TIME_INDEX: ClassVar[int] = 0
+    DATA_INDEXES: ClassVar[dict[str, int]] = {
+        "time": 0,
+        "air": 8,
+        "bottom_snow": 18,
+        "top_ice": 19,
+        "ocean": 43,
+    }
     BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
 
     def load_forcing_data(self):
@@ -87,12 +102,25 @@ class ForcingConfig:
         hard coded in as class variables.
         """
         data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
-        barrow_air_temp = data[:, self.AIR_TEMP_INDEX]
-        barrow_days = data[:, self.TIME_INDEX] - data[0, self.TIME_INDEX]
-        barrow_air_temp, barrow_days = filter_missing_values(
-            barrow_air_temp, barrow_days
+        top_temp_index = self.DATA_INDEXES[self.Barrow_top_temperature_data_choice]
+        ocean_temp_index = self.DATA_INDEXES["ocean"]
+        time_index = self.DATA_INDEXES["time"]
+
+        barrow_top_temp = data[:, top_temp_index]
+        barrow_days = data[:, time_index] - data[0, time_index]
+        barrow_top_temp, barrow_days = filter_missing_values(
+            barrow_top_temp, barrow_days
         )
-        self.barrow_air_temp = barrow_air_temp
+
+        barrow_bottom_temp = data[:, ocean_temp_index]
+        barrow_ocean_days = data[:, time_index] - data[0, time_index]
+        barrow_bottom_temp, barrow_ocean_days = filter_missing_values(
+            barrow_bottom_temp, barrow_ocean_days
+        )
+
+        self.barrow_top_temp = barrow_top_temp
+        self.barrow_bottom_temp = barrow_bottom_temp
+        self.barrow_ocean_days = barrow_ocean_days
         self.barrow_days = barrow_days
 
 
@@ -103,7 +131,7 @@ class NumericalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    solver: str = "LU"
+    solver: str = "SCI"
 
     @property
     def step(self):

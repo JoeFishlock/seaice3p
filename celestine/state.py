@@ -79,6 +79,11 @@ class StateBCs:
         _, _, _, ghosts = initialise_grids(self.cfg.numerical_params.I)
         return ghosts
 
+    @property
+    def edge_grid(self):
+        _, _, edges, _ = initialise_grids(self.cfg.numerical_params.I)
+        return edges
+
 
 class Solution:
     """store solution at specified times on the center grid"""
