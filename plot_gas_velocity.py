@@ -5,8 +5,7 @@ liquid fraction
 import numpy as np
 import matplotlib.pyplot as plt
 import celestine.velocities as vel
-from celestine.grids import get_difference_matrix, geometric
-from celestine.params import Config, DarcyLawParams, NumericalParams
+from celestine.grids import geometric
 from celestine.dimensional_params import DimensionalParams
 
 
@@ -53,10 +52,9 @@ if __name__ == "__main__":
             minimum_bubble_radius=minimum_bubble_radius,
             porosity_threshold=True,
             porosity_threshold_value=0.024,
+            I=1000,
         )
-        cfg = dimensional_cfg.get_config(
-            numerical_params=NumericalParams(solver="SCI", I=1000),
-        )
+        cfg = dimensional_cfg.get_config()
         return cfg, dimensional_cfg
 
     """Plot wall drag enhancement against bubble size fraction for the case where we

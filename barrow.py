@@ -28,15 +28,13 @@ barrow_dimensional_params = DimensionalParams(
     savefreq_in_days=3,
     bubble_radius=0.2e-3,
     lengthscale=2.4,
+    solver="SCI",
+    I=24,
+    temperature_forcing_choice="barrow_2009",
+    initial_conditions_choice="barrow_2009",
 )
 barrow_dimensional_params.save(DATA_DIRECTORY)
-barrow = barrow_dimensional_params.get_config(
-    forcing_config=ForcingConfig(temperature_forcing_choice="barrow_2009"),
-    numerical_params=NumericalParams(solver="SCI", I=24),
-    boundary_conditions_config=BoundaryConditionsConfig(
-        initial_conditions_choice="barrow_2009"
-    ),
-)
+barrow = barrow_dimensional_params.get_config()
 barrow.save(DATA_DIRECTORY)
 status, duration = solve(barrow, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
