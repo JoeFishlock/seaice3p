@@ -17,7 +17,6 @@ if __name__ == "__main__":
         "output_directory",
         help="save simulation output to this directory",
         nargs="?",
-        default="simulation_output",
     )
     parser.add_argument(
         "-d",
@@ -28,20 +27,24 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
     is_dimensional_configuration = args.dimensional
     configuration_directory_path = Path(args.configuration_directory)
-    output_directory_path = Path(args.output_directory)
-    output_directory_path.mkdir(parents=True, exist_ok=True)
 
-    list_of_configs = list(configuration_directory_path.glob("*.yaml")) + list(
-        configuration_directory_path.glob("*.yml")
-    )
+    if args.output_directory is None:
+        output_directory_path = configuration_directory_path
+    else:
+        output_directory_path = Path(args.output_directory)
+    output_directory_path.mkdir(parents=True, exist_ok=True)
 
     print(f"Running celestine version: {__version__}")
     print(f"Save simulation output to: {output_directory_path}")
     print(f"Looking for configurations in: {configuration_directory_path}")
     print(f"Dimensional configuration option is {is_dimensional_configuration}")
 
+    list_of_configs = list(configuration_directory_path.glob("*.yaml")) + list(
+        configuration_directory_path.glob("*.yml")
+    )
     cfgs = []
     for config_path in list_of_configs:
         if is_dimensional_configuration:
