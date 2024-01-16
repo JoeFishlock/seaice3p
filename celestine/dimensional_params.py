@@ -105,6 +105,12 @@ class DimensionalParams:
     haline_contraction_coefficient: float = 7.5e-4
     reference_permeability: float = 1e-8
 
+    # Boundary conditions in dimensional units
+    initial_conditions_choice: str = "uniform"
+    far_gas_sat: float = saturation_concentration
+    far_temp: float = -0.81
+    far_bulk_salinity: float = ocean_salinity
+
     @property
     def expansion_coefficient(self):
         r"""calculate
@@ -316,9 +322,18 @@ class DimensionalParams:
             couple_bubble_to_vertical_flow=self.couple_bubble_to_vertical_flow,
         )
 
+    def get_boundary_conditions_config(self):
+        return BoundaryConditionsConfig(
+            initial_conditions_choice=self.initial_conditions_choice,
+            far_gas_sat=self.far_gas_sat / self.saturation_concentration,
+            far_temp=(self.far_temp - self.ocean_freezing_temperature)
+            / self.temperature_difference,
+            far_bulk_salinity=(self.far_bulk_salinity - self.ocean_salinity)
+            / self.salinity_difference,
+        )
+
     def get_config(
         self,
-        boundary_conditions_config: BoundaryConditionsConfig = BoundaryConditionsConfig(),
         forcing_config: ForcingConfig = ForcingConfig(),
         numerical_params: NumericalParams = NumericalParams(),
     ):
@@ -329,6 +344,7 @@ class DimensionalParams:
         forcing provided for the simulation."""
         physical_params = self.get_physical_params()
         darcy_law_params = self.get_darcy_law_params()
+        boundary_conditions_config = self.get_boundary_conditions_config()
         return Config(
             name=self.name,
             physical_params=physical_params,
