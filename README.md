@@ -8,6 +8,14 @@ Currently use by downloading the source code and placing the `celestine/` direct
 Then import any functions you need as in the example `main.py`.
 Requirements can be installed by running `pip install -r requirements.txt`.
 
+## Usage ##
+
+Save configurations for a simulation (either dimensional or non-dimensional but not a mixture) as yaml files.
+This can be done by editing examples or by using classes within the dimensional_params and params modules.
+Once you have a directory of configuration files the simulation for each can be run using `python -m celestine path_to_configuration_directory path_to_output_directory`.
+The `--dimensional` flag should be added to this command if running dimensional parameter configurations.
+The simulation will be run for each configuration and the data saved as a numpy archive with the same name as the simulation in the specified output directory.
+
 ## Documentation ##
 
 found in the `docs/` directory
