@@ -5,7 +5,7 @@ liquid fraction
 import numpy as np
 import matplotlib.pyplot as plt
 import celestine.velocities as vel
-from celestine.grids import geometric
+from celestine.grids import geometric, initialise_grids
 from celestine.dimensional_params import DimensionalParams
 
 
@@ -17,6 +17,11 @@ if __name__ == "__main__":
         def __init__(self, liquid_fraction):
             self.liquid_fraction = liquid_fraction
             self.pressure = np.zeros_like(liquid_fraction)
+            self.liquid_salinity = np.zeros_like(liquid_fraction)
+            I = np.size(liquid_fraction)
+            _, centers, edges, _ = initialise_grids(I)
+            self.grid = centers
+            self.edge_grid = edges
 
     def calculate_volume_average_bubble_radius(max, min, p):
         cubed_radius = ((p - 1) * (max ** (4 - p) - min ** (4 - p))) / (
