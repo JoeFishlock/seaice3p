@@ -1,12 +1,9 @@
 import argparse
 from pathlib import Path
 from celestine import __version__
-
-
-def load_simulation_configuration(config_path):
-    """TEMPORARY Placeholder function. Need to load a config either from a saved
-    config or non-dimensional configuration"""
-    print("loading: ", config_path)
+from celestine.dimensional_params import DimensionalParams
+from celestine.params import Config
+from celestine.run_simulation import run_batch
 
 
 if __name__ == "__main__":
@@ -45,6 +42,11 @@ if __name__ == "__main__":
     print(f"Looking for configurations in: {configuration_directory_path}")
     print(f"Dimensional configuration option is {is_dimensional_configuration}")
 
+    cfgs = []
     for config_path in list_of_configs:
-        config = load_simulation_configuration(config_path)
-    #   Create a list of simulation configurations then we can batch run them
+        if is_dimensional_configuration:
+            cfgs.append(DimensionalParams.load(config_path).get_config())
+        else:
+            cfgs.append(Config.load(config_path))
+
+    run_batch(cfgs, output_directory_path)
