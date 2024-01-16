@@ -6,6 +6,7 @@ Solution: store primary variables at each timestep we want to save data
 """
 
 import numpy as np
+from pathlib import Path
 import celestine.params as cp
 import celestine.boundary_conditions as bc
 from celestine.enthalpy_method import get_enthalpy_method
@@ -91,7 +92,6 @@ class Solution:
     def __init__(self, cfg: cp.Config):
         self.time_length = 1 + int(cfg.total_time / cfg.savefreq)
         self.name = cfg.name
-        self.data_path = cfg.data_path
 
         self.times = np.zeros((self.time_length,))
 
@@ -108,11 +108,10 @@ class Solution:
         self.gas[:, index] = state.gas
         self.pressure[:, index] = state.pressure
 
-    def save(self):
-        data_path = self.data_path
+    def save(self, directory: Path):
         name = self.name
         np.savez(
-            f"{data_path}{name}.npz",
+            directory / f"{name}.npz",
             times=self.times,
             enthalpy=self.enthalpy,
             salt=self.salt,

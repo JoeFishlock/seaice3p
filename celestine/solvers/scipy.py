@@ -1,4 +1,5 @@
 from scipy.integrate import solve_ivp
+from pathlib import Path
 import numpy as np
 from celestine.velocities import (
     calculate_velocities,
@@ -71,7 +72,7 @@ class ScipySolver(SolverTemplate):
         return np.hstack((enthalpy_function, salt_function, gas_function))
 
     @logs.time_function
-    def solve(self):
+    def solve(self, directory: Path):
 
         # for the barrow forcing you need to load external data to the forcing config
         self.load_forcing_data_if_needed()
@@ -99,6 +100,6 @@ class ScipySolver(SolverTemplate):
         stored_solution.salt = sol_salt
         stored_solution.gas = sol_gas
         stored_solution.pressure = np.zeros_like(sol_gas)
-        stored_solution.save()
+        stored_solution.save(directory)
         print("")
         return 0

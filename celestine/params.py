@@ -8,6 +8,7 @@ from dataclasses import dataclass, asdict
 import numpy as np
 from celestine.logging_config import logger
 from typing import ClassVar
+from pathlib import Path
 
 
 @dataclass
@@ -158,10 +159,9 @@ class Config:
     scales: int = None
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
-    data_path: str = "data/"
 
-    def save(self):
-        with open(f"{self.data_path}{self.name}.yml", "w") as outfile:
+    def save(self, directory: Path):
+        with open(directory / f"{self.name}.yml", "w") as outfile:
             dump(asdict(self), outfile)
 
     @classmethod
@@ -172,7 +172,6 @@ class Config:
             name=dictionary["name"],
             total_time=dictionary["total_time"],
             savefreq=dictionary["savefreq"],
-            data_path=dictionary["data_path"],
             physical_params=PhysicalParams(**dictionary["physical_params"]),
             boundary_conditions_config=BoundaryConditionsConfig(
                 **dictionary["boundary_conditions_config"]
