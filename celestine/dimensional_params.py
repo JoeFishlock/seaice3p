@@ -111,6 +111,17 @@ class DimensionalParams:
     far_temp: float = -0.81
     far_bulk_salinity: float = ocean_salinity
 
+    # Forcing configuration parameters
+    temperature_forcing_choice: str = "constant"
+    constant_top_temperature: float = -30.32
+    Barrow_top_temperature_data_choice: str = "air"
+    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+    # These are the parameters for the sinusoidal temperature cycle in non dimensional
+    # units
+    offset: float = -1.0
+    amplitude: float = 0.75
+    period: float = 4.0
+
     @property
     def expansion_coefficient(self):
         r"""calculate
@@ -332,9 +343,22 @@ class DimensionalParams:
             / self.salinity_difference,
         )
 
+    def get_forcing_config(self):
+        return ForcingConfig(
+            temperature_forcing_choice=self.temperature_forcing_choice,
+            constant_top_temperature=(
+                self.constant_top_temperature - self.ocean_freezing_temperature
+            )
+            / self.temperature_difference,
+            offset=self.offset,
+            amplitude=self.amplitude,
+            period=self.period,
+            Barrow_top_temperature_data_choice=self.Barrow_top_temperature_data_choice,
+            Barrow_initial_bulk_gas_in_ice=self.Barrow_initial_bulk_gas_in_ice,
+        )
+
     def get_config(
         self,
-        forcing_config: ForcingConfig = ForcingConfig(),
         numerical_params: NumericalParams = NumericalParams(),
     ):
         """Return a Config object for the simulation.
@@ -345,6 +369,7 @@ class DimensionalParams:
         physical_params = self.get_physical_params()
         darcy_law_params = self.get_darcy_law_params()
         boundary_conditions_config = self.get_boundary_conditions_config()
+        forcing_config = self.get_forcing_config()
         return Config(
             name=self.name,
             physical_params=physical_params,
