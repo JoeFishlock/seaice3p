@@ -122,6 +122,12 @@ class DimensionalParams:
     amplitude: float = 0.75
     period: float = 4.0
 
+    # Numerical Params
+    I: int = 50
+    timestep: float = 2e-4
+    regularisation: float = 1e-6
+    solver: str = "SCI"
+
     @property
     def expansion_coefficient(self):
         r"""calculate
@@ -357,10 +363,15 @@ class DimensionalParams:
             Barrow_initial_bulk_gas_in_ice=self.Barrow_initial_bulk_gas_in_ice,
         )
 
-    def get_config(
-        self,
-        numerical_params: NumericalParams = NumericalParams(),
-    ):
+    def get_numerical_params(self):
+        return NumericalParams(
+            I=self.I,
+            timestep=self.timestep,
+            regularisation=self.regularisation,
+            solver=self.solver,
+        )
+
+    def get_config(self):
         """Return a Config object for the simulation.
 
         physical parameters and Darcy law parameters are calculated from the dimensional
@@ -370,6 +381,7 @@ class DimensionalParams:
         darcy_law_params = self.get_darcy_law_params()
         boundary_conditions_config = self.get_boundary_conditions_config()
         forcing_config = self.get_forcing_config()
+        numerical_params = self.get_numerical_params()
         return Config(
             name=self.name,
             physical_params=physical_params,
