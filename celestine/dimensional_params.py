@@ -329,6 +329,8 @@ class DimensionalParams:
             lewis_salt=self.lewis_salt,
             lewis_gas=self.lewis_gas,
             frame_velocity=self.frame_velocity,
+            phase_average_conductivity=self.phase_average_conductivity,
+            conductivity_ratio=self.conductivity_ratio,
         )
 
     def get_darcy_law_params(self):
