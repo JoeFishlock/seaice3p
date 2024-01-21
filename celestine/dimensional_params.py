@@ -315,7 +315,7 @@ class DimensionalParams:
     def conductivity_ratio(self):
         r"""Calculate the ratio of solid to liquid thermal conductivity
 
-        .. math:: \lambda_l = \frac{k_s}{k_l}
+        .. math:: \lambda = \frac{k_s}{k_l}
 
         """
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
