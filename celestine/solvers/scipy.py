@@ -57,7 +57,7 @@ class ScipySolver(SolverTemplate):
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
-        heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g)
+        heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g, cfg)
         salt_flux = calculate_salt_flux(state_BCs, Wl, V, D_g, cfg)
         gas_flux = calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg)
 
