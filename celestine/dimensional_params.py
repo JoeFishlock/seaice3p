@@ -70,7 +70,8 @@ class DimensionalParams:
     eutectic_temperature: float = -21.1  # deg Celsius
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     specific_heat_capacity: float = 4184  # ice and water assumed equal in J/kg degC
-    thermal_conductivity: float = 0.598  # ice and water assumed equal in W/m degC
+    liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
+    solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
     gas_diffusivity: float = 0  # molecular diffusivity of gas in water in m2/s
     frame_velocity_dimensional: float = 0  # velocity of frame in m/day
@@ -192,7 +193,7 @@ class DimensionalParams:
         .. math:: \kappa = \frac{k}{\rho_l c_p}
 
         """
-        return self.thermal_conductivity / (
+        return self.liquid_thermal_conductivity / (
             self.liquid_density * self.specific_heat_capacity
         )
 
