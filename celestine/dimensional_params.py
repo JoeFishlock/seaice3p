@@ -311,6 +311,15 @@ class DimensionalParams:
             / (self.thermal_diffusivity * self.liquid_viscosity)
         )
 
+    @property
+    def conductivity_ratio(self):
+        r"""Calculate the ratio of solid to liquid thermal conductivity
+
+        .. math:: \lambda_l = \frac{k_s}{k_l}
+
+        """
+        return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
+
     def get_physical_params(self):
         """return a PhysicalParams object"""
         return PhysicalParams(
