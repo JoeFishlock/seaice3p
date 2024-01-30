@@ -10,6 +10,7 @@ output between physical and non-dimensional variables.
 
 from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
+from pathlib import Path
 import numpy as np
 from celestine.params import (
     Config,
@@ -59,7 +60,6 @@ class DimensionalParams:
     name: str
     total_time_in_days: float = 365  # days
     savefreq_in_days: float = 1  # save data after this amount of time in days
-    data_path: str = "data/"
 
     lengthscale: float = 1  # domain height in m
     liquid_density: float = 1028  # kg/m3
@@ -70,7 +70,12 @@ class DimensionalParams:
     eutectic_temperature: float = -21.1  # deg Celsius
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     specific_heat_capacity: float = 4184  # ice and water assumed equal in J/kg degC
-    thermal_conductivity: float = 0.598  # ice and water assumed equal in W/m degC
+
+    # Option to average the conductivity term.
+    phase_average_conductivity: bool = False
+    liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
+    solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
+
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
     gas_diffusivity: float = 0  # molecular diffusivity of gas in water in m2/s
     frame_velocity_dimensional: float = 0  # velocity of frame in m/day
@@ -104,6 +109,29 @@ class DimensionalParams:
     convection_strength: float = 0.03
     haline_contraction_coefficient: float = 7.5e-4
     reference_permeability: float = 1e-8
+
+    # Boundary conditions in dimensional units
+    initial_conditions_choice: str = "uniform"
+    far_gas_sat: float = saturation_concentration
+    far_temp: float = -0.81
+    far_bulk_salinity: float = ocean_salinity
+
+    # Forcing configuration parameters
+    temperature_forcing_choice: str = "constant"
+    constant_top_temperature: float = -30.32
+    Barrow_top_temperature_data_choice: str = "air"
+    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+    # These are the parameters for the sinusoidal temperature cycle in non dimensional
+    # units
+    offset: float = -1.0
+    amplitude: float = 0.75
+    period: float = 4.0
+
+    # Numerical Params
+    I: int = 50
+    timestep: float = 2e-4
+    regularisation: float = 1e-6
+    solver: str = "SCI"
 
     @property
     def expansion_coefficient(self):
@@ -169,7 +197,7 @@ class DimensionalParams:
         .. math:: \kappa = \frac{k}{\rho_l c_p}
 
         """
-        return self.thermal_conductivity / (
+        return self.liquid_thermal_conductivity / (
             self.liquid_density * self.specific_heat_capacity
         )
 
@@ -283,6 +311,15 @@ class DimensionalParams:
             / (self.thermal_diffusivity * self.liquid_viscosity)
         )
 
+    @property
+    def conductivity_ratio(self):
+        r"""Calculate the ratio of solid to liquid thermal conductivity
+
+        .. math:: \lambda = \frac{k_s}{k_l}
+
+        """
+        return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
+
     def get_physical_params(self):
         """return a PhysicalParams object"""
         return PhysicalParams(
@@ -292,6 +329,8 @@ class DimensionalParams:
             lewis_salt=self.lewis_salt,
             lewis_gas=self.lewis_gas,
             frame_velocity=self.frame_velocity,
+            phase_average_conductivity=self.phase_average_conductivity,
+            conductivity_ratio=self.conductivity_ratio,
         )
 
     def get_darcy_law_params(self):
@@ -316,12 +355,39 @@ class DimensionalParams:
             couple_bubble_to_vertical_flow=self.couple_bubble_to_vertical_flow,
         )
 
-    def get_config(
-        self,
-        boundary_conditions_config: BoundaryConditionsConfig = BoundaryConditionsConfig(),
-        forcing_config: ForcingConfig = ForcingConfig(),
-        numerical_params: NumericalParams = NumericalParams(),
-    ):
+    def get_boundary_conditions_config(self):
+        return BoundaryConditionsConfig(
+            initial_conditions_choice=self.initial_conditions_choice,
+            far_gas_sat=self.far_gas_sat / self.saturation_concentration,
+            far_temp=(self.far_temp - self.ocean_freezing_temperature)
+            / self.temperature_difference,
+            far_bulk_salinity=(self.far_bulk_salinity - self.ocean_salinity)
+            / self.salinity_difference,
+        )
+
+    def get_forcing_config(self):
+        return ForcingConfig(
+            temperature_forcing_choice=self.temperature_forcing_choice,
+            constant_top_temperature=(
+                self.constant_top_temperature - self.ocean_freezing_temperature
+            )
+            / self.temperature_difference,
+            offset=self.offset,
+            amplitude=self.amplitude,
+            period=self.period,
+            Barrow_top_temperature_data_choice=self.Barrow_top_temperature_data_choice,
+            Barrow_initial_bulk_gas_in_ice=self.Barrow_initial_bulk_gas_in_ice,
+        )
+
+    def get_numerical_params(self):
+        return NumericalParams(
+            I=self.I,
+            timestep=self.timestep,
+            regularisation=self.regularisation,
+            solver=self.solver,
+        )
+
+    def get_config(self):
         """Return a Config object for the simulation.
 
         physical parameters and Darcy law parameters are calculated from the dimensional
@@ -329,6 +395,9 @@ class DimensionalParams:
         forcing provided for the simulation."""
         physical_params = self.get_physical_params()
         darcy_law_params = self.get_darcy_law_params()
+        boundary_conditions_config = self.get_boundary_conditions_config()
+        forcing_config = self.get_forcing_config()
+        numerical_params = self.get_numerical_params()
         return Config(
             name=self.name,
             physical_params=physical_params,
@@ -339,7 +408,6 @@ class DimensionalParams:
             scales=self.get_scales(),
             total_time=self.total_time,
             savefreq=self.savefreq,
-            data_path=self.data_path,
         )
 
     def get_scales(self):
@@ -356,12 +424,12 @@ class DimensionalParams:
             self.saturation_concentration,
         )
 
-    def save(self):
-        """save this object to a yaml file in the specified data path.
+    def save(self, directory: Path):
+        """save this object to a yaml file in the specified directory.
 
         The name will be the name given with _dimensional appended to distinguish it
         from a saved non-dimensional configuration."""
-        with open(f"{self.data_path}{self.name}_dimensional.yml", "w") as outfile:
+        with open(directory / f"{self.name}_dimensional.yml", "w") as outfile:
             dump(asdict(self), outfile)
 
     @classmethod

@@ -2,6 +2,7 @@
 concrete solvers should inherit and overwrite required methods"""
 
 import numpy as np
+from pathlib import Path
 from abc import ABC, abstractmethod
 import celestine.params as cp
 import celestine.grids as grids
@@ -59,7 +60,7 @@ class SolverTemplate(ABC):
             self.cfg.forcing_config.load_forcing_data()
 
     @logs.time_function
-    def solve(self):
+    def solve(self, directory: Path):
         self.pre_solve_checks()  # optional method
 
         # for the barrow forcing you need to load external data to the forcing config
@@ -91,7 +92,7 @@ class SolverTemplate(ABC):
 
             old_time_index = new_time_index
 
-        solution.save()
+        solution.save(directory)
         # clear line after carriage return
         print("")
         return 0

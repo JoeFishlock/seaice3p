@@ -2,6 +2,7 @@
 and see if the bulk salinity does as expected.
 """
 import numpy as np
+from pathlib import Path
 from celestine.params import Config, DarcyLawParams, ForcingConfig, NumericalParams
 from celestine.run_simulation import solve
 import matplotlib.pyplot as plt
@@ -16,6 +17,7 @@ logger.info(f"Celestine version {__version__}")
 """Generate one simulation config and save to data/base.yml
 run the config and save data to data/base.npz
 """
+DATA_DIRECTORY = Path("data/")
 cfg = Config(
     name="drainage",
     total_time=4,
@@ -33,8 +35,8 @@ cfg = Config(
     forcing_config=ForcingConfig(temperature_forcing_choice="yearly"),
     numerical_params=NumericalParams(solver="SCI"),
 )
-cfg.save()
-status, duration = solve(cfg)
+cfg.save(DATA_DIRECTORY)
+status, duration = solve(cfg, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
 
 

@@ -1,6 +1,7 @@
 """Script to run a simulation starting with dimensional parameters"""
 
 import numpy as np
+from pathlib import Path
 from celestine.params import (
     Config,
     ForcingConfig,
@@ -20,23 +21,22 @@ logger.info(f"Celestine version {__version__}")
 """Generate one simulation config and save to data/base.yml
 run the config and save data to data/base.npz
 """
+DATA_DIRECTORY = Path("data/")
 barrow_dimensional_params = DimensionalParams(
     name="barrow",
     total_time_in_days=164,
     savefreq_in_days=3,
     bubble_radius=0.2e-3,
     lengthscale=2.4,
+    solver="SCI",
+    I=24,
+    temperature_forcing_choice="barrow_2009",
+    initial_conditions_choice="barrow_2009",
 )
-barrow_dimensional_params.save()
-barrow = barrow_dimensional_params.get_config(
-    forcing_config=ForcingConfig(temperature_forcing_choice="barrow_2009"),
-    numerical_params=NumericalParams(solver="SCI", I=24),
-    boundary_conditions_config=BoundaryConditionsConfig(
-        initial_conditions_choice="barrow_2009"
-    ),
-)
-barrow.save()
-status, duration = solve(barrow)
+barrow_dimensional_params.save(DATA_DIRECTORY)
+barrow = barrow_dimensional_params.get_config()
+barrow.save(DATA_DIRECTORY)
+status, duration = solve(barrow, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
 
 

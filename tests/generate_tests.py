@@ -1,8 +1,9 @@
 """Generate yaml simulation config files for manual test cases.
 """
+from pathlib import Path
 import celestine.params
 
-TEST_DATA_DIR = "test_data/"
+TEST_DATA_DIR = Path("test_data/")
 
 if __name__ == "__main__":
     yearly_forcing_config = celestine.params.ForcingConfig(
@@ -40,9 +41,8 @@ if __name__ == "__main__":
                     name=forcing_string + bubble_string + solver_key,
                     total_time=4,
                     savefreq=5e-2,
-                    data_path=TEST_DATA_DIR,
                     darcy_law_params=bubble_size,
                     forcing_config=forcing_config,
                     numerical_params=solver,
                 )
-                cfg.save()
+                cfg.save(TEST_DATA_DIR)
