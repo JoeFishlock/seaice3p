@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.12.0 (2024-01-30) ##
+
+### Summary ###
+Add the option to run simulations with phase averaged thermal conductivity to better match ice depth for real sea
+ice growth. We also add the functionality to run a single simulation config or a directory of simulation configs,
+which can be dimensional or not, from the command line using the `python -m celestine` command.
+
+### Added ###
+- Add parameters to the dimensional params configuration class so that a simulation configuration can be generated
+without supplying any additional objects.
+- Add __main__.py file which uses argparse to run simulation configurations from the command line.
+- Option to calculate conductive heat transfer using phase averaged thermal conductivities.
+
+## Changed ##
+- Remove data_path as a configuration option and change solver methods to specify where they will save output.
+- Flux module calculation to calculate phase average thermal conductivities.
+
+## Removed ##
+- Remove tests/run_tests.py as tests can now be run from the command line using `python -m celestine test_data`.
+
+### Docs ###
+- Update test procedure in README.
+
 ## v0.11.0 (2024-01-15) ##
 
 ### Summary ###
