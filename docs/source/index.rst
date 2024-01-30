@@ -11,18 +11,23 @@ Celestine
    :caption: Contents:
    
    boundary_conditions
+   dimensional_params
    enthalpy_method
    flux
    forcing
    grids
+   initial_conditions
    logging_config
    params
    phase_boundaries
    run_simulation
    state
    velocities
-   lagged_solver
+   brine_drainage
+   brine_channel_sink_terms
    template
+   reduced_solver
+   scipy
 
 Indices and tables
 ==================

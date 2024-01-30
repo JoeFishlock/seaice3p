@@ -1,20 +1,37 @@
+"""Module for calculating the fluxes using upwind scheme"""
 import numpy as np
 from celestine.grids import upwind, geometric
 
 
-def calculate_conductive_heat_flux(temperature, D_g):
+def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
     r"""Calculate conductive heat flux as
 
     .. math:: -\frac{\partial\theta}{\partial z}
+
+    or alteratively if the phase_average_conductivity configuration parameter
+    is set to True then we use the conductivity ratio as follows
+
+    .. math:: -[(\phi_l + \lambda \phi_s) \frac{\partial \theta}{\partial z}]
 
     :param temperature: temperature including ghost cells
     :type temperature: Numpy Array of size I+2
     :param D_g: difference matrix for ghost grid
     :type D_g: Numpy Array
+    :param cfg: Simulation configuration
+    :type cfg: celestine.params.Config
     :return: conductive heat flux
 
     """
-    return -np.matmul(D_g, temperature)
+    temperature = state_BCs.temperature
+    if not cfg.physical_params.phase_average_conductivity:
+        return -np.matmul(D_g, temperature)
+
+    conductivity_ratio = cfg.physical_params.conductivity_ratio
+    edge_liquid_fraction = geometric(state_BCs.liquid_fraction)
+    edge_solid_fraction = 1 - edge_liquid_fraction
+    return -(
+        edge_liquid_fraction + conductivity_ratio * edge_solid_fraction
+    ) * np.matmul(D_g, temperature)
 
 
 def calculate_advective_heat_flux(temperature, Wl):
@@ -25,11 +42,11 @@ def calculate_frame_advection_heat_flux(enthalpy, V):
     return upwind(enthalpy, V)
 
 
-def calculate_heat_flux(state_BCs, Wl, V, D_g):
+def calculate_heat_flux(state_BCs, Wl, V, D_g, cfg):
     temperature = state_BCs.temperature
     enthalpy = state_BCs.enthalpy
     heat_flux = (
-        calculate_conductive_heat_flux(temperature, D_g)
+        calculate_conductive_heat_flux(state_BCs, D_g, cfg)
         + calculate_advective_heat_flux(temperature, Wl)
         + calculate_frame_advection_heat_flux(enthalpy, V)
     )
@@ -99,3 +116,20 @@ def calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg):
         + calculate_frame_advection_gas_flux(gas, V)
     )
     return gas_flux
+
+
+def take_forward_euler_step(quantity, flux, timestep, D_e):
+    r"""Advance the given quantity one forward Euler step using the given flux
+
+    The quantity is given on cell centers and the flux on cell edges.
+
+    Discretise the conservation equation
+
+    .. math:: \frac{\partial Q}{\partial t} = -\frac{\partial F}{\partial z}
+
+    as
+
+    .. math:: Q^{n+1} = Q^n - \Delta t (\frac{\partial F}{\partial z})
+
+    """
+    return quantity - timestep * np.matmul(D_e, flux)

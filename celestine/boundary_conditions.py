@@ -1,4 +1,8 @@
-from celestine.forcing import get_temperature_forcing
+"""Module to provide functions to add boundary conditions to each quantity on the
+centered grid that needs to be on the ghost grid for the upwind scheme.
+"""
+
+from celestine.forcing import get_temperature_forcing, get_bottom_temperature_forcing
 from celestine.grids import add_ghost_cells
 from celestine.params import Config
 
@@ -34,7 +38,7 @@ def temperature_BCs(temperature_centers, time, cfg: Config):
     """Add ghost cells with BCs to center quantity
 
     Note this needs the current time as well as top temperature is forced."""
-    far_temp = cfg.boundary_conditions_config.far_temp
+    far_temp = get_bottom_temperature_forcing(time, cfg)
     top_temp = get_temperature_forcing(time, cfg)
     return add_ghost_cells(temperature_centers, bottom=far_temp, top=top_temp)
 
@@ -62,4 +66,5 @@ def liquid_fraction_BCs(liquid_fraction_centers, cfg: Config):
 
 
 def pressure_BCs(pressure_centers, cfg: Config):
+    """Add ghost cells to pressure so that W_l=0 at z=0 and p=0 at z=-1"""
     return add_ghost_cells(pressure_centers, bottom=0, top=pressure_centers[-1])

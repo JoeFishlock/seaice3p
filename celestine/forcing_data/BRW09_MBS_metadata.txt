@@ -1,0 +1,315 @@
+---------------------------------------------------------
+   Metadata for UAF Sea Ice Mass Balance Probe 2009
+---------------------------------------------------------
+Version: 25 June, 2009
+
+
+       Chris Petrich    chris.petrich@gi.alaska.edu
+
+Data file name: BRW09_MBS_all.txt
+
+Format: ASCII, columns delimited by TAB, rows delimited by LF
+
+-----------------------------------------------------
+
+Changes:
+--------
+Jun 25: condition of probe after removal
+Jun 25: sliding pinger mast
+Mar 30: additional snow pinger (ID=0)
+Mar 27: added specs of wind turbine
+Mar  9: updated events
+Feb 17: updated quality and events section
+Feb 13: updated events
+Feb  9: update of Notes (ii) and (iii): temperature offsets
+        (mention application of wrong temperature offset in
+        data logger program)
+
+
+-----------------------------------------------------
+
+In 2009, the site was about 1000 meters offshore of Niksuiraq, 
+  the hook at the end of the road out to Pt. Barrow. 
+The site was installed by Chris Petirch, Matthew Druckenmiller, 
+  and Jeremy Harbeck. 
+GPS location of data logger: 71.36655 deg N, 156.54140 deg W
+
+The following measurements are recorded: 
+(i) snow depth, ice thickness, and local water depth;
+(ii) temperature profile through air-snow-ice-water; 
+(iii) air temperature and relative humidity approx. 2m above the ice.
+
+The mass balance site was installed 15 January 2009 with one snow 
+  depth pinger mounted at temperature/humidity mast above the 
+  upward looking altimeter.
+  (Campbell SR50, address 0; replaced on 24 January with Campbell 
+   SR50, address 2. The new instrument started to deliver data at 
+   13:45 AKST.)
+Thermistor string, data logger box w/antenna, and mass balance mast 
+  are collinear with approx. 5 m separation between each.
+On March 28, an additional snow pinger SR50A was added (ID=0).
+
+Another additional snow pinger (Campbell SR50a) was expected to be deployed 
+  but was never deployed.
+
+The thermistor string was removed on 12 June 2009 (the ice was completely
+  melted around the string since at least 9 June); the remaining sensors
+  were recovered on 13 June 2009 by Chris Petrich and Josh Jones.
+
+
+Mass Balance Site:
+
+Campbell CR10X Data logger, AM1664 multiplexer, SM4M data storage 
+  module, SC32A adaptor
+FreeWave Spread-spectrum, no-license radio: FGR 115-WC, 900 MHz 
+  [set to slave mode]
+Bluewave 10 dB directional Yagi Antenna (BMY890K)
+Campbell SR50 Sonic Ranger (snow pinger) with hardware-set SDI 
+  address = 2. 
+Campbell SR50A Sonic Ranger (snow pinger) with hardware-set SDI 
+  address = 0. 
+A second SR50a was not added (with hardware-set SDI addresses = 1)
+Shielded Campbell T107 air temperature/humidity probe
+Benthos underwater acoustic altimeter PSA-916 (one upward looking, 
+  one downward looking),
+Underwater thermistor, Campbell CS500, mounted next to Benthos 
+  altimeters
+CRREL-design thermistor strings (3 x 1 meter sections), (10 cm
+  thermistor spacing)
+Batteries: 2  (of 4 total) UAF 12V cells currently stored at 
+  BASC (85 Amp-hr Exide).
+
+Wind turbine: (installed 26 March pm, local time)
+  Aero4Gen 12V, 100 W max.
+  LVM4SB12-T temperature compensated charge controller, connected 
+     in parallel to the batteries
+
+BASC Site:
+
+Bluewave 10 dB omni-directional Antenna and RF coaxial cabling to:
+FreeWave Spread-spectrum, no-license radio: FGR 115-RC, 900 MHz 
+  [set to master mode]
+  connected to the serial port of a dedicated control PC with an 
+  internet connection. Communication with Campbell LoggerNet 3.5.1
+
+
+-----------------------------------------------------
+
+Measurement intervals:
+
+The measurement interval was 15 minutes. Values reported are
+  instantaneous, non-averaged measurements.
+
+The data logger clock was set to Alaska Standard Time (UTC-9). 
+  However, times reported below are converted to UTC.
+
+
+-----------------------------------------------------
+
+Notes:
+
+(i)     All depths are referenced to the ice/water interface at the 
+          time of installation.
+
+(ii)    T107 water temp is used by the data logger program to 
+          correct the underwater depths delivered by sounders using 
+          an equation for the speed of sound as function of 
+          temperature. The T107 temperature is read, an offset of 
+          +0.45 C is applied, and the speed of sound is calculated.
+        This is bogus. The calculated temperature is in the range 
+          of -1.5 C, while it should be -1.9+-0.1 C.
+          TODO: correct data logger program. Expected error in ice
+          thickness and water depth measurement: < 5 mm.
+        The temperature reported in this data file (column 7) is 
+          back-corrected by applying an offset of -0.45 C.
+
+(iii)   Similarly, the snow pinger uses a correction from the air 
+          temperature measurement of the CS500. No temperature offset 
+          is added.
+          (The operating temperature of the CS500 is down to -40C. 
+          The lowest reading returned by the temperature sensor is
+          –39.66 C. The sensor does not return a special code for
+          "out of range".)
+
+(iv)    Day-of-year is the fractional day of the year with 
+          midnight 1 January midnight being 1.0.
+
+(v)     The reference resistor is a low-temperature co-efficient 
+          resistor. It replaces the upper-most thermistor
+          of the CRREL thermistor string. Its value is close to 
+          the resistor in the voltage bridge.
+
+(vi)    Data from the the relative humidity sensor are questionable.
+          Sensor needs replacement.
+
+-----------------------------------------------------
+
+Events (local time, Alaska):
+03 June:         Pinger mast starts to slip vertically through 
+                 the ice.
+28 March:        Installed snow pinger SR50A with SID=0.
+26 March:        Installed Aero4Gen wind turbine and charge 
+                 controller, both connected in parallel to the 
+                 batteries. First measurement on day 86, 
+                 02:15 UTC reading about 14.5 V at 15 mph wind
+                 and -23 C air temperature.
+08 March:        Alaska changes to daylight savings time at
+                 2 am Alaska Standard Time. This should not
+                 affect the data file.
+04 March:        Batteries replaced by BASC staff on day
+                 64, 02:30 UTC. No measurements at day 
+                 64, 02:30 UTC.
+01 March:        Batteries recover enough for operation by 
+                 themselves.
+27 February:     Batteries drained: Starting day 58, 
+                 09:30 UTC the battery voltage drops from 
+                 11.20 V to 10.54 V at day 58, 18:45 UTC. 
+                 The next measurement recorded is day 60, 
+                 21:45 UTC at 11.66 V.
+11 February:     11:30 AKST bear bends up snow pinger arm
+                 (between 20:30 and 20:45 on day 42, UTC)
+                 apparent distance between pinger and snow 
+                 increases 96 mm. 
+                 Data in the file have correction +0.096 m applied.
+09--12 February: Air temperature may have fallen below -40 C.
+08 February:     Battery change by BASC staff (data logger 
+                 generates second entry with same time stamp)
+24 January:      Replacement of SR50 snow pinger (ID=0) with 
+                 another SR50 snow pinger (ID=2) by BASC staff
+15 January:      Installation of air temperature/humidity 
+                 probe and SR50 snow pinger (ID=0)
+14 January:      Installation of thermistor string, data 
+                 logger box, antenna, and underwater sounders
+
+
+-----------------------------------------------------
+
+Quality Comments:
+The data have been processed to compute the physical values from 
+  the measured quantities. Missing values or invalid data are 
+  indicated as -9999.
+
+Thermistor string temperature measurements:
+(Note: the upper and middle sections are swapped with respect to 
+  previous years.)
+Two bad thermistors in string 3 (bottom), data masked by -9999.
+The thermistor string is completely embedded in conduit painted 
+  white. It is subject to solar radiative heating. Effects due 
+  to thermal conductivity, and the effective response time are 
+  unknown.
+No calibration of thermistor strings.
+  Thermistors in water have individual offsets of approximately 
+  +/- 0.1 C.
+The thermistor string was melted out, i.e. surrounded by water
+  rather than ice, since 9 June.
+Post-deployment inspection: protective coating was missing from 
+  thermistor T18 (second to last in middle string). Protective 
+  coating of thermistors T15 and T17 were lose or cracked. 
+  (Sealed these flaws with PC-Marine hand moldable expoxy putty 
+  for next year.)
+
+Crude absolute calibration of T107 water sensor (offset -0.45 C 
+  added).
+
+Underwater sounders: 
+Return values of "99" (indicating missing return signals) and values 
+  indicating grossly wrong distances are flagged as -9999
+Sounder measuring ice thickness shows periodically an increase in 
+  path length by approx. 2 cm (this looks like noice with ice 
+  thicknesses that are too thin). 
+  These periods seem to be related to changes in the environment 
+  and may indicate actual changes in the acoustical path length.
+The pinger mast started to slip vertically on June 3. Hence, 
+  measurements of snow depth (column 12), ice thickness (column 13) 
+  and water depth (column 14) are systematically biased since 
+  June 3 inclusive.
+Note that water depth is referenced to the ice--water interface.
+  Ice grew 0.7 m since deployment, equivalent to a change in
+  freeboard of several centimeters. This needs to be accounted
+  for.
+Post-deployment inspection: sensor of upward-looking sounder was 
+  coated by a thin film of algae; sensor of downward looking sounder 
+  was free of algae. Water was a soup of brown/green algae in mid June.  
+
+Snow pingers: 
+The original SR50 pinger (ID=0; column 12) had problems, returning 
+  "0" readings most of the time (indicated as -9999 in the data 
+  file). The intermittend readings are considered good.
+The snow pinger on the mast has an offset of +0.096 m applied 
+  starting day 42, 20:45 UTC. This is to compensate for misalignment
+  of the temperature/pinger arm after a bear visit.
+
+Pingers (columns 10 to 12) have value set to -9999 when either not 
+  connected (i.e. before they were installed), when no signal 
+  detected (99 returned), or when distances measured were 
+  obviously wrong (raw data <0.5 m or >5 m).
+
+The pinger mast started to slip vertically on June 3. Hence, 
+  measurements of snow depth (column 12), ice thickness (column 13) 
+  and water depth (column 14) are systematically biased since 
+  June 3 inclusive.
+
+Snow depth/surface ablation determined by the pinger in column 10
+  is considered reliable. Distance measurement of the pinger 
+  agreed with tape measure to better than 0.01 m on 13 June.
+
+Time:
+Since I was not able to reliably determine a systematic drift of
+  the data logger clock between mid Feb and mid June based on
+  time stamps attached by the processing computers, the clock
+  of the CR10X is probably accurate to better than 5 minutes 
+  throughout the course of the field season.
+
+-----------------------------------------------------
+
+
+Column	Description 		
+
+ 1     day-of-year in UTC (decimal fraction)
+ 2     year
+ 3     day of the year in UTC (non-fractional)
+ 4     time (HHMM) in UTC
+
+ 5     internal data logger temp (deg C)
+ 6     battery voltage (V)	 	
+ 7     T107 water temp (deg C)
+
+ 8     CS500 rel hum (%)
+ 9     CS500 air temp (C)
+		
+10     snow depth from SR50a with ID=0 (m) (deployed 28 March)
+11     snow depth from SR50a with ID=1 (m) (never deployed, always -9999)
+12     snow depth from SR50 at the MAST (m) (either ID=0 or ID=2)
+       *** do not use column 12 uncorrected after 2 June ***
+
+13     ice thickness (m)
+       *** do not use column 13 uncorrected after 2 June ***
+14     water depth plus freeboard (m)
+       *** do not use column 14 uncorrected after 2 June ***
+
+15     Reference resistor equivalent temperature (C) 
+       (reading should be constant)
+
+16     T1 (+ 40 cm) (deg C)
+17     T2 (+ 30 cm) (deg C)
+       ....
+20     T5 (   0 cm) (deg C) -- nominal ice--snow interface
+       ....
+24     T9 (- 40 cm) (deg C) -- last thermistor of top string
+25     T10 (- 50 cm) (deg C) -- first thermistor of middle string
+       ....
+30     T15 (-100 cm) (deg C) (see comments)
+       ....
+32     T17 (-120 cm) (deg C) (see comments)
+33     T18 (-130 cm) (deg C) (see comments)
+34     T19 (-140 cm) (deg C) -- last thermistor of middle string
+35     T20 (-150 cm) (deg C) -- first thermistor of bottom string
+       ....
+38     T23 (-180 cm) (deg C) (questionable since mid April)
+       ....
+40     T25 (-200 cm) (deg C) (bad, always -9999)
+       ....
+42     T27 (-220 cm) (deg C) (bad, always -9999)
+       ....
+44     T29 (-240 cm) (deg C)
+

@@ -1,6 +1,261 @@
 # Changelog
 
+## v0.11.0 (2024-01-15) ##
+
+### Summary ###
+We have added options to the simulation to use a brine convection parameterisation (Rees Jones 2014).
+This desalinates the ice and brings in saturated ocean water, assuming continuity of velocity at the ice interface.
+This seems to work relatively well to desalinate the ice for the barrow simulation if we start with ocean bulk salinity.
+This however also changes the heat balance so to get the ice growth correct we need to use a thermal conductivity value
+that is an average of ice and water. Going forward we could just implement the full heat conduction term for each phase.
+To further improve the barrow simulation we use thermistor data for the ocean to force the bottom of the domain.
+We also give the option to use thermistor data at the ice snow interface to better match temperature evolution of the ice.
+This is better than the air temperature as we do not simulate the insulating layer of snow.
+
+### Added ###
+- Functionality to calculate the liquid velocity associated with brine convection using Rees Jones
+2014 parameterisation by turning the brine_convection_parameterisation to True in the simulation configuration.
+The parameterisation should advect tracers with the broad upward liquid flow and also remove salt, heat and bulk gas
+via a sink term that appears as the downward brine channel flow. There are two more true/false flags that
+decide wether to couple bubble motion to the vertical flow that should move bubbles upward and to the horizontal flow
+which is responsible for transporting bubbles to brine channels where they would be expelled and so this appears in
+the sink term.
+- Added configuration parameters needed for the brine convection parameterisation. The critical Rayleigh number,
+the convection strength tuning parameter and then the dimensional haline contraction coefficient and reference permeability.
+The two tuning parameters are given default values from the Rees Jones 2014 paper but later work (Thomas 2022) suggests
+using lower values of these will work better to desalinate the ice.
+- test_brine_drainage.py This script is useful as it generates some plots illustrating the functions
+used to calculate the ice depth, rayleigh number and convecting liquid velocity.
+This can be used to visually confirm the parameterisation is working as expected and the templates for
+plotting these quantities may come in handy.
+- drainage_test.py This script runs a simulation with the brine drainage parameterisation turned on.
+- celestine/brine_drainage.py This module calculates the quantities needed for the Rees Jones 2014
+brine convection parameterisation and provides the parameterised darcy liquid velocity to the rest of
+the simulation.
+- celestine/brine_channel_sink_terms.py This module implements the loss of heat, salt and bulk gas
+through the downward brine channel flow in the Rees Jones 2014 convective parameterisation.
+This provides the terms in the conservation equations that loose heat, salt and bulk gas to the ocean.
+- Added the option to choose the thermistor temperature data used to force the top of the simulation for the barrow simulation.
+This is important as we don't simulate a snow layer so we can choose via the new option Barrow_top_temperature_data_choice
+in the configuration if we want to use temperature data recorded at the air interface, bottom snow or top of ice.
+- Added option in the barrow configuration to choose the bulk gas content of the initial ice cover.
+
+## Changed ##
+- Make the barrow simulation configuration use recorded ocean temperature to force the bottom of the domain.
+
+### Docs ###
+- Add the modules brine_drainage and brine_channel_sink_terms to the documentation index.
+
+### Bugs ###
+- The brine convection parameterisation seems to work but the option to couple bubbles to the horizontal flow
+and hence remove free gas phase via brine channels does not work as it seems some quantity is calculated on the wrong
+grid. This option currently just breaks the simulation if set to True.
+
+## v0.10.0 (2023-11-24) ##
+
+### Summary ###
+To calculation of gas velocity we add options to use a different fit for wall drag enhancement
+function taken from a paper by Haberman. We also add the option to use a critical liquid
+velocity percolation threshold to cut off gas motion. We add some plots comparing different
+gas rise parameterisations.
+
+### Added ###
+- Alternative fit for wall drag enhancement as a function of scaled bubble radius taken from
+a paper by Haberman.
+- parameters in config and non dimensional config to choose the type of wall drag funciton used.
+- plot of different wall drag enhancement functions and bubble rise velocities against liquid
+fraction for different bubble distributions and drag laws.
+- Add critical liquid fraction porosity cutoff of 2.4% from Maus paper.
+- Add options to enable this cutoff, leave the default behaviour the same.
+- Gas velocity plots comparing different bubble terminal rise velocities to Moreau 2014 paper.
+
+## Changed ##
+- Values for pore throat radius and scaling taken from Maus paper for gas velocity plots.
+Before we were wrongly using diameter instead of radius.
+- Change default value of dynamic liquid viscosity used in dimensional configuration to
+match the value of kinematic viscosity used in Moreau 2014 paper.
+
+## v0.9.0 (2023-11-12) ##
+
+### Summary ###
+This version adds the funcitonality to calculate the gas Darcy flux using the interstitial
+terminal rise velocity of a bubble averaged over a power law bubble size distribution.
+The default behaviour remains to use a single bubble size but parameters now exist for
+the power law case. The velocities module has also been refactored and in anticipation
+of parameterising the liquid flow instead of direct calculation the lagged upwind solver
+and funcitons for solving the pressure ODE are removed here.
+
+### Added ###
+- script called plot_gas_velocity.py to plot different versions of the calculated gas
+interstitial velocity against liquid fraction.
+- Functions in the velocities module to calculate the gas interstitial velocity
+averaged over a power law distribution of bubble sizes.
+- Parameters needed (dimesnional and non dimensional) to select either a single bubble size
+or power law distribution case. In the power law case added the maximum and minimum bubble
+sizes and the power law slope as parameters.
+
+## Changed ##
+- Refactor calculation of gas interstitial velocity to make it possible to add options
+to calculate this with a monodispersed bubble size distribution or a power law distribution.
+- The definition of the non dimensional buoyancy parameter B is changed to use the pore
+length scale as this doesn't change as we integrate over bubble size distributions.
+
+### Removed ###
+- For simplicity we remove the functions which calculate liquid Darcy velocity from
+solving an ODE for the pressure at each timestep. These are not necessary for the
+reduced model approximation.
+- Remove the lagged upwind solver which was the only one to attempt to use the pressure
+solve.
+
+### Docs ###
+- Equation for calculation of gas bubble interstitial velocity is updated in the numerical
+method documentation.
+
+### Tests ###
+- Remove test cases that use the now removed lagged upwind solver.
+
+
+## v0.8.0 (2023-05-23) ##
+
+### Summary ###
+
+This code can now generate a simulation configuration from dimensional parameter inputs.
+It can also convert the output to dimensional units for plots.
+It can also now run simulations with the "barrow_2009" forcing and initial conditions option
+which uses surface temperature data from the Barrow field station in 2009 to compare our
+simulation data to the field data of Zhou and Tison.
+
+### Added ###
+
+- Dimensional parameters module to handle input of dimensional parameters and converting
+between non dimensional and dimensional variables.
+- Example script to run a simulation with Barrow 2009 Jan-Jun configuration called `barrow.py`.
+- Barrow field station temperature data and metadata in `celestine/forcing_data/`. Must be read
+in to use "barrow_2009" temperature forcing option.
+- Initial conditions module so we can use different initial conditions chosen in configuration.
+- Method in Scales class to convert bulk air content into mircro moles of Argon per Liter of ice,
+under some assumptions that mass ratio of Argon in air is the same as in the atmosphere. This lets
+us compare to the field data for Argon of Zhou and Tison.
+
+### Docs ###
+
+- Document explaining numerical methods used. 
+- README containing install instructions, how to run the tests, a breakdown of the documentation
+and checklist for creating a new release.
+
+## v0.7.0 (2023-05-19) ##
+
+### Summary ###
+
+This code is now capable of solving the reduced model configuration for the same forcing
+and boundary conditions as the full model. This is a set of approximations where the gas
+fraction is neglected in the enthalpy method and so no liquid flow is generated by gas
+motion, so we do not need to solve for the liquid pressure. The reduced model can be solved
+using a forward euler upwind scheme or using RK23 with scipy solve_ivp. As this includes
+adaptive timestepping this works well for simulations with high gas buoyancy. It is 
+important to note that as gas fraction is decoupled from solid and liquid fraction in
+the reduced model we must impose that gas cannot enter a cell which already contains high
+enough gas fraction to saturate the pore space.
+
+### Added ###
+
+- Reduced model classes for the phase boundaries, enthalpy method and solver. This is chosen
+with the solver choice "RED" in the simulation configuration.
+- Solver class to solve the reduced model using the `scipy.integrate.solve_ivp` function
+with the RK23 method. This solver option is "SCI" in the simulation configuration.
+
+### Docs ###
+
+- Add docs pages for the reduced model solver and the reduced model solver that uses
+`scipy.integrate.solve_ivp`.
+
+### Tests ###
+
+- Include configurations with the two new solvers in the test cases.
+
+## v0.6.0 (2023-05-19) ##
+
+## Summary ##
+
+Can run only the lagged upwind solver (LU) for the full enthalpy method with constant or
+yearly surface temperature forcing with given initial state. A lot of broken or redundant
+code was removed from v0.5.0 and refactored to make it easier to extend adding reduced model
+as another enthalpy method and new solvers and boundary conditions.
+
+### Added ###
+
+- Helper function for grids to add ghost cells to a quantity on cell centers. This is very
+useful for applying boundary conditions.
+- Module called flux to calculate fluxes for heat, salt and gas. This should make
+implementing new solvers easier and more reliable.
+- Function for lagged upwind solver to take forward euler timestep given fluxes.
+- State module for working with solution state at each timestep. Contains the State
+class for working with the solution on cell centers at each timestep and running the
+appropriate enthalpy method. StateBCs is responsible for adding the boundary conditions.
+Solution is responsible for storing the timesteps to be saved.
+- Class interface for enthalpy method so we can implement different versions. The
+enthalpy method is picked from the solver choice in the configuration.
+- Class interface for phase boundary calculation so we can implement difference versions.
+
+### Changed ###
+
+- Refactor solver template and enthalpy method to use a state class. 
+This contains all the variables needed at a timestep so makes writing solvers more concise.
+- Solver template uses solution class to store variables to be saved in a numpy array of
+fixed dimensions. This has better performance than appending to an array each time we
+want to save new data.
+- Simplify boundary conditions module to just add a fixed condition to each variable we may
+need on the ghost grid. Then the StateBCs class handles adding these to the state at each
+timestep.
+- Before boundary conditions were calculated by inverting the enthalpy method. Now we just
+impose appropriate values of temperature, dissolved gas etc... I have chosen to extrapolate
+the liquid fraction to the ghost cells as being equal to the top and bottom cell centers.
+- Solution output of simulation is now given on the cell centers but can be easily extended
+to the ghost cells by using the StateBCs class.
+- Initial solution is now uniform profile of enthalpy, bulk salt and bulk gas given by their
+given values at the bottom of the domain.
+- Lagged Upwind solver uses new template solver interface.
+- Velocities module now takes stateBCs object.
+
+### Docs ###
+
+- Auto generate docstring documentation for each module using sphinx as `docs/manual.pdf`.
+
+### Tests ###
+
+- Put tests in their own package `tests/`.
+- Run different bubble sizes and constant/yearly forcing for only lagged upwind solver as
+test case. Record if the simulation runs or crashes.
+
+### Removed ###
+
+- Implicit lax friedrich solver (LXFImplicit).
+- Lax Friedrich solver (LXF).
+- Other partially written solvers that I wasn't using.
+- Adaptive timestepping option. This wasn't really being utilised and was making the code
+more opaque.
+- Checks on initial timestep and grid size. Now just log a warning if Courant number for
+thermal diffusion exceeds 0.5 in the lagged upwind solver as this treats the diffusive term
+explicitly.
+- Code to plot full enthalpy method phase space diagram from `celestine.phase_boundaries.py`.
+- Code to plot enthalpy method quantities from `celestine.enthalpy_method.py`.
+- Scripts to plot benchmark case for comparing the three solvers in v0.5.0.
+
 ## v0.5.0 (2023-04-27) ##
+
+## Summary ##
+
+Runs full enthalpy method with three different solvers:
+- LU (forward euler explicit upwind scheme, calculate velocity from previous timestep)
+- LXF (forward euler explicit lax-friedrich scheme)
+- LXFImplicit (same as LXF but calculate heat diffusion implictly for better resolution)
+
+Contains benchmark scripts to compare these solvers during yearly temperature forcing run.
+
+Contains code in enthalpy_method and phase_boundaries to plot phase space diagrams.
+
+Contained artificial cut off in liquid darcy velocity calculation and all of the solvers
+suffer the same instability during melting part of yearly cycle.
 
 ### Added ###
 

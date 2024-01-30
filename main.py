@@ -1,5 +1,6 @@
 """Celestine"""
 import numpy as np
+from pathlib import Path
 from celestine.params import Config, DarcyLawParams, ForcingConfig, NumericalParams
 from celestine.run_simulation import solve
 import matplotlib.pyplot as plt
@@ -14,16 +15,17 @@ logger.info(f"Celestine version {__version__}")
 """Generate one simulation config and save to data/base.yml
 run the config and save data to data/base.npz
 """
+DATA_DIRECTORY = Path("data/")
 base = Config(
     name="base",
     total_time=4,
     savefreq=5e-2,
     darcy_law_params=DarcyLawParams(bubble_radius_scaled=0.1),
     forcing_config=ForcingConfig(temperature_forcing_choice="yearly"),
-    numerical_params=NumericalParams(solver="LU"),
+    numerical_params=NumericalParams(solver="RED"),
 )
-base.save()
-status, duration = solve(base)
+base.save(DATA_DIRECTORY)
+status, duration = solve(base, DATA_DIRECTORY)
 log_time(logger, duration, message="solve ran in ")
 
 

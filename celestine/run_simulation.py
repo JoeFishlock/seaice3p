@@ -1,25 +1,29 @@
+"""Module to run the simulation on the given configuration with the appropriate solver.
+"""
+from pathlib import Path
 from celestine.params import Config
 from celestine.logging_config import logger, log_time
-from celestine.solvers.lagged_solver import LaggedUpwindSolver
+from celestine.solvers.reduced_solver import ReducedSolver
+from celestine.solvers.scipy import ScipySolver
 
 
-def solve(cfg: Config):
+def solve(cfg: Config, directory: Path):
+    """Solve simulation choosing appropriate solver from the choice in the config."""
     SOLVER_OPTIONS = {
-        "LU": LaggedUpwindSolver,
+        "RED": ReducedSolver,
+        "SCI": ScipySolver,
     }
     solver_choice = cfg.numerical_params.solver
     if solver_choice in SOLVER_OPTIONS.keys():
         solver_class = SOLVER_OPTIONS[solver_choice]
         solver_instance = solver_class(cfg)
-        return solver_instance.solve()
-    else:
-        logger.error(
-            f"config {cfg.name} solver choice {solver_choice} is not an option"
-        )
-        raise KeyError(f"solver choice {solver_choice} is not an option")
+        return solver_instance.solve(directory)
+
+    logger.error(f"config {cfg.name} solver choice {solver_choice} is not an option")
+    raise KeyError(f"solver choice {solver_choice} is not an option")
 
 
-def run_batch(list_of_cfg):
+def run_batch(list_of_cfg, directory: Path):
     """Run a batch of simulations from a list of configurations.
 
     Each simulation name is logged, as well as if it successfully runs or crashes.
@@ -32,7 +36,7 @@ def run_batch(list_of_cfg):
     for cfg in list_of_cfg:
         logger.info(f"Running {cfg.name}")
         try:
-            status, duration = solve(cfg)
+            status, duration = solve(cfg, directory)
             log_time(logger, duration, message=f"{cfg.name} ran in ")
         except Exception as e:
             logger.error(f"{cfg.name} crashed")
