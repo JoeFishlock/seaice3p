@@ -22,6 +22,10 @@ class PhysicalParams:
     lewis_gas: float = np.inf
     frame_velocity: float = 0
 
+    # Option to average the conductivity term.
+    phase_average_conductivity: bool = False
+    conductivity_ratio: float = 4.11
+
 
 def filter_missing_values(air_temp, days):
     """Filter out missing values are recorded as 9999"""
