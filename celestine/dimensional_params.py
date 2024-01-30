@@ -70,7 +70,12 @@ class DimensionalParams:
     eutectic_temperature: float = -21.1  # deg Celsius
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     specific_heat_capacity: float = 4184  # ice and water assumed equal in J/kg degC
-    thermal_conductivity: float = 0.598  # ice and water assumed equal in W/m degC
+
+    # Option to average the conductivity term.
+    phase_average_conductivity: bool = False
+    liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
+    solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
+
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
     gas_diffusivity: float = 0  # molecular diffusivity of gas in water in m2/s
     frame_velocity_dimensional: float = 0  # velocity of frame in m/day
@@ -192,7 +197,7 @@ class DimensionalParams:
         .. math:: \kappa = \frac{k}{\rho_l c_p}
 
         """
-        return self.thermal_conductivity / (
+        return self.liquid_thermal_conductivity / (
             self.liquid_density * self.specific_heat_capacity
         )
 
@@ -306,6 +311,15 @@ class DimensionalParams:
             / (self.thermal_diffusivity * self.liquid_viscosity)
         )
 
+    @property
+    def conductivity_ratio(self):
+        r"""Calculate the ratio of solid to liquid thermal conductivity
+
+        .. math:: \lambda = \frac{k_s}{k_l}
+
+        """
+        return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
+
     def get_physical_params(self):
         """return a PhysicalParams object"""
         return PhysicalParams(
@@ -315,6 +329,8 @@ class DimensionalParams:
             lewis_salt=self.lewis_salt,
             lewis_gas=self.lewis_gas,
             frame_velocity=self.frame_velocity,
+            phase_average_conductivity=self.phase_average_conductivity,
+            conductivity_ratio=self.conductivity_ratio,
         )
 
     def get_darcy_law_params(self):
