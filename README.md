@@ -29,7 +29,7 @@ Generate by running `make latexpdf` in the `docs/` directory and then copying th
 ## Tests ##
 
 - Run `python -m tests.generate_tests` to add all test simulation yaml files to `test_data/` directory.
-- Run `python -m tests.run_tests` to run all test configurations.
+- Run `python -m celestine test_data` to run all test configurations.
 - Those that run or crash will be in the logs.
 - Record simulations that crash.
 - Others have run. Note tests that ran could still have garbage output.
