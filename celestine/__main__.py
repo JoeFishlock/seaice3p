@@ -25,6 +25,12 @@ if __name__ == "__main__":
         action=argparse.BooleanOptionalAction,
         help="This flag makes the program expect configurations with dimensional parameters",
     )
+    parser.add_argument(
+        "-s",
+        "--single",
+        help="""Use this option to give the file for a single configuration to run
+        in the configuration directory instead of running all of the yaml files.""",
+    )
 
     args = parser.parse_args()
 
@@ -42,9 +48,12 @@ if __name__ == "__main__":
     print(f"Looking for configurations in: {configuration_directory_path}")
     print(f"Dimensional configuration option is {is_dimensional_configuration}")
 
-    list_of_configs = list(configuration_directory_path.glob("*.yaml")) + list(
-        configuration_directory_path.glob("*.yml")
-    )
+    if args.single is not None:
+        list_of_configs = [configuration_directory_path / args.single]
+    else:
+        list_of_configs = list(configuration_directory_path.glob("*.yaml")) + list(
+            configuration_directory_path.glob("*.yml")
+        )
     cfgs = []
     for config_path in list_of_configs:
         if is_dimensional_configuration:
