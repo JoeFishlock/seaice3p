@@ -37,6 +37,13 @@ class ScipySolver(SolverTemplate):
     the `celestine.state.Solution` class.
     """
 
+    # For explicit heat diffusion stability we require timestep < 0.5 * step^2
+    # In the case of enhanced conduction in solid we multiply by
+    # (liquid_fraction * conductivity_ratio*solid_fraction)
+    # For typical sea ice parameters reducing the Courant coefficient for stability
+    # to 0.1 should suffice.
+    THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
+
     def take_timestep(self, state: State):
         pass
 
@@ -87,7 +94,8 @@ class ScipySolver(SolverTemplate):
             [0, T],
             initial,
             t_eval=t_eval,
-            max_step=0.4 * self.cfg.numerical_params.step**2,
+            max_step=self.THERMAL_DIFFUSION_TIMESTEP_LIMIT
+            * self.cfg.numerical_params.step**2,
             method="RK23",
         )
 
