@@ -232,8 +232,8 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
         is_super_saturated = gas >= gas_sat
         is_sub_saturated = ~is_super_saturated
         dissolved_gas[is_super_saturated] = tolerable_super_saturation
-        dissolved_gas[is_sub_saturated] = (
-            gas[is_sub_saturated] / gas_sat[is_sub_saturated]
+        dissolved_gas[is_sub_saturated] = gas[is_sub_saturated] / (
+            chi * liquid_fraction[is_sub_saturated]
         )
         return dissolved_gas
 
