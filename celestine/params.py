@@ -26,6 +26,9 @@ class PhysicalParams:
     phase_average_conductivity: bool = False
     conductivity_ratio: float = 4.11
 
+    # Option to change tolerable supersaturation
+    tolerable_super_saturation_fraction: float = 1
+
 
 def filter_missing_values(air_temp, days):
     """Filter out missing values are recorded as 9999"""

@@ -207,9 +207,12 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
 
     def calculate_gas_fraction(self, gas, liquid_fraction):
         chi = self.physical_params.expansion_coefficient
+        tolerable_super_saturation = (
+            self.physical_params.tolerable_super_saturation_fraction
+        )
         gas_fraction = np.full_like(liquid_fraction, np.NaN)
 
-        gas_sat = chi * liquid_fraction
+        gas_sat = chi * liquid_fraction * tolerable_super_saturation
         is_super_saturated = gas >= gas_sat
         is_sub_saturated = ~is_super_saturated
         gas_fraction[is_super_saturated] = (
@@ -220,12 +223,15 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
 
     def calculate_dissolved_gas(self, gas, liquid_fraction):
         chi = self.physical_params.expansion_coefficient
+        tolerable_super_saturation = (
+            self.physical_params.tolerable_super_saturation_fraction
+        )
         dissolved_gas = np.full_like(gas, np.NaN)
 
-        gas_sat = chi * liquid_fraction
+        gas_sat = chi * liquid_fraction * tolerable_super_saturation
         is_super_saturated = gas >= gas_sat
         is_sub_saturated = ~is_super_saturated
-        dissolved_gas[is_super_saturated] = 1
+        dissolved_gas[is_super_saturated] = tolerable_super_saturation
         dissolved_gas[is_sub_saturated] = (
             gas[is_sub_saturated] / gas_sat[is_sub_saturated]
         )

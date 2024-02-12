@@ -110,6 +110,9 @@ class DimensionalParams:
     haline_contraction_coefficient: float = 7.5e-4
     reference_permeability: float = 1e-8
 
+    # Option to change tolerable super saturation in brines
+    tolerable_super_saturation_fraction: float = 1
+
     # Boundary conditions in dimensional units
     initial_conditions_choice: str = "uniform"
     far_gas_sat: float = saturation_concentration
@@ -331,6 +334,7 @@ class DimensionalParams:
             frame_velocity=self.frame_velocity,
             phase_average_conductivity=self.phase_average_conductivity,
             conductivity_ratio=self.conductivity_ratio,
+            tolerable_super_saturation_fraction=self.tolerable_super_saturation_fraction,
         )
 
     def get_darcy_law_params(self):
