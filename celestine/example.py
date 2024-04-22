@@ -1,4 +1,4 @@
-"""Script to run a simulation starting with dimensional parameters"""
+"""Script to run a simulation starting with dimensional parameters and plot output"""
 
 from pathlib import Path
 import numpy as np
@@ -35,14 +35,13 @@ def main(
     _, duration = solve(cfg, data_directory)
     log_time(logger, duration, message="solve ran in ")
 
-    """Analysis load simulation data
-    plot:
-    gas_fraction
-    salt
-    temperature
-    solid_fraction
-    save as frames in frames/gas_fraction etc...
-    """
+    # Analysis load simulation data
+    # plot:
+    # gas_fraction
+    # salt
+    # temperature
+    # solid_fraction
+    # save as frames in frames/gas_fraction etc...
     simulation_name = simulation_dimensional_params["name"]
     SIMULATION_DATA_PATH = data_directory / f"{simulation_name}.npz"
     CONFIG_DATA_PATH = data_directory / f"{simulation_name}.yml"
@@ -131,10 +130,10 @@ def main(
 
 
 if __name__ == "__main__":
-    DATA_DIRECTORY = Path("data")
-    FRAMES_DIR = Path("frames")
+    DATA_DIRECTORY = Path("example_data")
+    FRAMES_DIR = Path("example_data/frames")
     SIMULATION_DIMENSIONAL_PARAMS = {
-        "name": "barrow",
+        "name": "example",
         "total_time_in_days": 164,
         "savefreq_in_days": 3,
         "bubble_radius": 0.2e-3,
