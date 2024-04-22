@@ -26,6 +26,9 @@ class PhysicalParams:
     phase_average_conductivity: bool = False
     conductivity_ratio: float = 4.11
 
+    # Option to change tolerable supersaturation
+    tolerable_super_saturation_fraction: float = 1
+
 
 def filter_missing_values(air_temp, days):
     """Filter out missing values are recorded as 9999"""
@@ -96,7 +99,7 @@ class ForcingConfig:
         "top_ice": 19,
         "ocean": 43,
     }
-    BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
+    BARROW_DATA_PATH: ClassVar[Path] = Path(__file__).parent / "forcing_data/BRW09.txt"
 
     def load_forcing_data(self):
         """populate class attributes with barrow dimensional air temperature

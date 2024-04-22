@@ -63,6 +63,7 @@ def get_barrow_initial_conditions(cfg: Config):
     Ice temperature is given as -8.15 degC and ocean is the far value from boundary
     config.
     """
+    far_gas_sat = cfg.boundary_conditions_config.far_gas_sat
     ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
 
     # if we are going to have brine convection ice will desalinate on its own
@@ -84,7 +85,7 @@ def get_barrow_initial_conditions(cfg: Config):
     gas = apply_value_in_ice_layer(
         ICE_DEPTH,
         ice_value=cfg.forcing_config.Barrow_initial_bulk_gas_in_ice * chi,
-        liquid_value=chi,
+        liquid_value=chi * far_gas_sat,
         grid=centers,
     )
     pressure = np.full_like(salt, 0)
