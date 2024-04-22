@@ -99,7 +99,7 @@ class ForcingConfig:
         "top_ice": 19,
         "ocean": 43,
     }
-    BARROW_DATA_PATH: ClassVar[str] = "celestine/forcing_data/BRW09.txt"
+    BARROW_DATA_PATH: ClassVar[Path] = Path(__file__).parent / "forcing_data/BRW09.txt"
 
     def load_forcing_data(self):
         """populate class attributes with barrow dimensional air temperature
