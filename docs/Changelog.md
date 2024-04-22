@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.13.0 (2024-04-22) ##
+
+### Summary ###
+To investigate the effect of gas nucleation rate without changing the equilibrium model significantly add parameters
+that control tolerable supersaturation and ocean saturation state. This allows investigation of a case with less gas
+exsolution.
+
+Package is also now pip installable.
+
+### Added ###
+- Tolerable supersaturation parameter. Used by ReducedEnthalpyMethod.
+
+## Changed ##
+- Barrow initial condition initialises ocean with `far_gas_sat` so that ocean can be subsaturated with air.
+- Made poetry a package managed by poetry with pyproject.toml so that it can be installed easily with pip.
+
+## Removed ##
+- Remove requirements.txt as not needed now dependencies are in pyproject.toml.
+
 ## v0.12.0 (2024-01-30) ##
 
 ### Summary ###
