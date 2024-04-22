@@ -12,6 +12,20 @@ from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
 from celestine.state import State
 
+DATA_DIRECTORY = Path("example_data")
+FRAMES_DIR = Path("example_data/frames")
+SIMULATION_DIMENSIONAL_PARAMS = {
+    "name": "example",
+    "total_time_in_days": 164,
+    "savefreq_in_days": 3,
+    "bubble_radius": 0.2e-3,
+    "lengthscale": 2.4,
+    "solver": "SCI",
+    "I": 24,
+    "temperature_forcing_choice": "barrow_2009",
+    "initial_conditions_choice": "barrow_2009",
+}
+
 
 def create_and_save_config(data_directory: Path, simulation_dimensional_params: dict):
     data_directory.mkdir(exist_ok=True, parents=True)
@@ -130,17 +144,4 @@ def main(
 
 
 if __name__ == "__main__":
-    DATA_DIRECTORY = Path("example_data")
-    FRAMES_DIR = Path("example_data/frames")
-    SIMULATION_DIMENSIONAL_PARAMS = {
-        "name": "example",
-        "total_time_in_days": 164,
-        "savefreq_in_days": 3,
-        "bubble_radius": 0.2e-3,
-        "lengthscale": 2.4,
-        "solver": "SCI",
-        "I": 24,
-        "temperature_forcing_choice": "barrow_2009",
-        "initial_conditions_choice": "barrow_2009",
-    }
     main(DATA_DIRECTORY, FRAMES_DIR, SIMULATION_DIMENSIONAL_PARAMS)
