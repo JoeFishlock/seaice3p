@@ -37,6 +37,15 @@ class State:
         # initialise appropriate enthalpy method for this state
         self.enthalpy_method = ReducedEnthalpyMethod(self.cfg.physical_params)
 
+    @classmethod
+    def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
+        """initialise from stacked solution vector for use in the solver"""
+        cls.cfg = cfg
+        cls.time = time
+        enthalpy, salt, gas = np.split(stacked_state, 3)
+
+        return cls(cfg, time, enthalpy, salt, gas, pressure=None)
+
     @property
     def grid(self):
         _, centers, _, _ = initialise_grids(self.cfg.numerical_params.I)
@@ -93,17 +102,18 @@ class StateBCs:
         _, _, edges, _ = initialise_grids(self.cfg.numerical_params.I)
         return edges
 
-    def calculate_fluxes(self, Wl, Vg, V, D_g):
-        heat_flux = calculate_heat_flux(self, Wl, V, D_g, self.cfg)
-        salt_flux = calculate_salt_flux(self, Wl, V, D_g, self.cfg)
-        gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, self.cfg)
-        return np.hstack((heat_flux, salt_flux, gas_flux))
-
     def calculate_brine_convection_sink(self):
         heat_sink = calculate_heat_sink(self, self.cfg)
         salt_sink = calculate_salt_sink(self, self.cfg)
         gas_sink = calculate_gas_sink(self, self.cfg)
         return np.hstack((heat_sink, salt_sink, gas_sink))
+
+    def calculate_dz_fluxes(self, Wl, Vg, V, D_g, D_e):
+        heat_flux = calculate_heat_flux(self, Wl, V, D_g, self.cfg)
+        salt_flux = calculate_salt_flux(self, Wl, V, D_g, self.cfg)
+        gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, self.cfg)
+        dz = lambda flux: np.matmul(D_e, flux)
+        return np.hstack((dz(heat_flux), dz(salt_flux), dz(gas_flux)))
 
 
 class Solution:

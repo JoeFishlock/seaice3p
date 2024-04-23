@@ -65,31 +65,21 @@ class ScipySolver(SolverTemplate):
             f"{self.cfg.name}: time={time:.3f}/{self.cfg.total_time}\r",
             end="",
         )
-        enthalpy, salt, gas = np.split(solution_vector, 3)
         cfg = self.cfg
         D_g = self.D_g
         D_e = self.D_e
 
-        state = State(cfg, time, enthalpy, salt, gas)
+        state = State.init_from_stacked_state(cfg, time, solution_vector)
         state.calculate_enthalpy_method()
         state_BCs = StateBCs(state)
 
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
-        heat_flux, salt_flux, gas_flux = np.split(
-            state_BCs.calculate_fluxes(Wl, Vg, V, D_g), 3
+        return (
+            -state_BCs.calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
+            - state_BCs.calculate_brine_convection_sink()
         )
-
-        heat_sink, salt_sink, gas_sink = np.split(
-            state_BCs.calculate_brine_convection_sink(), 3
-        )
-
-        enthalpy_function = -np.matmul(D_e, heat_flux) - heat_sink
-        salt_function = -np.matmul(D_e, salt_flux) - salt_sink
-        gas_function = -np.matmul(D_e, gas_flux) - gas_sink
-
-        return np.hstack((enthalpy_function, salt_function, gas_function))
 
     @logs.time_function
     def solve(self, directory: Path):
