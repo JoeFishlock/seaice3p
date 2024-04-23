@@ -4,7 +4,7 @@ import numpy as np
 from celestine.velocities import (
     calculate_velocities,
 )
-from celestine.state import State, StateBCs, Solution
+from celestine.state import State, StateBCs
 import celestine.logging_config as logs
 from .params import Config
 from .grids import get_difference_matrix
@@ -73,6 +73,13 @@ class Solver:
         self.D_e = get_difference_matrix(self.I, self.step)
         self.D_g = get_difference_matrix(self.I + 1, self.step)
 
+    @property
+    def number_of_solution_components(self):
+        """This determines how many components the solution object is split into when
+        saved and therefore must be determined from the configuraiton to match the
+        state object"""
+        return 3
+
     def pre_solve_checks(self):
         """Optionally implement this method if you want to check anything before
         running the solver.
@@ -128,15 +135,12 @@ class Solver:
             method="RK23",
         )
 
-        sol_enthalpy, sol_salt, sol_gas = np.split(sol.y, 3)
-
-        stored_solution = Solution(self.cfg)
-        stored_solution.times = sol.t
-        stored_solution.time_length = sol.t.size
-        stored_solution.enthalpy = sol_enthalpy
-        stored_solution.salt = sol_salt
-        stored_solution.gas = sol_gas
-        stored_solution.pressure = np.zeros_like(sol_gas)
-        stored_solution.save(directory)
+        # Note that to keep the solution components general we must just save with
+        # defaults so that time corresponds to "arr_0", next component "arr_1" etc...
+        np.savez(
+            directory / f"{self.cfg.name}.npz",
+            sol.t,
+            *np.split(sol.y, self.number_of_solution_components),
+        )
         print("")
         return 0

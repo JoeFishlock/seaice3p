@@ -114,37 +114,3 @@ class StateBCs:
         gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, self.cfg)
         dz = lambda flux: np.matmul(D_e, flux)
         return np.hstack((dz(heat_flux), dz(salt_flux), dz(gas_flux)))
-
-
-class Solution:
-    """store solution at specified times on the center grid"""
-
-    def __init__(self, cfg: cp.Config):
-        self.time_length = 1 + int(cfg.total_time / cfg.savefreq)
-        self.name = cfg.name
-
-        self.times = np.zeros((self.time_length,))
-
-        self.enthalpy = np.zeros((cfg.numerical_params.I, self.time_length))
-        self.salt = np.zeros_like(self.enthalpy)
-        self.gas = np.zeros_like(self.enthalpy)
-        self.pressure = np.zeros_like(self.enthalpy)
-
-    def add_state(self, state: State, index: int):
-        """add state to stored solution at given time index"""
-        self.times[index] = state.time
-        self.enthalpy[:, index] = state.enthalpy
-        self.salt[:, index] = state.salt
-        self.gas[:, index] = state.gas
-        self.pressure[:, index] = state.pressure
-
-    def save(self, directory: Path):
-        name = self.name
-        np.savez(
-            directory / f"{name}.npz",
-            times=self.times,
-            enthalpy=self.enthalpy,
-            salt=self.salt,
-            gas=self.gas,
-            pressure=self.pressure,
-        )

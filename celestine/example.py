@@ -62,11 +62,10 @@ def main(
     DIMENSIONAL_CONFIG_DATA_PATH = data_directory / f"{simulation_name}_dimensional.yml"
 
     with np.load(SIMULATION_DATA_PATH) as data:
-        enthalpy = data["enthalpy"]
-        salt = data["salt"]
-        gas = data["gas"]
-        pressure = data["pressure"]
-        times = data["times"]
+        enthalpy = data["arr_1"]
+        salt = data["arr_2"]
+        gas = data["arr_3"]
+        times = data["arr_0"]
     cfg = Config.load(CONFIG_DATA_PATH)
     scales = DimensionalParams.load(DIMENSIONAL_CONFIG_DATA_PATH).get_scales()
 
@@ -86,7 +85,7 @@ def main(
     BULK_SALT_DIR.mkdir(exist_ok=True, parents=True)
 
     for n, time in enumerate(times):
-        state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n], pressure[:, n])
+        state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n])
         state.calculate_enthalpy_method()
         dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
 
