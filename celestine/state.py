@@ -40,11 +40,11 @@ class State:
     @classmethod
     def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
         """initialise from stacked solution vector for use in the solver"""
-        cls.cfg = cfg
-        cls.time = time
         enthalpy, salt, gas = np.split(stacked_state, 3)
-
         return cls(cfg, time, enthalpy, salt, gas, pressure=None)
+
+    def get_stacked_state(self):
+        return np.hstack((self.enthalpy, self.salt, self.gas))
 
     @property
     def grid(self):

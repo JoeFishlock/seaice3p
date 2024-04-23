@@ -73,13 +73,6 @@ class Solver:
         self.D_e = get_difference_matrix(self.I, self.step)
         self.D_g = get_difference_matrix(self.I + 1, self.step)
 
-    def generate_initial_solution(self):
-        """Generate initial solution on the ghost grid
-
-        :returns: initial solution arrays on ghost grid (enthalpy, salt, gas, pressure)
-        """
-        return get_initial_conditions(self.cfg)
-
     def pre_solve_checks(self):
         """Optionally implement this method if you want to check anything before
         running the solver.
@@ -116,11 +109,12 @@ class Solver:
     @logs.time_function
     def solve(self, directory: Path):
 
+        self.pre_solve_checks()
+
         # for the barrow forcing you need to load external data to the forcing config
         self.load_forcing_data_if_needed()
 
-        state = self.generate_initial_solution()
-        initial = np.hstack((state.enthalpy, state.salt, state.gas))
+        initial = get_initial_conditions(self.cfg).get_stacked_state()
         T = self.cfg.total_time
         t_eval = np.arange(0, T, self.cfg.savefreq)
 
