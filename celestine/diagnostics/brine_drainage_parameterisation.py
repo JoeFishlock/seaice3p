@@ -14,10 +14,9 @@ from celestine.brine_drainage import (
 from celestine.params import Config, NumericalParams, DarcyLawParams
 
 
-def main():
-    OUTPUT_DIR = Path("brine_drainage_parameterisation_diagnostics")
-    OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
-    OUTPUT_FILE = OUTPUT_DIR / "diagnostics.txt"
+def main(output_dir: Path):
+    output_dir.mkdir(exist_ok=True, parents=True)
+    OUTPUT_FILE = output_dir / "diagnostics.txt"
 
     """Plot showing location of ice ocean interface"""
     I = 20
@@ -35,7 +34,7 @@ def main():
     plt.plot(liquid_fraction, center_grid, "b*--", label="liquid fraction")
     plt.axhline(-h, label="ice depth")
     plt.legend()
-    plt.savefig(OUTPUT_DIR / "liquid_fraction.pdf")
+    plt.savefig(output_dir / "liquid_fraction.pdf")
     plt.close()
 
     """Print values of average permeability in ice"""
@@ -97,7 +96,7 @@ def main():
     plt.axhline(top_boundary)
     plt.xlabel("Rayleigh Number")
     plt.ylabel("depth")
-    plt.savefig(OUTPUT_DIR / "Rayleigh_number.pdf")
+    plt.savefig(output_dir / "Rayleigh_number.pdf")
     plt.close()
 
     """Plot the liquid velocity"""
@@ -108,7 +107,7 @@ def main():
     plt.plot(Wl, edge_grid, "m*--")
     plt.xlabel("Liquid Darcy Velocity")
     plt.ylabel("Depth")
-    plt.savefig(OUTPUT_DIR / "liquid_Darcy_velocity.pdf")
+    plt.savefig(output_dir / "liquid_Darcy_velocity.pdf")
     plt.close()
 
     """Plot the sink term"""
@@ -119,9 +118,10 @@ def main():
     plt.plot(sink, center_grid, "g*--")
     plt.xlabel("Brine Channel Sink Strength")
     plt.ylabel("Depth")
-    plt.savefig(OUTPUT_DIR / "sink_term.pdf")
+    plt.savefig(output_dir / "sink_term.pdf")
     plt.close()
 
 
 if __name__ == "__main__":
-    main()
+    OUTPUT_DIR = Path("brine_drainage_parameterisation_diagnostics")
+    main(OUTPUT_DIR)
