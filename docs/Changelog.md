@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.14.0 (2024-04-23) ##
+
+### Summary ###
+No new physics in this version just changed the structure so that tests are run with pytest.
+Example script is now a module `celestine.example`.
+Scripts that plotted gas velocity and brine drainage parameterisation quantities were useful so have been moved to
+a diagnostics module.
+
+### Tests ###
+- Run all tests with pytest.
+- Run tests that aren't slow with `pytest -m "not slow"`.
+
+### Docs ###
+- Update installation instructions in the README.
+
 ## v0.13.0 (2024-04-22) ##
 
 ### Summary ###
