@@ -1,29 +1,22 @@
-"""Classes to store solution variables
-
-State: store variables on cell centers
-StateBCs: add boundary conditions in ghost cells to cell center variables
-Solution: store primary variables at each timestep we want to save data
-"""
-
 import numpy as np
 import celestine.boundary_conditions as bc
-from celestine.grids import initialise_grids
 from ..flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
 from ..brine_channel_sink_terms import (
     calculate_heat_sink,
     calculate_salt_sink,
     calculate_gas_sink,
 )
-from .abstract_state import State
+from .equilibrium_state import EQMState
+from .abstract_state_bcs import StateBCs
 
 
-class StateBCs:
+class EQMStateBCs(StateBCs):
     """Stores information needed for solution at one timestep with BCs on ghost
     cells as well
 
     Note must initialise once enthalpy method has already run on State."""
 
-    def __init__(self, state: State):
+    def __init__(self, state: EQMState):
         self.cfg = state.cfg
         self.time = state.time
         self.enthalpy = bc.enthalpy_BCs(state.enthalpy, state.cfg)
@@ -40,16 +33,6 @@ class StateBCs:
         self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
         self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, state.cfg)
         self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, state.cfg)
-
-    @property
-    def grid(self):
-        _, _, _, ghosts = initialise_grids(self.cfg.numerical_params.I)
-        return ghosts
-
-    @property
-    def edge_grid(self):
-        _, _, edges, _ = initialise_grids(self.cfg.numerical_params.I)
-        return edges
 
     def calculate_brine_convection_sink(self):
         heat_sink = calculate_heat_sink(self, self.cfg)

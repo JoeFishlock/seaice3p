@@ -4,14 +4,14 @@ import numpy as np
 from celestine.velocities import (
     calculate_velocities,
 )
-from celestine.state import EQMState, StateBCs
+from celestine.state import EQMState, EQMStateBCs
 import celestine.logging_config as logs
 from .params import Config
 from .grids import get_difference_matrix
 from .initial_conditions import get_initial_conditions
 
 
-def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
+def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: EQMStateBCs):
     """Modify the gas interstitial velocity to prevent bubble rise into a cell which
     is already theoretically saturated with gas.
 
@@ -103,7 +103,7 @@ class Solver:
 
         state = EQMState.init_from_stacked_state(cfg, time, solution_vector)
         state.calculate_enthalpy_method()
-        state_BCs = StateBCs(state)
+        state_BCs = EQMStateBCs(state)
 
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
