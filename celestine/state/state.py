@@ -6,66 +6,15 @@ Solution: store primary variables at each timestep we want to save data
 """
 
 import numpy as np
-from pathlib import Path
-import celestine.params as cp
 import celestine.boundary_conditions as bc
-from celestine.enthalpy_method import ReducedEnthalpyMethod
 from celestine.grids import initialise_grids
-from .flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
-from .brine_channel_sink_terms import (
+from ..flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
+from ..brine_channel_sink_terms import (
     calculate_heat_sink,
     calculate_salt_sink,
     calculate_gas_sink,
 )
-
-
-class State:
-    """Stores information needed for solution at one timestep on cell centers"""
-
-    def __init__(self, cfg: cp.Config, time, enthalpy, salt, gas, pressure=None):
-        self.cfg = cfg
-        self.time = time
-        self.enthalpy = enthalpy
-        self.salt = salt
-        self.gas = gas
-
-        if pressure is not None:
-            self.pressure = pressure
-        else:
-            self.pressure = np.full_like(self.enthalpy, 0)
-
-        # initialise appropriate enthalpy method for this state
-        self.enthalpy_method = ReducedEnthalpyMethod(self.cfg.physical_params)
-
-    @classmethod
-    def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
-        """initialise from stacked solution vector for use in the solver"""
-        enthalpy, salt, gas = np.split(stacked_state, 3)
-        return cls(cfg, time, enthalpy, salt, gas, pressure=None)
-
-    def get_stacked_state(self):
-        return np.hstack((self.enthalpy, self.salt, self.gas))
-
-    @property
-    def grid(self):
-        _, centers, _, _ = initialise_grids(self.cfg.numerical_params.I)
-        return centers
-
-    def calculate_enthalpy_method(self):
-        (
-            temperature,
-            liquid_fraction,
-            gas_fraction,
-            solid_fraction,
-            liquid_salinity,
-            dissolved_gas,
-        ) = self.enthalpy_method.calculate_enthalpy_method(self)
-        self.temperature = temperature
-        self.liquid_fraction = liquid_fraction
-        self.gas_fraction = gas_fraction
-        self.solid_fraction = solid_fraction
-        self.liquid_salinity = liquid_salinity
-        self.dissolved_gas = dissolved_gas
+from .abstract_state import State
 
 
 class StateBCs:

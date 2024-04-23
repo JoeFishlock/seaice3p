@@ -4,7 +4,7 @@ import numpy as np
 from celestine.velocities import (
     calculate_velocities,
 )
-from celestine.state import State, StateBCs
+from celestine.state import EQMState, StateBCs
 import celestine.logging_config as logs
 from .params import Config
 from .grids import get_difference_matrix
@@ -101,7 +101,7 @@ class Solver:
         D_g = self.D_g
         D_e = self.D_e
 
-        state = State.init_from_stacked_state(cfg, time, solution_vector)
+        state = EQMState.init_from_stacked_state(cfg, time, solution_vector)
         state.calculate_enthalpy_method()
         state_BCs = StateBCs(state)
 

@@ -3,7 +3,7 @@ simulation.
 """
 import numpy as np
 from celestine.params import Config
-from celestine.state import State
+from celestine.state import EQMState
 from celestine.grids import initialise_grids
 
 
@@ -34,7 +34,7 @@ def get_uniform_initial_conditions(cfg):
     gas = np.full_like(enthalpy, bottom_bulk_gas)
     pressure = np.full_like(enthalpy, 0)
 
-    initial_state = State(cfg, 0, enthalpy, salt, gas, pressure)
+    initial_state = EQMState(cfg, 0, enthalpy, salt, gas, pressure)
 
     return initial_state
 
@@ -103,6 +103,6 @@ def get_barrow_initial_conditions(cfg: Config):
         grid=centers,
     )
 
-    initial_state = State(cfg, 0, enthalpy, salt, gas, pressure)
+    initial_state = EQMState(cfg, 0, enthalpy, salt, gas, pressure)
 
     return initial_state

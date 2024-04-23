@@ -10,7 +10,7 @@ from celestine.params import (
 )
 from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
-from celestine.state import State
+from celestine.state import EQMState
 
 DATA_DIRECTORY = Path("example_data")
 FRAMES_DIR = Path("example_data/frames")
@@ -85,7 +85,7 @@ def main(
     BULK_SALT_DIR.mkdir(exist_ok=True, parents=True)
 
     for n, time in enumerate(times):
-        state = State(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n])
+        state = EQMState(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n])
         state.calculate_enthalpy_method()
         dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
 
