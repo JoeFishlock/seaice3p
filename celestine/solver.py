@@ -5,10 +5,10 @@ from celestine.velocities import (
     calculate_velocities,
 )
 from celestine.state import State, StateBCs, Solution
-from celestine.solvers.template import (
-    SolverTemplate,
-)
 import celestine.logging_config as logs
+from .params import Config
+from .grids import get_difference_matrix
+from .initial_conditions import get_initial_conditions
 
 
 def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
@@ -36,7 +36,7 @@ def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
     return filtered_Vg
 
 
-class ScipySolver(SolverTemplate):
+class Solver:
     """Solve reduced model using scipy solve_ivp using RK23 solver. This is the "SCI"
     solver option.
 
@@ -59,6 +59,38 @@ class ScipySolver(SolverTemplate):
     # For typical sea ice parameters reducing the Courant coefficient for stability
     # to 0.1 should suffice.
     THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
+
+    def __init__(self, cfg: Config):
+        """initialise solver object
+
+        Assign step size, number of cells and difference matrices for convenience.
+
+        :param cfg: simulation configuration
+        """
+        self.cfg = cfg
+        self.step = cfg.numerical_params.step
+        self.I = cfg.numerical_params.I
+        self.D_e = get_difference_matrix(self.I, self.step)
+        self.D_g = get_difference_matrix(self.I + 1, self.step)
+
+    def generate_initial_solution(self):
+        """Generate initial solution on the ghost grid
+
+        :returns: initial solution arrays on ghost grid (enthalpy, salt, gas, pressure)
+        """
+        return get_initial_conditions(self.cfg)
+
+    def pre_solve_checks(self):
+        """Optionally implement this method if you want to check anything before
+        running the solver.
+
+        For example to check the timestep and grid step satisfy some constraint.
+        """
+        pass
+
+    def load_forcing_data_if_needed(self):
+        if self.cfg.forcing_config.temperature_forcing_choice == "barrow_2009":
+            self.cfg.forcing_config.load_forcing_data()
 
     def ode_fun(self, time, solution_vector):
         print(
