@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "celestine"
-version = "0.13.0"
+version = "0.14.0"
 description = "Simulate gas bubble motion in sea ice."
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
