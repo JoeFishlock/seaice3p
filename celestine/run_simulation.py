@@ -3,13 +3,13 @@
 from pathlib import Path
 from celestine.params import Config
 from celestine.logging_config import logger, log_time
-from celestine.solvers import ReducedSolver, ScipySolver
+from celestine.solvers import ScipySolver
 
 
 def solve(cfg: Config, directory: Path):
     """Solve simulation choosing appropriate solver from the choice in the config."""
     SOLVER_OPTIONS = {
-        "RED": ReducedSolver,
+        "RED": None,
         "SCI": ScipySolver,
     }
     solver_choice = cfg.numerical_params.solver

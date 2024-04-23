@@ -12,9 +12,33 @@ from celestine.brine_channel_sink_terms import (
 from celestine.state import State, StateBCs, Solution
 from celestine.solvers.template import (
     SolverTemplate,
-    prevent_gas_rise_into_saturated_cell,
 )
 import celestine.logging_config as logs
+
+
+def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs):
+    """Modify the gas interstitial velocity to prevent bubble rise into a cell which
+    is already theoretically saturated with gas.
+
+    From the state with boundary conditions calculate the gas and solid fraction in the
+    cells (except at lower ghost cell). If any of these are such that there is more gas
+    fraction than pore space available then set gas insterstitial velocity to zero on
+    the edge below. Make sure the very top boundary velocity is not changed as we want
+    to always alow flux to the atmosphere regardless of the boundary conditions imposed.
+
+    :param Vg: gas insterstitial velocity on cell edges
+    :type Vg: Numpy array (size I+1)
+    :param state_BCs: state of system with boundary conditions
+    :type state_BCs: celestine.state.StateBCs
+    :return: filtered gas interstitial velocities on edges to prevent gas rise into a
+        fully gas saturated cell
+
+    """
+    gas_fraction_above = state_BCs.gas_fraction[1:]
+    solid_fraction_above = 1 - state_BCs.liquid_fraction[1:]
+    filtered_Vg = np.where(gas_fraction_above + solid_fraction_above >= 1, 0, Vg)
+    filtered_Vg[-1] = Vg[-1]
+    return filtered_Vg
 
 
 class ScipySolver(SolverTemplate):
@@ -40,9 +64,6 @@ class ScipySolver(SolverTemplate):
     # For typical sea ice parameters reducing the Courant coefficient for stability
     # to 0.1 should suffice.
     THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
-
-    def take_timestep(self, state: State):
-        pass
 
     def ode_fun(self, time, solution_vector):
         print(
