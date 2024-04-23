@@ -2,6 +2,7 @@
 liquid fraction
 """
 
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import celestine.velocities as vel
@@ -9,9 +10,11 @@ from celestine.grids import geometric, initialise_grids
 from celestine.dimensional_params import DimensionalParams
 
 
-if __name__ == "__main__":
+def main(output_dir: Path):
     MAUS_THROAT = 3.89e-4 / 2
     MAUS_THROAT_POWER = 0.46
+
+    output_dir.mkdir(exist_ok=True, parents=True)
 
     class MockStateBCs:
         def __init__(self, liquid_fraction):
@@ -92,7 +95,8 @@ if __name__ == "__main__":
     plt.xlabel("Bubble size fraction")
     plt.ylabel("1 / wall drag enhancement function")
     plt.title("Wall drag as function of bubble radius to tube radius")
-    plt.savefig("Wall_drag_function.pdf")
+    plt.savefig(output_dir / "Wall_drag_function.pdf")
+    plt.close()
 
     """Plot gas interstitial velocities against liquid fraciton for the different power
     law drag exponents and Haberman as different linestyles.
@@ -221,7 +225,7 @@ if __name__ == "__main__":
         plt.title(
             f"p={BUBBLE_DISTRIBUTION_POWER}, max radius = {1000*MAX_BUBBLE_SIZE:.2g}mm, min radius = {1000*MIN_BUBBLE_SIZE:.2g}"
         )
-        plt.savefig(name + ".pdf")
+        plt.savefig(output_dir / (name + ".pdf"))
         plt.close()
 
     generate_interstitial_gas_velocity_plot("Light Sizes", 1e-3, 1e-6, 1.5)
@@ -269,7 +273,7 @@ if __name__ == "__main__":
     plt.legend(prop={"size": 7})
     plt.xlabel("bubble radius (m)")
     plt.ylabel("terminal rise velocity (m/hour)")
-    plt.savefig("terminal_velocity.pdf")
+    plt.savefig(output_dir / "terminal_velocity.pdf")
     plt.close()
 
     """Plot haberman drag power law bubble distribution interstitial velocities against
@@ -315,7 +319,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xscale("log")
     plt.title("Changing interstitial gas velocity curves with maximum bubble size")
-    plt.savefig("Changing_maximum.pdf")
+    plt.savefig(output_dir / "Changing_maximum.pdf")
     plt.close()
 
     plt.figure(figsize=(8, 8))
@@ -356,7 +360,7 @@ if __name__ == "__main__":
     plt.yscale("log")
     plt.xscale("log")
     plt.title("Changing interstitial gas velocity curves with minimum bubble size")
-    plt.savefig("Changing_minimum.pdf")
+    plt.savefig(output_dir / "Changing_minimum.pdf")
     plt.close()
 
     plt.figure(figsize=(8, 8))
@@ -401,5 +405,10 @@ if __name__ == "__main__":
     plt.title(
         "Changing interstitial gas velocity curves with bubble distribution power"
     )
-    plt.savefig("Changing_power.pdf")
+    plt.savefig(output_dir / "Changing_power.pdf")
     plt.close()
+
+
+if __name__ == "__main__":
+    OUTPUT_DIR = Path("gas_velocity_diagnostics")
+    main(OUTPUT_DIR)

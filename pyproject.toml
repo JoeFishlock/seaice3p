@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "celestine"
-version = "0.13.0"
+version = "0.14.0"
 description = "Simulate gas bubble motion in sea ice."
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
@@ -20,6 +20,10 @@ matplotlib = "^3.8.4"
 [tool.poetry.group.profile.dependencies]
 snakeviz = "^2.2.0"
 pydeps = "^1.12.20"
+
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^8.1.1"
 
 [build-system]
 requires = ["poetry-core"]
