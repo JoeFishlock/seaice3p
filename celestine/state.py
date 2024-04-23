@@ -9,7 +9,7 @@ import numpy as np
 from pathlib import Path
 import celestine.params as cp
 import celestine.boundary_conditions as bc
-from celestine.enthalpy_method import get_enthalpy_method
+from celestine.enthalpy_method import ReducedEnthalpyMethod
 from celestine.grids import initialise_grids
 
 
@@ -28,13 +28,15 @@ class State:
         else:
             self.pressure = np.full_like(self.enthalpy, 0)
 
+        # initialise appropriate enthalpy method for this state
+        self.enthalpy_method = ReducedEnthalpyMethod(self.cfg.physical_params)
+
     @property
     def grid(self):
         _, centers, _, _ = initialise_grids(self.cfg.numerical_params.I)
         return centers
 
     def calculate_enthalpy_method(self):
-        enthalpy_method = get_enthalpy_method(self.cfg)(self.cfg.physical_params)
         (
             temperature,
             liquid_fraction,
@@ -42,7 +44,7 @@ class State:
             solid_fraction,
             liquid_salinity,
             dissolved_gas,
-        ) = enthalpy_method.calculate_enthalpy_method(self)
+        ) = self.enthalpy_method.calculate_enthalpy_method(self)
         self.temperature = temperature
         self.liquid_fraction = liquid_fraction
         self.gas_fraction = gas_fraction
