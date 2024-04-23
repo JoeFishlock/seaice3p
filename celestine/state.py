@@ -11,6 +11,7 @@ import celestine.params as cp
 import celestine.boundary_conditions as bc
 from celestine.enthalpy_method import ReducedEnthalpyMethod
 from celestine.grids import initialise_grids
+from .flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
 
 
 class State:
@@ -86,6 +87,12 @@ class StateBCs:
     def edge_grid(self):
         _, _, edges, _ = initialise_grids(self.cfg.numerical_params.I)
         return edges
+
+    def calculate_fluxes(self, Wl, Vg, V, D_g):
+        heat_flux = calculate_heat_flux(self, Wl, V, D_g, self.cfg)
+        salt_flux = calculate_salt_flux(self, Wl, V, D_g, self.cfg)
+        gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, self.cfg)
+        return np.hstack((heat_flux, salt_flux, gas_flux))
 
 
 class Solution:

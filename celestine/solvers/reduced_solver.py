@@ -1,17 +1,29 @@
+import numpy as np
 from celestine.velocities import (
     calculate_velocities,
-)
-from celestine.flux import (
-    calculate_heat_flux,
-    calculate_salt_flux,
-    calculate_gas_flux,
-    take_forward_euler_step,
 )
 from celestine.state import State, StateBCs
 from celestine.solvers.template import (
     SolverTemplate,
     prevent_gas_rise_into_saturated_cell,
 )
+
+
+def take_forward_euler_step(quantity, flux, timestep, D_e):
+    r"""Advance the given quantity one forward Euler step using the given flux
+
+    The quantity is given on cell centers and the flux on cell edges.
+
+    Discretise the conservation equation
+
+    .. math:: \frac{\partial Q}{\partial t} = -\frac{\partial F}{\partial z}
+
+    as
+
+    .. math:: Q^{n+1} = Q^n - \Delta t (\frac{\partial F}{\partial z})
+
+    """
+    return quantity - timestep * np.matmul(D_e, flux)
 
 
 class ReducedSolver(SolverTemplate):
@@ -37,9 +49,9 @@ class ReducedSolver(SolverTemplate):
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
-        heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g, cfg)
-        salt_flux = calculate_salt_flux(state_BCs, Wl, V, D_g, cfg)
-        gas_flux = calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg)
+        heat_flux, salt_flux, gas_flux = np.split(
+            state_BCs.calculate_fluxes(Wl, Vg, V, D_g), 3
+        )
 
         new_enthalpy = take_forward_euler_step(state.enthalpy, heat_flux, timestep, D_e)
         new_salt = take_forward_euler_step(state.salt, salt_flux, timestep, D_e)

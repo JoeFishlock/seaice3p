@@ -4,11 +4,6 @@ import numpy as np
 from celestine.velocities import (
     calculate_velocities,
 )
-from celestine.flux import (
-    calculate_heat_flux,
-    calculate_salt_flux,
-    calculate_gas_flux,
-)
 from celestine.brine_channel_sink_terms import (
     calculate_heat_sink,
     calculate_salt_sink,
@@ -66,9 +61,9 @@ class ScipySolver(SolverTemplate):
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
-        heat_flux = calculate_heat_flux(state_BCs, Wl, V, D_g, cfg)
-        salt_flux = calculate_salt_flux(state_BCs, Wl, V, D_g, cfg)
-        gas_flux = calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg)
+        heat_flux, salt_flux, gas_flux = np.split(
+            state_BCs.calculate_fluxes(Wl, Vg, V, D_g), 3
+        )
 
         heat_sink = calculate_heat_sink(state_BCs, cfg)
         salt_sink = calculate_salt_sink(state_BCs, cfg)
