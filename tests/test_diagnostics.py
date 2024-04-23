@@ -10,13 +10,13 @@ import pytest
 
 
 @pytest.mark.slow
-def test_running_gas_velocity():
+def test_running_gas_velocity(tmp_path):
     from celestine.diagnostics.gas_velocity import main
 
-    main()
+    main(tmp_path)
 
 
-def test_running_brine_convection_parameterisation():
+def test_running_brine_convection_parameterisation(tmp_path):
     from celestine.diagnostics.brine_drainage_parameterisation import main
 
-    main()
+    main(tmp_path)
