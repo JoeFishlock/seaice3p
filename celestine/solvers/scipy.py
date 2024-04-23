@@ -15,8 +15,10 @@ from celestine.brine_channel_sink_terms import (
     calculate_gas_sink,
 )
 from celestine.state import State, StateBCs, Solution
-from celestine.solvers.template import SolverTemplate
-from celestine.solvers.reduced_solver import prevent_gas_rise_into_saturated_cell
+from celestine.solvers.template import (
+    SolverTemplate,
+    prevent_gas_rise_into_saturated_cell,
+)
 import celestine.logging_config as logs
 
 

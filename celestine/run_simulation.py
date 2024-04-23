@@ -3,8 +3,7 @@
 from pathlib import Path
 from celestine.params import Config
 from celestine.logging_config import logger, log_time
-from celestine.solvers.reduced_solver import ReducedSolver
-from celestine.solvers.scipy import ScipySolver
+from celestine.solvers import ReducedSolver, ScipySolver
 
 
 def solve(cfg: Config, directory: Path):
@@ -36,7 +35,7 @@ def run_batch(list_of_cfg, directory: Path):
     for cfg in list_of_cfg:
         logger.info(f"Running {cfg.name}")
         try:
-            status, duration = solve(cfg, directory)
+            _, duration = solve(cfg, directory)
             log_time(logger, duration, message=f"{cfg.name} ran in ")
         except Exception as e:
             logger.error(f"{cfg.name} crashed")
