@@ -4,9 +4,9 @@ Code for simulating gas content of sea ice in 1D using enthalpy method.
 
 ## Install ##
 
-Install via pip.
-Use by defning simulation configurations and using the `python -m celestine` command
-Example script that generates, runs and plots a simulation can be run with `python -m celestine.example`.
+Install via pip (v0.13.0 and above).
+To install a specific version run `pip install git+file:///ABSOLUTE/PATH/TO/LOCAL/GIT/REPO@vX.X.X`.
+Alternatively use poetry to build a wheel for a specific version and pip install this.
 
 ## Usage ##
 
@@ -15,6 +15,7 @@ This can be done by editing examples or by using classes within the dimensional_
 Once you have a directory of configuration files the simulation for each can be run using `python -m celestine path_to_configuration_directory path_to_output_directory`.
 The `--dimensional` flag should be added to this command if running dimensional parameter configurations.
 The simulation will be run for each configuration and the data saved as a numpy archive with the same name as the simulation in the specified output directory.
+Example script that generates, runs and plots a simulation can be run with `python -m celestine.example`.
 
 ## Documentation ##
 
