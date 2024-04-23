@@ -4,11 +4,6 @@ import numpy as np
 from celestine.velocities import (
     calculate_velocities,
 )
-from celestine.brine_channel_sink_terms import (
-    calculate_heat_sink,
-    calculate_salt_sink,
-    calculate_gas_sink,
-)
 from celestine.state import State, StateBCs, Solution
 from celestine.solvers.template import (
     SolverTemplate,
@@ -86,9 +81,9 @@ class ScipySolver(SolverTemplate):
             state_BCs.calculate_fluxes(Wl, Vg, V, D_g), 3
         )
 
-        heat_sink = calculate_heat_sink(state_BCs, cfg)
-        salt_sink = calculate_salt_sink(state_BCs, cfg)
-        gas_sink = calculate_gas_sink(state_BCs, cfg)
+        heat_sink, salt_sink, gas_sink = np.split(
+            state_BCs.calculate_brine_convection_sink(), 3
+        )
 
         enthalpy_function = -np.matmul(D_e, heat_flux) - heat_sink
         salt_function = -np.matmul(D_e, salt_flux) - salt_sink

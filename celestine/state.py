@@ -12,6 +12,11 @@ import celestine.boundary_conditions as bc
 from celestine.enthalpy_method import ReducedEnthalpyMethod
 from celestine.grids import initialise_grids
 from .flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
+from .brine_channel_sink_terms import (
+    calculate_heat_sink,
+    calculate_salt_sink,
+    calculate_gas_sink,
+)
 
 
 class State:
@@ -93,6 +98,12 @@ class StateBCs:
         salt_flux = calculate_salt_flux(self, Wl, V, D_g, self.cfg)
         gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, self.cfg)
         return np.hstack((heat_flux, salt_flux, gas_flux))
+
+    def calculate_brine_convection_sink(self):
+        heat_sink = calculate_heat_sink(self, self.cfg)
+        salt_sink = calculate_salt_sink(self, self.cfg)
+        gas_sink = calculate_gas_sink(self, self.cfg)
+        return np.hstack((heat_sink, salt_sink, gas_sink))
 
 
 class Solution:
