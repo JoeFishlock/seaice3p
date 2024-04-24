@@ -61,9 +61,9 @@ class EQMStateBCs(StateBCs):
         self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, state.cfg)
 
     def _calculate_brine_convection_sink(self):
-        heat_sink = calculate_heat_sink(self, self.cfg)
-        salt_sink = calculate_salt_sink(self, self.cfg)
-        gas_sink = calculate_gas_sink(self, self.cfg)
+        heat_sink = calculate_heat_sink(self)
+        salt_sink = calculate_salt_sink(self)
+        gas_sink = calculate_gas_sink(self)
         return np.hstack((heat_sink, salt_sink, gas_sink))
 
     def _calculate_dz_fluxes(self, Wl, Vg, V, D_g, D_e):

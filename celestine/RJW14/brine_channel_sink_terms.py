@@ -8,12 +8,13 @@ from ..velocities.mono_distribution import calculate_mono_lag_factor
 from ..grids import geometric
 
 
-def calculate_heat_sink(state_BCs, cfg: Config):
+def calculate_heat_sink(state_BCs):
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]
     temperature = state_BCs.temperature[1:-1]
     center_grid = state_BCs.grid[1:-1]
     edge_grid = state_BCs.edge_grid
+    cfg = state_BCs.cfg
 
     if not cfg.darcy_law_params.brine_convection_parameterisation:
         return np.zeros_like(liquid_fraction)
@@ -24,11 +25,12 @@ def calculate_heat_sink(state_BCs, cfg: Config):
     return sink * temperature
 
 
-def calculate_salt_sink(state_BCs, cfg: Config):
+def calculate_salt_sink(state_BCs):
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]
     center_grid = state_BCs.grid[1:-1]
     edge_grid = state_BCs.edge_grid
+    cfg = state_BCs.cfg
 
     if not cfg.darcy_law_params.brine_convection_parameterisation:
         return np.zeros_like(liquid_fraction)
@@ -39,13 +41,14 @@ def calculate_salt_sink(state_BCs, cfg: Config):
     return sink * (liquid_salinity + cfg.physical_params.concentration_ratio)
 
 
-def calculate_gas_sink(state_BCs, cfg: Config):
+def calculate_gas_sink(state_BCs):
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]
     dissolved_gas = state_BCs.dissolved_gas[1:-1]
     gas_fraction = state_BCs.gas_fraction[1:-1]
     center_grid = state_BCs.grid[1:-1]
     edge_grid = state_BCs.edge_grid
+    cfg = state_BCs.cfg
 
     if not cfg.darcy_law_params.brine_convection_parameterisation:
         return np.zeros_like(liquid_fraction)
