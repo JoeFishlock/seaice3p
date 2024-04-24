@@ -10,7 +10,7 @@ from celestine.params import (
 )
 from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
-from celestine.state import EQMState
+from .state import EQMState
 
 DATA_DIRECTORY = Path("example_data")
 FRAMES_DIR = Path("example_data/frames")

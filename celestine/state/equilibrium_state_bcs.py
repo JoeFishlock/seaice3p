@@ -6,7 +6,6 @@ from ..RJW14 import (
     calculate_salt_sink,
     calculate_gas_sink,
 )
-from .equilibrium_state import EQMState
 from .abstract_state_bcs import StateBCs
 from ..velocities import calculate_velocities
 
@@ -42,7 +41,7 @@ class EQMStateBCs(StateBCs):
 
     Note must initialise once enthalpy method has already run on State."""
 
-    def __init__(self, state: EQMState):
+    def __init__(self, state):
         """Initialiase the prime variables for the solver:
         enthalpy, bulk salinity and bulk air
         """

@@ -3,7 +3,7 @@ simulation.
 """
 import numpy as np
 from celestine.params import Config
-from celestine.state import EQMState
+from .state import EQMState
 from celestine.grids import initialise_grids
 
 

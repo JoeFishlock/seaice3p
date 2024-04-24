@@ -2,6 +2,7 @@ import numpy as np
 import celestine.params as cp
 from celestine.enthalpy_method import ReducedEnthalpyMethod
 from .abstract_state import State
+from .equilibrium_state_bcs import EQMStateBCs
 
 
 class EQMState(State):
@@ -13,6 +14,10 @@ class EQMState(State):
         self.enthalpy = enthalpy
         self.salt = salt
         self.gas = gas
+
+    def get_state_with_bcs(self):
+        """Initialise the appropriate StateBCs object"""
+        return EQMStateBCs(self)
 
     @classmethod
     def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
