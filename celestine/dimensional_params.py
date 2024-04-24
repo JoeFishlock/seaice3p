@@ -61,6 +61,14 @@ class DimensionalParams:
     total_time_in_days: float = 365  # days
     savefreq_in_days: float = 1  # save data after this amount of time in days
 
+    # choose the system to be solved
+
+    # EQM: the bubbles and dissolved gas are in equilibrium
+
+    # DISEQ: the bubbles and dissolved gas are not in equilibirum so we prescribe a
+    # nucleation rate
+    model: str = "EQM"
+
     lengthscale: float = 1  # domain height in m
     liquid_density: float = 1028  # kg/m3
     gas_density: float = 1  # kg/m3
@@ -410,6 +418,7 @@ class DimensionalParams:
             scales=self.get_scales(),
             total_time=self.total_time,
             savefreq=self.savefreq,
+            model=self.model,
         )
 
     def get_scales(self):

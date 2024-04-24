@@ -29,6 +29,7 @@ forcing_config:
   offset: -1.0
   period: 4.0
   temperature_forcing_choice: barrow_2009
+model: EQM
 name: example
 numerical_params:
   I: 24

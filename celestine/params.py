@@ -157,6 +157,7 @@ class Config:
     this config object can be saved and loaded to a yaml file."""
 
     name: str
+    model: str = "EQM"
     physical_params: PhysicalParams = PhysicalParams()
     boundary_conditions_config: BoundaryConditionsConfig = BoundaryConditionsConfig()
     darcy_law_params: DarcyLawParams = DarcyLawParams()
@@ -176,6 +177,7 @@ class Config:
             dictionary = safe_load(infile)
         return cls(
             name=dictionary["name"],
+            model=dictionary["model"],
             total_time=dictionary["total_time"],
             savefreq=dictionary["savefreq"],
             physical_params=PhysicalParams(**dictionary["physical_params"]),
