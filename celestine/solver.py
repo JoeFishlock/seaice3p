@@ -50,7 +50,8 @@ class Solver:
         """This determines how many components the solution object is split into when
         saved and therefore must be determined from the configuraiton to match the
         state object"""
-        return 3
+        STATE_COMPONENTS = {"EQM": 3, "DISEQ": 4}
+        return STATE_COMPONENTS[self.cfg.model]
 
     def pre_solve_checks(self):
         """Optionally implement this method if you want to check anything before

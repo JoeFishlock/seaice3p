@@ -122,3 +122,51 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
             liquid_salinity,
             dissolved_gas,
         )
+
+
+class DisequilibriumEnthalpyMethod(ReducedEnthalpyMethod):
+    """IGNORE TOLERABLE SUPERSATURATION PARAMETER FOR THIS IMPLEMENTATION"""
+
+    def calculate_gas_fraction(self):
+        raise TypeError("No need to call this as gas fraction is a primary variable")
+
+    def calculate_dissolved_gas(self, bulk_dissolved_gas, liquid_fraction, phase_masks):
+        chi = self.physical_params.expansion_coefficient
+        L, M, E, S = phase_masks
+
+        # prevent dissolved gas concentration blowing up during total freezing
+        REGULARISATION = 1e-6
+
+        dissolved_gas = np.full_like(bulk_dissolved_gas, np.NaN)
+        dissolved_gas[L] = bulk_dissolved_gas[L] / chi
+        dissolved_gas[M] = bulk_dissolved_gas[M] / (chi * liquid_fraction[M])
+        dissolved_gas[E] = bulk_dissolved_gas[E] / (
+            chi * liquid_fraction[E] + REGULARISATION
+        )
+        dissolved_gas[S] = 0
+
+        return dissolved_gas
+
+    def calculate_enthalpy_method(self, state):
+        phase_masks = self.phase_boundaries.get_phase_masks(state)
+        enthalpy, salt, bulk_dissolved_gas, gas_fraction = (
+            state.enthalpy,
+            state.salt,
+            state.bulk_dissolved_gas,
+            state.gas_fraction,
+        )
+        solid_fraction = self.calculate_solid_fraction(enthalpy, salt, phase_masks)
+        liquid_fraction = self.calculate_liquid_fraction(solid_fraction)
+        temperature = self.calculate_temperature(enthalpy, solid_fraction, phase_masks)
+        liquid_salinity = self.calculate_liquid_salinity(salt, temperature, phase_masks)
+        dissolved_gas = self.calculate_dissolved_gas(
+            bulk_dissolved_gas, liquid_fraction, phase_masks
+        )
+        return (
+            temperature,
+            liquid_fraction,
+            gas_fraction,
+            solid_fraction,
+            liquid_salinity,
+            dissolved_gas,
+        )

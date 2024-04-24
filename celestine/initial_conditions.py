@@ -3,7 +3,7 @@ simulation.
 """
 import numpy as np
 from celestine.params import Config
-from .state import EQMState
+from .state import EQMState, DISEQState
 from celestine.grids import initialise_grids
 
 
@@ -33,9 +33,14 @@ def get_uniform_initial_conditions(cfg):
     salt = np.full_like(enthalpy, bottom_bulk_salinity)
     gas = np.full_like(enthalpy, bottom_bulk_gas)
 
-    initial_state = EQMState(cfg, 0, enthalpy, salt, gas)
-
-    return initial_state
+    if cfg.model == "EQM":
+        return EQMState(cfg, 0, enthalpy, salt, gas)
+    elif cfg.model == "DISEQ":
+        bulk_dissolved_gas = gas
+        gas_fraction = np.zeros_like(gas)
+        return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+    else:
+        raise TypeError("Cannot provide uniform initial condition for model choice")
 
 
 def apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
@@ -101,6 +106,11 @@ def get_barrow_initial_conditions(cfg: Config):
         grid=centers,
     )
 
-    initial_state = EQMState(cfg, 0, enthalpy, salt, gas)
-
-    return initial_state
+    if cfg.model == "EQM":
+        return EQMState(cfg, 0, enthalpy, salt, gas)
+    elif cfg.model == "DISEQ":
+        bulk_dissolved_gas = gas
+        gas_fraction = np.zeros_like(gas)
+        return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+    else:
+        raise TypeError("Cannot provide barrow initial condition for model choice")
