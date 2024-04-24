@@ -49,11 +49,6 @@ class EQMStateBCs(StateBCs):
         self.salt = bc.salt_BCs(state.salt, state.cfg)
         self.gas = bc.gas_BCs(state.gas, state.cfg)
 
-        if state.pressure is not None:
-            self.pressure = bc.pressure_BCs(state.pressure, state.cfg)
-        else:
-            self.pressure = np.full_like(self.enthalpy, 0)
-
         self.temperature = bc.temperature_BCs(state.temperature, state.time, state.cfg)
         self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, state.cfg)
         self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)

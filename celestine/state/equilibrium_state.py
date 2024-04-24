@@ -7,23 +7,18 @@ from .abstract_state import State
 class EQMState(State):
     """Stores information needed for solution at one timestep on cell centers"""
 
-    def __init__(self, cfg: cp.Config, time, enthalpy, salt, gas, pressure=None):
+    def __init__(self, cfg: cp.Config, time, enthalpy, salt, gas):
         self.cfg = cfg
         self.time = time
         self.enthalpy = enthalpy
         self.salt = salt
         self.gas = gas
 
-        if pressure is not None:
-            self.pressure = pressure
-        else:
-            self.pressure = np.full_like(self.enthalpy, 0)
-
     @classmethod
     def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
         """initialise from stacked solution vector for use in the solver"""
         enthalpy, salt, gas = np.split(stacked_state, 3)
-        return cls(cfg, time, enthalpy, salt, gas, pressure=None)
+        return cls(cfg, time, enthalpy, salt, gas)
 
     def get_stacked_state(self):
         return np.hstack((self.enthalpy, self.salt, self.gas))

@@ -19,7 +19,7 @@ def get_initial_conditions(cfg: Config):
 def get_uniform_initial_conditions(cfg):
     """Generate uniform initial solution on the ghost grid
 
-    :returns: initial solution arrays on ghost grid (enthalpy, salt, gas, pressure)
+    :returns: initial solution arrays on ghost grid (enthalpy, salt, gas)
     """
     chi = cfg.physical_params.expansion_coefficient
 
@@ -32,9 +32,8 @@ def get_uniform_initial_conditions(cfg):
     enthalpy = np.full((cfg.numerical_params.I,), bottom_temp)
     salt = np.full_like(enthalpy, bottom_bulk_salinity)
     gas = np.full_like(enthalpy, bottom_bulk_gas)
-    pressure = np.full_like(enthalpy, 0)
 
-    initial_state = EQMState(cfg, 0, enthalpy, salt, gas, pressure)
+    initial_state = EQMState(cfg, 0, enthalpy, salt, gas)
 
     return initial_state
 
@@ -88,7 +87,6 @@ def get_barrow_initial_conditions(cfg: Config):
         liquid_value=chi * far_gas_sat,
         grid=centers,
     )
-    pressure = np.full_like(salt, 0)
 
     temp = apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers
@@ -103,6 +101,6 @@ def get_barrow_initial_conditions(cfg: Config):
         grid=centers,
     )
 
-    initial_state = EQMState(cfg, 0, enthalpy, salt, gas, pressure)
+    initial_state = EQMState(cfg, 0, enthalpy, salt, gas)
 
     return initial_state

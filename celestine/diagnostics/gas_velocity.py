@@ -19,7 +19,6 @@ def main(output_dir: Path):
     class MockStateBCs:
         def __init__(self, liquid_fraction):
             self.liquid_fraction = liquid_fraction
-            self.pressure = np.zeros_like(liquid_fraction)
             self.liquid_salinity = np.zeros_like(liquid_fraction)
             I = np.size(liquid_fraction)
             _, centers, edges, _ = initialise_grids(I)
