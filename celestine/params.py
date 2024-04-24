@@ -29,6 +29,9 @@ class PhysicalParams:
     # Option to change tolerable supersaturation
     tolerable_super_saturation_fraction: float = 1
 
+    # only used in DISEQ model
+    damkohler_number: float = 1
+
 
 def filter_missing_values(air_temp, days):
     """Filter out missing values are recorded as 9999"""

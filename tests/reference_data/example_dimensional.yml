@@ -31,6 +31,7 @@ liquid_viscosity: 0.00278
 maximum_bubble_radius: 0.001
 minimum_bubble_radius: 1.0e-06
 name: example
+nucleation_timescale: 6869075
 ocean_salinity: 34
 offset: -1.0
 period: 4.0

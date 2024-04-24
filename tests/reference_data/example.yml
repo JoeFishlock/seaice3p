@@ -38,6 +38,7 @@ numerical_params:
 physical_params:
   concentration_ratio: 0.1440677966101695
   conductivity_ratio: 4.111111111111112
+  damkohler_number: 6.6790586311354385
   expansion_coefficient: 0.010280000000000001
   frame_velocity: 0.0
   lewis_gas: .inf

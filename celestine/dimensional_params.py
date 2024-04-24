@@ -121,6 +121,9 @@ class DimensionalParams:
     # Option to change tolerable super saturation in brines
     tolerable_super_saturation_fraction: float = 1
 
+    # timescale of nucleation to set damkohler number (in seconds)
+    nucleation_timescale: float = 6869075
+
     # Boundary conditions in dimensional units
     initial_conditions_choice: str = "uniform"
     far_gas_sat: float = saturation_concentration
@@ -210,6 +213,15 @@ class DimensionalParams:
         return self.liquid_thermal_conductivity / (
             self.liquid_density * self.specific_heat_capacity
         )
+
+    @property
+    def damkohler_number(self):
+        r"""Return damkohler number as ratio of thermal timescale to nucleation
+        timescale
+        """
+        return (
+            (self.lengthscale**2) / self.thermal_diffusivity
+        ) / self.nucleation_timescale
 
     @property
     def lewis_salt(self):
@@ -342,6 +354,7 @@ class DimensionalParams:
             phase_average_conductivity=self.phase_average_conductivity,
             conductivity_ratio=self.conductivity_ratio,
             tolerable_super_saturation_fraction=self.tolerable_super_saturation_fraction,
+            damkohler_number=self.damkohler_number,
         )
 
     def get_darcy_law_params(self):

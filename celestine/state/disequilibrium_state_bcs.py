@@ -61,7 +61,7 @@ class DISEQStateBCs(StateBCs):
     def _calculate_nucleation(self):
         """implement nucleation term"""
         chi = self.cfg.physical_params.expansion_coefficient
-        Da = 1
+        Da = self.cfg.physical_params.damkohler_number
         centers = np.s_[1:-1]
         bulk_dissolved_gas = self.bulk_dissolved_gas[centers]
         liquid_fraction = self.liquid_fraction[centers]
