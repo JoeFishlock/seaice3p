@@ -1,39 +1,11 @@
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import numpy as np
-from celestine.velocities import (
-    calculate_velocities,
-)
 from celestine.state import EQMState, EQMStateBCs
 import celestine.logging_config as logs
 from .params import Config
 from .grids import get_difference_matrix
 from .initial_conditions import get_initial_conditions
-
-
-def prevent_gas_rise_into_saturated_cell(Vg, state_BCs: EQMStateBCs):
-    """Modify the gas interstitial velocity to prevent bubble rise into a cell which
-    is already theoretically saturated with gas.
-
-    From the state with boundary conditions calculate the gas and solid fraction in the
-    cells (except at lower ghost cell). If any of these are such that there is more gas
-    fraction than pore space available then set gas insterstitial velocity to zero on
-    the edge below. Make sure the very top boundary velocity is not changed as we want
-    to always alow flux to the atmosphere regardless of the boundary conditions imposed.
-
-    :param Vg: gas insterstitial velocity on cell edges
-    :type Vg: Numpy array (size I+1)
-    :param state_BCs: state of system with boundary conditions
-    :type state_BCs: celestine.state.StateBCs
-    :return: filtered gas interstitial velocities on edges to prevent gas rise into a
-        fully gas saturated cell
-
-    """
-    gas_fraction_above = state_BCs.gas_fraction[1:]
-    solid_fraction_above = 1 - state_BCs.liquid_fraction[1:]
-    filtered_Vg = np.where(gas_fraction_above + solid_fraction_above >= 1, 0, Vg)
-    filtered_Vg[-1] = Vg[-1]
-    return filtered_Vg
 
 
 class Solver:
@@ -97,21 +69,12 @@ class Solver:
             f"{self.cfg.name}: time={time:.3f}/{self.cfg.total_time}\r",
             end="",
         )
-        cfg = self.cfg
-        D_g = self.D_g
-        D_e = self.D_e
 
-        state = EQMState.init_from_stacked_state(cfg, time, solution_vector)
+        state = EQMState.init_from_stacked_state(self.cfg, time, solution_vector)
         state.calculate_enthalpy_method()
         state_BCs = EQMStateBCs(state)
 
-        Vg, Wl, V = calculate_velocities(state_BCs, cfg)
-        Vg = prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
-
-        return (
-            -state_BCs.calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
-            - state_BCs.calculate_brine_convection_sink()
-        )
+        return state_BCs.calculate_equation(self.D_g, self.D_e)
 
     @logs.time_function
     def solve(self, directory: Path):

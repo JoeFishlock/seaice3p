@@ -31,9 +31,5 @@ class StateBCs(ABC):
         return edges
 
     @abstractmethod
-    def calculate_brine_convection_sink(self):
-        pass
-
-    @abstractmethod
-    def calculate_dz_fluxes(self, Wl, Vg, V, D_g, D_e):
+    def calculate_equation(self, D_g, D_e):
         pass
