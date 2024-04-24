@@ -18,7 +18,8 @@ def main(output_dir: Path):
     output_dir.mkdir(exist_ok=True, parents=True)
 
     class MockStateBCs:
-        def __init__(self, liquid_fraction):
+        def __init__(self, liquid_fraction, cfg):
+            self.cfg = cfg
             self.liquid_fraction = liquid_fraction
             self.liquid_salinity = np.zeros_like(liquid_fraction)
             I = np.size(liquid_fraction)
@@ -138,8 +139,8 @@ def main(output_dir: Path):
                 MIN_BUBBLE_SIZE,
             )
             liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-            mock_state = MockStateBCs(liquid_fraction)
-            Vg, _, _ = calculate_velocities(mock_state, cfg)
+            mock_state = MockStateBCs(liquid_fraction, cfg)
+            Vg, _, _ = calculate_velocities(mock_state)
 
             # convert Vg to be in m/day
             scales = dimensional_cfg.get_scales()
@@ -170,8 +171,8 @@ def main(output_dir: Path):
                 MIN_BUBBLE_SIZE,
             )
             liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-            mock_state = MockStateBCs(liquid_fraction)
-            Vg, _, _ = calculate_velocities(mock_state, cfg)
+            mock_state = MockStateBCs(liquid_fraction, cfg)
+            Vg, _, _ = calculate_velocities(mock_state)
 
             # convert Vg to be in m/day
             scales = dimensional_cfg.get_scales()
@@ -202,8 +203,8 @@ def main(output_dir: Path):
                 MIN_BUBBLE_SIZE,
             )
             liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-            mock_state = MockStateBCs(liquid_fraction)
-            Vg, _, _ = calculate_velocities(mock_state, cfg)
+            mock_state = MockStateBCs(liquid_fraction, cfg)
+            Vg, _, _ = calculate_velocities(mock_state)
 
             # convert Vg to be in m/day
             scales = dimensional_cfg.get_scales()
@@ -298,8 +299,8 @@ def main(output_dir: Path):
             MINIMUM_BUBBLE_SIZE,
         )
         liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-        mock_state = MockStateBCs(liquid_fraction)
-        Vg, _, _ = calculate_velocities(mock_state, cfg)
+        mock_state = MockStateBCs(liquid_fraction, cfg)
+        Vg, _, _ = calculate_velocities(mock_state)
 
         # convert Vg to be in m/day
         scales = dimensional_cfg.get_scales()
@@ -339,8 +340,8 @@ def main(output_dir: Path):
             minimum_bubble_size,
         )
         liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-        mock_state = MockStateBCs(liquid_fraction)
-        Vg, _, _ = calculate_velocities(mock_state, cfg)
+        mock_state = MockStateBCs(liquid_fraction, cfg)
+        Vg, _, _ = calculate_velocities(mock_state)
 
         # convert Vg to be in m/day
         scales = dimensional_cfg.get_scales()
@@ -382,8 +383,8 @@ def main(output_dir: Path):
             MINIMUM_BUBBLE_SIZE,
         )
         liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
-        mock_state = MockStateBCs(liquid_fraction)
-        Vg, _, _ = calculate_velocities(mock_state, cfg)
+        mock_state = MockStateBCs(liquid_fraction, cfg)
+        Vg, _, _ = calculate_velocities(mock_state)
 
         # convert Vg to be in m/day
         scales = dimensional_cfg.get_scales()

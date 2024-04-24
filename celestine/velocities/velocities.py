@@ -81,12 +81,16 @@ def calculate_gas_interstitial_velocity(
     return Vg
 
 
-def calculate_velocities(state_BCs, cfg: Config):
-    "Inputs on ghost grid, outputs on edge grid" ""
+def calculate_velocities(state_BCs):
+    """Inputs on ghost grid, outputs on edge grid
+
+    needs the simulation config, liquid fraction, liquid salinity and grids
+    """
     liquid_fraction = state_BCs.liquid_fraction
     liquid_salinity = state_BCs.liquid_salinity
     center_grid = state_BCs.grid[1:-1]
     edge_grid = state_BCs.edge_grid
+    cfg = state_BCs.cfg
 
     if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
         wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)

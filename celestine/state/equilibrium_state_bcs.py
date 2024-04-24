@@ -74,7 +74,7 @@ class EQMStateBCs(StateBCs):
         return np.hstack((dz(heat_flux), dz(salt_flux), dz(gas_flux)))
 
     def calculate_equation(self, D_g, D_e):
-        Vg, Wl, V = calculate_velocities(self, self.cfg)
+        Vg, Wl, V = calculate_velocities(self)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, self)
 
         return (
