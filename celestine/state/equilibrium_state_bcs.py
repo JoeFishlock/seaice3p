@@ -43,12 +43,17 @@ class EQMStateBCs(StateBCs):
     Note must initialise once enthalpy method has already run on State."""
 
     def __init__(self, state: EQMState):
+        """Initialiase the prime variables for the solver:
+        enthalpy, bulk salinity and bulk air
+        """
         self.cfg = state.cfg
         self.time = state.time
         self.enthalpy = bc.enthalpy_BCs(state.enthalpy, state.cfg)
         self.salt = bc.salt_BCs(state.salt, state.cfg)
         self.gas = bc.gas_BCs(state.gas, state.cfg)
 
+        # here we apply boundary conditions to the secondary variables calculated from
+        # the enthalpy method
         self.temperature = bc.temperature_BCs(state.temperature, state.time, state.cfg)
         self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, state.cfg)
         self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
