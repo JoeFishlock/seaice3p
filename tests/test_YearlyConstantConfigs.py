@@ -1,8 +1,8 @@
 """Run the simulations as a batch of non dimensional configurations using yearly or
 constant forcing options using the commmand line interface.
 
-This simulataneously tests yearly and RED solvers run as a batch and the command line
-interface for non-dimensional configurations.
+This simulataneously tests yearly and constant top temperature forcing conditions
+run as a batch from the command line interface for non-dimensional configurations.
 """
 
 from pathlib import Path

@@ -63,8 +63,3 @@ def liquid_fraction_BCs(liquid_fraction_centers, cfg: Config):
         bottom=liquid_fraction_centers[0],
         top=liquid_fraction_centers[-1],
     )
-
-
-def pressure_BCs(pressure_centers, cfg: Config):
-    """Add ghost cells to pressure so that W_l=0 at z=0 and p=0 at z=-1"""
-    return add_ghost_cells(pressure_centers, bottom=0, top=pressure_centers[-1])

@@ -122,19 +122,3 @@ class ReducedEnthalpyMethod(EnthalpyMethod):
             liquid_salinity,
             dissolved_gas,
         )
-
-
-def get_enthalpy_method(cfg):
-    """Return the enthalpy method object required depending on solver choice
-
-    RED: Reduced
-    SCI: Reduced
-
-    :param cfg: configuration for simulation
-    """
-    solver_choice = cfg.numerical_params.solver
-    options = {
-        "RED": ReducedEnthalpyMethod,
-        "SCI": ReducedEnthalpyMethod,
-    }
-    return options[solver_choice]

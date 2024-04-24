@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from celestine.brine_drainage import (
+from ..RJW14.brine_drainage import (
     calculate_ice_ocean_boundary_depth,
     calculate_integrated_mean_permeability,
     calculate_Rayleigh,
