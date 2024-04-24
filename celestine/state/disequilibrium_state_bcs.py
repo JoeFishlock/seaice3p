@@ -59,17 +59,30 @@ class DISEQStateBCs(StateBCs):
         )
 
     def _calculate_nucleation(self):
-        """TODO: implement nucleation term"""
-        # nucleation = np.zeros_like(self.gas_fraction)
-        # return np.hstack(
-        #     (
-        #         np.zeros_like(nucleation),
-        #         np.zeros_like(nucleation),
-        #         -nucleation,
-        #         nucleation,
-        #     )
-        # )
-        return 0
+        """implement nucleation term"""
+        chi = self.cfg.physical_params.expansion_coefficient
+        Da = 1
+        centers = np.s_[1:-1]
+        bulk_dissolved_gas = self.bulk_dissolved_gas[centers]
+        liquid_fraction = self.liquid_fraction[centers]
+        saturation = chi * liquid_fraction
+        gas_fraction = self.gas_fraction[centers]
+
+        is_saturated = bulk_dissolved_gas > saturation
+        nucleation = np.full_like(bulk_dissolved_gas, np.NaN)
+        nucleation[is_saturated] = Da * (
+            bulk_dissolved_gas[is_saturated] - saturation[is_saturated]
+        )
+        nucleation[~is_saturated] = -Da * gas_fraction[~is_saturated]
+
+        return np.hstack(
+            (
+                np.zeros_like(nucleation),
+                np.zeros_like(nucleation),
+                -nucleation,
+                nucleation,
+            )
+        )
 
     def _calculate_dz_fluxes(self, Wl, Vg, V, D_g, D_e):
         heat_flux = calculate_heat_flux(self, Wl, V, D_g, self.cfg)
