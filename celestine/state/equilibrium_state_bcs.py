@@ -1,7 +1,7 @@
 import numpy as np
 import celestine.boundary_conditions as bc
 from ..flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
-from ..brine_channel_sink_terms import (
+from ..RJW14 import (
     calculate_heat_sink,
     calculate_salt_sink,
     calculate_gas_sink,

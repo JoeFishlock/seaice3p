@@ -1,16 +1,11 @@
-"""Module to calculate the sink terms for conservation equations when using the
-Rees Jones and Worster 2014 brine drainage parameterisation.
-
-These terms represent loss through the brine channels and need to be added in the
-convecting region when using this parameterisation
-"""
-
 import numpy as np
-from celestine.brine_drainage import calculate_brine_channel_sink
-from celestine.params import Config
-from .velocities.power_law_distribution import calculate_power_law_lag_factor
-from .velocities.mono_distribution import calculate_mono_lag_factor
-from celestine.grids import geometric
+
+from .brine_drainage import calculate_brine_channel_sink
+
+from ..params import Config
+from ..velocities.power_law_distribution import calculate_power_law_lag_factor
+from ..velocities.mono_distribution import calculate_mono_lag_factor
+from ..grids import geometric
 
 
 def calculate_heat_sink(state_BCs, cfg: Config):

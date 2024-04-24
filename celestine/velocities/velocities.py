@@ -1,7 +1,7 @@
 import numpy as np
 from celestine.grids import geometric
 from celestine.params import Config
-from celestine.brine_drainage import calculate_brine_convection_liquid_velocity
+from ..RJW14 import calculate_brine_convection_liquid_velocity
 from .mono_distribution import (
     calculate_mono_wall_drag_factor,
     calculate_mono_lag_factor,
