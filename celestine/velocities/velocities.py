@@ -1,0 +1,113 @@
+import numpy as np
+from celestine.grids import geometric
+from celestine.params import Config
+from celestine.brine_drainage import calculate_brine_convection_liquid_velocity
+from .mono_distribution import (
+    calculate_mono_wall_drag_factor,
+    calculate_mono_lag_factor,
+)
+from .power_law_distribution import (
+    calculate_power_law_wall_drag_factor,
+    calculate_power_law_lag_factor,
+)
+
+
+def calculate_frame_velocity(cfg: Config):
+    return np.full((cfg.numerical_params.I + 1,), cfg.physical_params.frame_velocity)
+
+
+def calculate_liquid_darcy_velocity(
+    liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg: Config
+):
+    r"""Calculate liquid Darcy velocity either using brine convection parameterisation
+    or as stagnant
+
+
+    :param liquid_fraction: liquid fraction on ghost grid
+    :type liquid_fraction: Numpy Array (size I+2)
+    :param liquid_salinity: liquid salinity on ghost grid
+    :type liquid_salinity: Numpy Array (size I+2)
+    :param center_grid: vertical coordinates of cell centers
+    :type center_grid: Numpy Array of shape (I,)
+    :param edge_grid: Vertical coordinates of cell edges
+    :type edge_grid: Numpy Array (size I+1)
+    :param cfg: simulation configuration object
+    :type cfg: celestine.params.Config
+    :return: liquid darcy velocity on edge grid
+    """
+    if not cfg.darcy_law_params.brine_convection_parameterisation:
+        return np.zeros_like(geometric(liquid_fraction))
+
+    Wl = calculate_brine_convection_liquid_velocity(
+        liquid_fraction[1:-1], liquid_salinity[1:-1], center_grid, edge_grid, cfg
+    )
+    return Wl
+
+
+def calculate_gas_interstitial_velocity(
+    liquid_fraction,
+    liquid_darcy_velocity,
+    wall_drag_factor,
+    lag_factor,
+    cfg: Config,
+):
+    r"""Calculate Vg from liquid fraction on the ghost frid and liquid interstitial velocity
+
+    .. math:: V_g = \mathcal{B} (\phi_l^{2q} I_1) + U_0 I_2
+
+    Return Vg on edge grid
+    """
+    B = cfg.darcy_law_params.B
+    exponent = cfg.darcy_law_params.pore_throat_scaling
+
+    REGULARISATION = 1e-10
+    liquid_interstitial_velocity = (
+        liquid_darcy_velocity * 2 / (geometric(liquid_fraction) + REGULARISATION)
+    )
+
+    Vg = (
+        B * wall_drag_factor * geometric(liquid_fraction) ** (2 * exponent)
+        + liquid_interstitial_velocity * lag_factor
+    )
+
+    # apply a porosity cutoff to the gas interstitial velocity if necking occurs below
+    # critical porosity.
+    if cfg.darcy_law_params.porosity_threshold:
+        return Vg * np.heaviside(
+            geometric(liquid_fraction) - cfg.darcy_law_params.porosity_threshold_value,
+            0,
+        )
+
+    return Vg
+
+
+def calculate_velocities(state_BCs, cfg: Config):
+    "Inputs on ghost grid, outputs on edge grid" ""
+    liquid_fraction = state_BCs.liquid_fraction
+    liquid_salinity = state_BCs.liquid_salinity
+    center_grid = state_BCs.grid[1:-1]
+    edge_grid = state_BCs.edge_grid
+
+    if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
+        wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)
+        lag_factor = calculate_mono_lag_factor(liquid_fraction, cfg)
+    elif cfg.darcy_law_params.bubble_size_distribution_type == "power_law":
+        wall_drag_factor = calculate_power_law_wall_drag_factor(liquid_fraction, cfg)
+        lag_factor = calculate_power_law_lag_factor(liquid_fraction, cfg)
+    else:
+        raise ValueError(
+            f"Bubble size distribution of type {cfg.darcy_law_params.bubble_size_distribution_type} not recognised"
+        )
+
+    # check if we want to couple the bubble to fluid motion in the vertical
+    if not cfg.darcy_law_params.couple_bubble_to_vertical_flow:
+        lag_factor = np.zeros_like(wall_drag_factor)
+
+    Wl = calculate_liquid_darcy_velocity(
+        liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg
+    )
+    Vg = calculate_gas_interstitial_velocity(
+        liquid_fraction, Wl, wall_drag_factor, lag_factor, cfg
+    )
+    V = calculate_frame_velocity(cfg)
+    return Vg, Wl, V

@@ -8,10 +8,8 @@ convecting region when using this parameterisation
 import numpy as np
 from celestine.brine_drainage import calculate_brine_channel_sink
 from celestine.params import Config
-from celestine.velocities import (
-    calculate_mono_lag_factor,
-    calculate_power_law_lag_factor,
-)
+from .velocities.power_law_distribution import calculate_power_law_lag_factor
+from .velocities.mono_distribution import calculate_mono_lag_factor
 from celestine.grids import geometric
 
 

@@ -5,7 +5,8 @@ liquid fraction
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-import celestine.velocities as vel
+from ..velocities import calculate_velocities
+from ..velocities.mono_distribution import calculate_wall_drag_function
 from celestine.grids import geometric, initialise_grids
 from celestine.dimensional_params import DimensionalParams
 
@@ -88,7 +89,7 @@ def main(output_dir: Path):
             1e-6,
         )
         bubble_size_fraction = np.linspace(0, 1, cfg.numerical_params.I)
-        wall_drag = vel.calculate_wall_drag_function(bubble_size_fraction, cfg)
+        wall_drag = calculate_wall_drag_function(bubble_size_fraction, cfg)
         plt.plot(bubble_size_fraction, wall_drag, label=LABEL)
     plt.legend()
     plt.xlabel("Bubble size fraction")
@@ -138,7 +139,7 @@ def main(output_dir: Path):
             )
             liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
             mock_state = MockStateBCs(liquid_fraction)
-            Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+            Vg, _, _ = calculate_velocities(mock_state, cfg)
 
             # convert Vg to be in m/day
             scales = dimensional_cfg.get_scales()
@@ -170,7 +171,7 @@ def main(output_dir: Path):
             )
             liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
             mock_state = MockStateBCs(liquid_fraction)
-            Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+            Vg, _, _ = calculate_velocities(mock_state, cfg)
 
             # convert Vg to be in m/day
             scales = dimensional_cfg.get_scales()
@@ -202,7 +203,7 @@ def main(output_dir: Path):
             )
             liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
             mock_state = MockStateBCs(liquid_fraction)
-            Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+            Vg, _, _ = calculate_velocities(mock_state, cfg)
 
             # convert Vg to be in m/day
             scales = dimensional_cfg.get_scales()
@@ -298,7 +299,7 @@ def main(output_dir: Path):
         )
         liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
         mock_state = MockStateBCs(liquid_fraction)
-        Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+        Vg, _, _ = calculate_velocities(mock_state, cfg)
 
         # convert Vg to be in m/day
         scales = dimensional_cfg.get_scales()
@@ -339,7 +340,7 @@ def main(output_dir: Path):
         )
         liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
         mock_state = MockStateBCs(liquid_fraction)
-        Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+        Vg, _, _ = calculate_velocities(mock_state, cfg)
 
         # convert Vg to be in m/day
         scales = dimensional_cfg.get_scales()
@@ -382,7 +383,7 @@ def main(output_dir: Path):
         )
         liquid_fraction = np.linspace(0, 1, cfg.numerical_params.I + 2)
         mock_state = MockStateBCs(liquid_fraction)
-        Vg, _, _ = vel.calculate_velocities(mock_state, cfg)
+        Vg, _, _ = calculate_velocities(mock_state, cfg)
 
         # convert Vg to be in m/day
         scales = dimensional_cfg.get_scales()
