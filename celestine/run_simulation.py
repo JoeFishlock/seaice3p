@@ -8,12 +8,8 @@ from .solver import Solver
 
 def solve(cfg: Config, directory: Path):
     """Solve simulation choosing appropriate solver from the choice in the config."""
-    solver_choice = cfg.numerical_params.solver
-    if solver_choice != "SCI":
-        raise ValueError("All solvers except SCI are deprecated")
 
-    solver_instance = Solver(cfg)
-    return solver_instance.solve(directory)
+    return Solver(cfg).solve(directory)
 
 
 def run_batch(list_of_cfg, directory: Path):

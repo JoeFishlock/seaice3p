@@ -134,7 +134,6 @@ class DimensionalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    solver: str = "SCI"
 
     @property
     def expansion_coefficient(self):
@@ -388,7 +387,6 @@ class DimensionalParams:
             I=self.I,
             timestep=self.timestep,
             regularisation=self.regularisation,
-            solver=self.solver,
         )
 
     def get_config(self):

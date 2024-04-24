@@ -20,7 +20,6 @@ SIMULATION_DIMENSIONAL_PARAMS = {
     "savefreq_in_days": 3,
     "bubble_radius": 0.2e-3,
     "lengthscale": 2.4,
-    "solver": "SCI",
     "I": 24,
     "temperature_forcing_choice": "barrow_2009",
     "initial_conditions_choice": "barrow_2009",

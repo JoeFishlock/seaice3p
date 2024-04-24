@@ -33,7 +33,6 @@ name: YearlyMedSCI
 numerical_params:
   I: 50
   regularisation: 1.0e-06
-  solver: SCI
   timestep: 0.0002
 physical_params:
   concentration_ratio: 0.17
