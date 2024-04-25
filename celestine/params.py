@@ -4,7 +4,7 @@ The config class contains all the parameters needed to run a simulation as well
 as methods to save and load this configuration to a yaml file."""
 
 from yaml import safe_load, dump
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import numpy as np
 from celestine.logging_config import logger
 from typing import ClassVar
@@ -161,11 +161,13 @@ class Config:
 
     name: str
     model: str = "EQM"
-    physical_params: PhysicalParams = PhysicalParams()
-    boundary_conditions_config: BoundaryConditionsConfig = BoundaryConditionsConfig()
-    darcy_law_params: DarcyLawParams = DarcyLawParams()
-    forcing_config: ForcingConfig = ForcingConfig()
-    numerical_params: NumericalParams = NumericalParams()
+    physical_params: PhysicalParams = field(default_factory=PhysicalParams)
+    boundary_conditions_config: BoundaryConditionsConfig = field(
+        default_factory=BoundaryConditionsConfig
+    )
+    darcy_law_params: DarcyLawParams = field(default_factory=DarcyLawParams)
+    forcing_config: ForcingConfig = field(default_factory=ForcingConfig)
+    numerical_params: NumericalParams = field(default_factory=NumericalParams)
     scales: int = None
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
