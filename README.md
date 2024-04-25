@@ -30,6 +30,7 @@ Generate by running `make latexpdf` in the `docs/` directory and then copying th
 
 Run `pytest` to run all tests.
 Note this may take some time so you can also run `pytest -m "not slow"`.
+To speed this up run in parallel using `pytest-xdist` with the extra options `pytest -n auto --dist worksteal`.
 
 ## Release checklist ##
 
