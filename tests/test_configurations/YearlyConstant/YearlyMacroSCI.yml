@@ -29,6 +29,7 @@ forcing_config:
   offset: -1.0
   period: 4.0
   temperature_forcing_choice: yearly
+model: EQM
 name: YearlyMacroSCI
 numerical_params:
   I: 50
@@ -37,6 +38,7 @@ numerical_params:
 physical_params:
   concentration_ratio: 0.17
   conductivity_ratio: 4.11
+  damkohler_number: 1
   expansion_coefficient: 0.029
   frame_velocity: 0
   lewis_gas: .inf
