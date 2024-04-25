@@ -45,7 +45,6 @@ salt_diffusivity: 0
 saturation_concentration: 5.492850000000001e-05
 savefreq_in_days: 1
 solid_thermal_conductivity: 2.22
-solver: SCI
 specific_heat_capacity: 2090
 temperature_forcing_choice: barrow_2009
 timestep: 0.0002

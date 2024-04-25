@@ -10,4 +10,5 @@ from .brine_channel_sink_terms import (
     calculate_heat_sink,
     calculate_salt_sink,
     calculate_gas_sink,
+    calculate_bulk_dissolved_gas_sink,
 )

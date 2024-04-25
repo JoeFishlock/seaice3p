@@ -29,15 +29,16 @@ forcing_config:
   offset: -1.0
   period: 4.0
   temperature_forcing_choice: constant
+model: EQM
 name: ConstantMacroSCI
 numerical_params:
   I: 50
   regularisation: 1.0e-06
-  solver: SCI
   timestep: 0.0002
 physical_params:
   concentration_ratio: 0.17
   conductivity_ratio: 4.11
+  damkohler_number: 1
   expansion_coefficient: 0.029
   frame_velocity: 0
   lewis_gas: .inf

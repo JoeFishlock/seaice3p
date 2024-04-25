@@ -31,6 +31,7 @@ liquid_viscosity: 0.00278
 maximum_bubble_radius: 0.001
 minimum_bubble_radius: 1.0e-06
 name: example
+nucleation_timescale: 6869075
 ocean_salinity: 34
 offset: -1.0
 period: 4.0
@@ -45,7 +46,6 @@ salt_diffusivity: 0
 saturation_concentration: 1.0e-05
 savefreq_in_days: 3
 solid_thermal_conductivity: 2.22
-solver: SCI
 specific_heat_capacity: 4184
 temperature_forcing_choice: barrow_2009
 timestep: 0.0002

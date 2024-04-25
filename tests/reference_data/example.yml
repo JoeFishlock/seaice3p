@@ -29,15 +29,16 @@ forcing_config:
   offset: -1.0
   period: 4.0
   temperature_forcing_choice: barrow_2009
+model: EQM
 name: example
 numerical_params:
   I: 24
   regularisation: 1.0e-06
-  solver: SCI
   timestep: 0.0002
 physical_params:
   concentration_ratio: 0.1440677966101695
   conductivity_ratio: 4.111111111111112
+  damkohler_number: 6.6790586311354385
   expansion_coefficient: 0.010280000000000001
   frame_velocity: 0.0
   lewis_gas: .inf

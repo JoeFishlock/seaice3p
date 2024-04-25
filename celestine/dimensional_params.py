@@ -61,6 +61,14 @@ class DimensionalParams:
     total_time_in_days: float = 365  # days
     savefreq_in_days: float = 1  # save data after this amount of time in days
 
+    # choose the system to be solved
+
+    # EQM: the bubbles and dissolved gas are in equilibrium
+
+    # DISEQ: the bubbles and dissolved gas are not in equilibirum so we prescribe a
+    # nucleation rate
+    model: str = "EQM"
+
     lengthscale: float = 1  # domain height in m
     liquid_density: float = 1028  # kg/m3
     gas_density: float = 1  # kg/m3
@@ -113,6 +121,9 @@ class DimensionalParams:
     # Option to change tolerable super saturation in brines
     tolerable_super_saturation_fraction: float = 1
 
+    # timescale of nucleation to set damkohler number (in seconds)
+    nucleation_timescale: float = 6869075
+
     # Boundary conditions in dimensional units
     initial_conditions_choice: str = "uniform"
     far_gas_sat: float = saturation_concentration
@@ -134,7 +145,6 @@ class DimensionalParams:
     I: int = 50
     timestep: float = 2e-4
     regularisation: float = 1e-6
-    solver: str = "SCI"
 
     @property
     def expansion_coefficient(self):
@@ -203,6 +213,15 @@ class DimensionalParams:
         return self.liquid_thermal_conductivity / (
             self.liquid_density * self.specific_heat_capacity
         )
+
+    @property
+    def damkohler_number(self):
+        r"""Return damkohler number as ratio of thermal timescale to nucleation
+        timescale
+        """
+        return (
+            (self.lengthscale**2) / self.thermal_diffusivity
+        ) / self.nucleation_timescale
 
     @property
     def lewis_salt(self):
@@ -335,6 +354,7 @@ class DimensionalParams:
             phase_average_conductivity=self.phase_average_conductivity,
             conductivity_ratio=self.conductivity_ratio,
             tolerable_super_saturation_fraction=self.tolerable_super_saturation_fraction,
+            damkohler_number=self.damkohler_number,
         )
 
     def get_darcy_law_params(self):
@@ -388,7 +408,6 @@ class DimensionalParams:
             I=self.I,
             timestep=self.timestep,
             regularisation=self.regularisation,
-            solver=self.solver,
         )
 
     def get_config(self):
@@ -412,6 +431,7 @@ class DimensionalParams:
             scales=self.get_scales(),
             total_time=self.total_time,
             savefreq=self.savefreq,
+            model=self.model,
         )
 
     def get_scales(self):

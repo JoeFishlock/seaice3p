@@ -42,6 +42,10 @@ def calculate_salt_sink(state_BCs):
 
 
 def calculate_gas_sink(state_BCs):
+    """This is for the EQM model
+
+    TODO: fix bug in bubble coupling to flow
+    """
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]
     dissolved_gas = state_BCs.dissolved_gas[1:-1]
@@ -73,3 +77,22 @@ def calculate_gas_sink(state_BCs):
         bubble_term = np.zeros_like(liquid_fraction)
 
     return sink * (dissolved_gas_term + bubble_term)
+
+
+def calculate_bulk_dissolved_gas_sink(state_BCs):
+    """This is for the DISEQ model"""
+    liquid_fraction = state_BCs.liquid_fraction[1:-1]
+    liquid_salinity = state_BCs.liquid_salinity[1:-1]
+    dissolved_gas = state_BCs.dissolved_gas[1:-1]
+    center_grid = state_BCs.grid[1:-1]
+    edge_grid = state_BCs.edge_grid
+    cfg = state_BCs.cfg
+
+    if not cfg.darcy_law_params.brine_convection_parameterisation:
+        return np.zeros_like(liquid_fraction)
+
+    sink = calculate_brine_channel_sink(
+        liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg
+    )
+
+    return sink * cfg.physical_params.expansion_coefficient * dissolved_gas

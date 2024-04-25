@@ -1,32 +1,47 @@
 import numpy as np
 import celestine.params as cp
-from celestine.enthalpy_method import ReducedEnthalpyMethod
+from ..enthalpy_method import DisequilibriumEnthalpyMethod
 from .abstract_state import State
-from .equilibrium_state_bcs import EQMStateBCs
+from .disequilibrium_state_bcs import DISEQStateBCs
 
 
-class EQMState(State):
+class DISEQState(State):
     """Stores information needed for solution at one timestep on cell centers"""
 
-    def __init__(self, cfg: cp.Config, time, enthalpy, salt, gas):
+    def __init__(
+        self, cfg: cp.Config, time, enthalpy, salt, bulk_dissolved_gas, gas_fraction
+    ):
+        """Define bulk dissolved gas for the system as
+
+        expansion_coefficient * liquid_fraction * dissolved_gas
+
+        so that this is different from the dissolved gas concentration and
+
+        bulk_gas = bulk_dissolved_gas + gas_fraction
+
+        in non-dimensional units.
+        """
         self.cfg = cfg
         self.time = time
         self.enthalpy = enthalpy
         self.salt = salt
-        self.gas = gas
+        self.bulk_dissolved_gas = bulk_dissolved_gas
+        self.gas_fraction = gas_fraction
 
     def get_state_with_bcs(self):
         """Initialise the appropriate StateBCs object"""
-        return EQMStateBCs(self)
+        return DISEQStateBCs(self)
 
     @classmethod
     def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
         """initialise from stacked solution vector for use in the solver"""
-        enthalpy, salt, gas = np.split(stacked_state, 3)
-        return cls(cfg, time, enthalpy, salt, gas)
+        enthalpy, salt, bulk_dissolved_gas, gas_fraction = np.split(stacked_state, 4)
+        return cls(cfg, time, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
 
     def get_stacked_state(self):
-        return np.hstack((self.enthalpy, self.salt, self.gas))
+        return np.hstack(
+            (self.enthalpy, self.salt, self.bulk_dissolved_gas, self.gas_fraction)
+        )
 
     def calculate_enthalpy_method(self):
         (
@@ -36,7 +51,9 @@ class EQMState(State):
             solid_fraction,
             liquid_salinity,
             dissolved_gas,
-        ) = ReducedEnthalpyMethod(self.cfg.physical_params).calculate_enthalpy_method(
+        ) = DisequilibriumEnthalpyMethod(
+            self.cfg.physical_params
+        ).calculate_enthalpy_method(
             self
         )
         self.temperature = temperature

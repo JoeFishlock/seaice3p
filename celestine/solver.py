@@ -1,7 +1,7 @@
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import numpy as np
-from celestine.state import EQMState, EQMStateBCs
+from celestine.state import get_model
 import celestine.logging_config as logs
 from .params import Config
 from .grids import get_difference_matrix
@@ -50,7 +50,8 @@ class Solver:
         """This determines how many components the solution object is split into when
         saved and therefore must be determined from the configuraiton to match the
         state object"""
-        return 3
+        STATE_COMPONENTS = {"EQM": 3, "DISEQ": 4}
+        return STATE_COMPONENTS[self.cfg.model]
 
     def pre_solve_checks(self):
         """Optionally implement this method if you want to check anything before
@@ -70,9 +71,13 @@ class Solver:
             end="",
         )
 
-        state = EQMState.init_from_stacked_state(self.cfg, time, solution_vector)
+        # Let state module handle providing the correct State class based on
+        # simulation configuration
+        state = get_model(self.cfg).init_from_stacked_state(
+            self.cfg, time, solution_vector
+        )
         state.calculate_enthalpy_method()
-        state_BCs = EQMStateBCs(state)
+        state_BCs = state.get_state_with_bcs()
 
         return state_BCs.calculate_equation(self.D_g, self.D_e)
 

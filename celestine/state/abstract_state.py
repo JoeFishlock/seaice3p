@@ -11,6 +11,11 @@ class State(ABC):
         self.cfg = cfg
         pass
 
+    @abstractmethod
+    def get_state_with_bcs(self):
+        """Initialise the appropriate StateBCs object"""
+        pass
+
     @property
     def grid(self):
         _, centers, _, _ = initialise_grids(self.cfg.numerical_params.I)
