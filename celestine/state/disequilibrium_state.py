@@ -28,6 +28,9 @@ class DISEQState(State):
         self.bulk_dissolved_gas = bulk_dissolved_gas
         self.gas_fraction = gas_fraction
 
+        # Calculate bulk gas content and use same attribute name as EQM model
+        self.gas = bulk_dissolved_gas + gas_fraction
+
     def get_state_with_bcs(self):
         """Initialise the appropriate StateBCs object"""
         return DISEQStateBCs(self)
