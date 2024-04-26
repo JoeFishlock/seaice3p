@@ -1,16 +1,13 @@
 """Script to run a simulation starting with dimensional parameters and plot output"""
 
 from pathlib import Path
-import numpy as np
 import matplotlib.pyplot as plt
 from celestine.logging_config import logger, log_time
 from celestine.__init__ import __version__
-from celestine.params import (
-    Config,
-)
 from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
-from .state import EQMState
+from .grids import initialise_grids
+from .load import get_array_data, load_data, get_state
 
 DATA_DIRECTORY = Path("example_data")
 FRAMES_DIR = Path("example_data/frames")
@@ -56,16 +53,9 @@ def main(
     # solid_fraction
     # save as frames in frames/gas_fraction etc...
     simulation_name = simulation_dimensional_params["name"]
-    SIMULATION_DATA_PATH = data_directory / f"{simulation_name}.npz"
-    CONFIG_DATA_PATH = data_directory / f"{simulation_name}.yml"
     DIMENSIONAL_CONFIG_DATA_PATH = data_directory / f"{simulation_name}_dimensional.yml"
 
-    with np.load(SIMULATION_DATA_PATH) as data:
-        enthalpy = data["arr_1"]
-        salt = data["arr_2"]
-        gas = data["arr_3"]
-        times = data["arr_0"]
-    cfg = Config.load(CONFIG_DATA_PATH)
+    cfg, times, data = load_data(simulation_name, data_directory, is_dimensional=True)
     scales = DimensionalParams.load(DIMENSIONAL_CONFIG_DATA_PATH).get_scales()
 
     GAS_FRACTION_DIR = frames_directory / "gas_fraction/"
@@ -84,7 +74,8 @@ def main(
     BULK_SALT_DIR.mkdir(exist_ok=True, parents=True)
 
     for n, time in enumerate(times):
-        state = EQMState(cfg, time, enthalpy[:, n], salt[:, n], gas[:, n])
+
+        state = get_state(time, times, data, cfg)
         state.calculate_enthalpy_method()
         dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
 
@@ -139,6 +130,15 @@ def main(
         )
         plt.savefig(BULK_AIR_DIR / f"bulk_air{n}.pdf")
         plt.close()
+
+    for attr in ["temperature", "salt", "gas_fraction", "solid_fraction", "gas"]:
+        plt.figure()
+        _, non_dim_grid, _, _ = initialise_grids(cfg.numerical_params.I)
+        grid = scales.convert_to_dimensional_grid(non_dim_grid)
+        plt.contourf(times, grid, get_array_data(attr, cfg, times, data))
+        plt.colorbar()
+        plt.title(f"{attr}")
+        plt.savefig(data_directory / f"contours_{attr}.pdf")
 
 
 if __name__ == "__main__":
