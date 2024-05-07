@@ -130,11 +130,17 @@ class DimensionalParams:
     far_temp: float = -0.81
     far_bulk_salinity: float = ocean_salinity
 
+    # Parameters for summer initial conditions
+    initial_summer_ice_depth: float = 1  # in m
+    initial_summer_ocean_temperature: float = -2  # in deg C
+    initial_summer_ice_temperature: float = -4  # in deg C
+
     # Forcing configuration parameters
     temperature_forcing_choice: str = "constant"
     constant_top_temperature: float = -30.32
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+
     # These are the parameters for the sinusoidal temperature cycle in non dimensional
     # units
     offset: float = -1.0
@@ -380,6 +386,7 @@ class DimensionalParams:
         )
 
     def get_boundary_conditions_config(self):
+        scales = self.get_scales()
         return BoundaryConditionsConfig(
             initial_conditions_choice=self.initial_conditions_choice,
             far_gas_sat=self.far_gas_sat / self.saturation_concentration,
@@ -387,6 +394,13 @@ class DimensionalParams:
             / self.temperature_difference,
             far_bulk_salinity=(self.far_bulk_salinity - self.ocean_salinity)
             / self.salinity_difference,
+            initial_summer_ice_depth=self.initial_summer_ice_depth / self.lengthscale,
+            initial_summer_ocean_temperature=scales.convert_from_dimensional_temperature(
+                self.initial_summer_ocean_temperature
+            ),
+            initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
+                self.initial_summer_ice_temperature
+            ),
         )
 
     def get_forcing_config(self):

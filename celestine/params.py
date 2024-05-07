@@ -48,6 +48,11 @@ class BoundaryConditionsConfig:
     far_temp: float = 0.1
     far_bulk_salinity: float = 0
 
+    # Non dimensional parameters for summer initial conditions
+    initial_summer_ice_depth: float = 0.5
+    initial_summer_ocean_temperature: float = -0.05
+    initial_summer_ice_temperature: float = -0.1
+
 
 @dataclass
 class DarcyLawParams:
