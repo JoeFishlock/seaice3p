@@ -141,6 +141,9 @@ class DimensionalParams:
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
+    # Short wave forcing parameters
+    SW_internal_heating: bool = False
+
     # These are the parameters for the sinusoidal temperature cycle in non dimensional
     # units
     offset: float = -1.0
@@ -415,6 +418,7 @@ class DimensionalParams:
             period=self.period,
             Barrow_top_temperature_data_choice=self.Barrow_top_temperature_data_choice,
             Barrow_initial_bulk_gas_in_ice=self.Barrow_initial_bulk_gas_in_ice,
+            SW_internal_heating=self.SW_internal_heating,
         )
 
     def get_numerical_params(self):

@@ -91,8 +91,14 @@ class EQMStateBCs(StateBCs):
         Vg, Wl, V = calculate_velocities(self)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, self)
 
+        if self.cfg.forcing_config.SW_internal_heating:
+            return (
+                -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
+                - self._calculate_brine_convection_sink()
+                + self._calculate_radiative_heating()
+            )
+
         return (
             -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
             - self._calculate_brine_convection_sink()
-            + self._calculate_radiative_heating()
         )
