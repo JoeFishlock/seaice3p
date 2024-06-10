@@ -100,6 +100,8 @@ class ForcingConfig:
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
     SW_internal_heating: bool = False
+    SW_forcing_choice: str = "constant"
+    constant_SW_irradiance: float = 280  # W/m2
 
     # class variables with barrow forcing data hard coded in
     DATA_INDEXES: ClassVar[dict[str, int]] = {

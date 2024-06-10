@@ -4,12 +4,11 @@ import numpy as np
 from oilrad import calculate_SW_heating_in_ice
 from .state.abstract_state_bcs import StateBCs
 from .RJW14.brine_drainage import calculate_ice_ocean_boundary_depth
+from .radiative_forcing import get_SW_forcing
 
 
 def calculate_non_dimensional_shortwave_heating(state_bcs: StateBCs):
     """Calculate internal shortwave heating due to oil droplets on center grid"""
-    # dimensional incident SW in W/m2
-    INCIDENT_SW = 280
     MODEL_CHOICE = "1L"
     # To integrate spectrum between in nm
     MIN_WAVELENGTH = 350
@@ -33,7 +32,7 @@ def calculate_non_dimensional_shortwave_heating(state_bcs: StateBCs):
     }
 
     dimensional_heating = calculate_SW_heating_in_ice(
-        INCIDENT_SW,
+        get_SW_forcing(state_bcs.time, state_bcs.cfg),
         center_grid[is_ice],
         MODEL_CHOICE,
         MIN_WAVELENGTH,

@@ -143,6 +143,8 @@ class DimensionalParams:
 
     # Short wave forcing parameters
     SW_internal_heating: bool = False
+    SW_forcing_choice: str = "constant"
+    constant_SW_irradiance: float = 280  # W/m2
 
     # These are the parameters for the sinusoidal temperature cycle in non dimensional
     # units
@@ -419,6 +421,8 @@ class DimensionalParams:
             Barrow_top_temperature_data_choice=self.Barrow_top_temperature_data_choice,
             Barrow_initial_bulk_gas_in_ice=self.Barrow_initial_bulk_gas_in_ice,
             SW_internal_heating=self.SW_internal_heating,
+            SW_forcing_choice=self.SW_forcing_choice,
+            constant_SW_irradiance=self.constant_SW_irradiance,
         )
 
     def get_numerical_params(self):
