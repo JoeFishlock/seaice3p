@@ -145,6 +145,9 @@ class DimensionalParams:
     SW_internal_heating: bool = False
     SW_forcing_choice: str = "constant"
     constant_SW_irradiance: float = 280  # W/m2
+    SW_radiation_model_choice: str = "1L"  # specify oilrad model to use
+    constant_oil_mass_ratio: float = 0  # ng/g
+    SW_scattering_ice_type: str = "FYI"
 
     # These are the parameters for the sinusoidal temperature cycle in non dimensional
     # units
@@ -423,6 +426,9 @@ class DimensionalParams:
             SW_internal_heating=self.SW_internal_heating,
             SW_forcing_choice=self.SW_forcing_choice,
             constant_SW_irradiance=self.constant_SW_irradiance,
+            SW_radiation_model_choice=self.SW_radiation_model_choice,
+            constant_oil_mass_ratio=self.constant_oil_mass_ratio,
+            SW_scattering_ice_type=self.SW_scattering_ice_type,
         )
 
     def get_numerical_params(self):

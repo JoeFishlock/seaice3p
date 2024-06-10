@@ -8,6 +8,7 @@ DATA_DIRECTORY = Path("summer_test")
 FRAMES_DIR = Path("summer_test/frames")
 SIMULATION_DIMENSIONAL_PARAMS = {
     "name": "summer-test",
+    "SW_internal_heating": True,
     "total_time_in_days": 90,
     "savefreq_in_days": 1,
     "lengthscale": 2.4,
@@ -25,7 +26,12 @@ SIMULATION_DIMENSIONAL_PARAMS = {
     "initial_summer_ice_temperature": -4,
     "far_gas_sat": 0,
     "temperature_forcing_choice": "constant",
-    "constant_top_temperature": -2,
+    "constant_top_temperature": 0,
+    "SW_forcing_choice": "constant",
+    "constant_SW_irradiance": 280,
+    "SW_radiation_model_choice": "1L",
+    "constant_oil_mass_ratio": 1000,
+    "SW_scattering_ice_type": "FYI",
 }
 
 

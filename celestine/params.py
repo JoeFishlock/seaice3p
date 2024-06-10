@@ -103,6 +103,11 @@ class ForcingConfig:
     SW_forcing_choice: str = "constant"
     constant_SW_irradiance: float = 280  # W/m2
 
+    SW_radiation_model_choice: str = "1L"  # specify oilrad model to use
+    # Parameters for single layer SW radiative transfer model
+    constant_oil_mass_ratio: float = 0  # ng/g
+    SW_scattering_ice_type: str = "FYI"
+
     # class variables with barrow forcing data hard coded in
     DATA_INDEXES: ClassVar[dict[str, int]] = {
         "time": 0,

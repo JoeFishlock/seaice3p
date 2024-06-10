@@ -9,7 +9,6 @@ from .radiative_forcing import get_SW_forcing
 
 def calculate_non_dimensional_shortwave_heating(state_bcs: StateBCs):
     """Calculate internal shortwave heating due to oil droplets on center grid"""
-    MODEL_CHOICE = "1L"
     # To integrate spectrum between in nm
     MIN_WAVELENGTH = 350
     MAX_WAVELENGTH = 700
@@ -26,15 +25,15 @@ def calculate_non_dimensional_shortwave_heating(state_bcs: StateBCs):
     )
 
     MODEL_KWARGS = {
-        "oil_mass_ratio": 0,
+        "oil_mass_ratio": state_bcs.cfg.forcing_config.constant_oil_mass_ratio,
         "ice_thickness": dimensional_ice_thickness,
-        "ice_type": "FYI",
+        "ice_type": state_bcs.cfg.forcing_config.SW_scattering_ice_type,
     }
 
     dimensional_heating = calculate_SW_heating_in_ice(
         get_SW_forcing(state_bcs.time, state_bcs.cfg),
         center_grid[is_ice],
-        MODEL_CHOICE,
+        state_bcs.cfg.forcing_config.SW_radiation_model_choice,
         MIN_WAVELENGTH,
         MAX_WAVELENGTH,
         **MODEL_KWARGS
