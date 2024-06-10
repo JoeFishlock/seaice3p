@@ -454,6 +454,7 @@ class DimensionalParams:
         return Scales(
             self.lengthscale,
             self.thermal_diffusivity,
+            self.liquid_thermal_conductivity,
             self.ocean_salinity,
             self.salinity_difference,
             self.ocean_freezing_temperature,
@@ -482,6 +483,7 @@ class DimensionalParams:
 class Scales:
     lengthscale: float  # domain height in m
     thermal_diffusivity: float  # m2/s
+    liquid_thermal_conductivity: float  # W/m deg C
     ocean_salinity: float  # g/kg
     salinity_difference: float  # g/kg
     ocean_freezing_temperature: float  # deg C
@@ -565,3 +567,11 @@ class Scales:
         """convert from non dimensional dissolved gas to dimensional dissolved gas in
         kg(gas)/kg(liquid)"""
         return self.saturation_concentration * dissolved_gas
+
+    def convert_from_dimensional_heating(self, dimensional_heating):
+        """convert from heating rate in W/m3 to dimensionless units"""
+        return (
+            dimensional_heating
+            * self.lengthscale**2
+            / (self.liquid_thermal_conductivity * self.temperature_difference)
+        )
