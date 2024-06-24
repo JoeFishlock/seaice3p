@@ -1,5 +1,6 @@
 import numpy as np
-import celestine.boundary_conditions as bc
+from ..forcing import boundary_conditions as bc
+from ..forcing import calculate_non_dimensional_shortwave_heating
 from ..flux import (
     calculate_heat_flux,
     calculate_salt_flux,
@@ -14,7 +15,6 @@ from ..RJW14 import (
 from .abstract_state_bcs import StateBCs
 from .equilibrium_state_bcs import prevent_gas_rise_into_saturated_cell
 from ..velocities import calculate_velocities
-from ..radiative_heating import calculate_non_dimensional_shortwave_heating
 
 
 class DISEQStateBCs(StateBCs):
