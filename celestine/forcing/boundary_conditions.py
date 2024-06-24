@@ -2,9 +2,9 @@
 centered grid that needs to be on the ghost grid for the upwind scheme.
 """
 
-from celestine.forcing import get_temperature_forcing, get_bottom_temperature_forcing
-from celestine.grids import add_ghost_cells
-from celestine.params import Config
+from .temperature_forcing import get_temperature_forcing, get_bottom_temperature_forcing
+from ..grids import add_ghost_cells
+from ..params import Config
 
 
 def dissolved_gas_BCs(dissolved_gas_centers, cfg: Config):

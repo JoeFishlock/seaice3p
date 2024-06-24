@@ -2,8 +2,8 @@
 
 import numpy as np
 from oilrad import calculate_SW_heating_in_ice
-from .state.abstract_state_bcs import StateBCs
-from .RJW14.brine_drainage import calculate_ice_ocean_boundary_depth
+from ..state.abstract_state_bcs import StateBCs
+from ..RJW14.brine_drainage import calculate_ice_ocean_boundary_depth
 from .radiative_forcing import get_SW_forcing
 
 

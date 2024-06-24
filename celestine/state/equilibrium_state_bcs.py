@@ -1,5 +1,6 @@
 import numpy as np
-import celestine.boundary_conditions as bc
+from ..forcing import boundary_conditions as bc
+from ..forcing import calculate_non_dimensional_shortwave_heating
 from ..flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
 from ..RJW14 import (
     calculate_heat_sink,
@@ -8,7 +9,6 @@ from ..RJW14 import (
 )
 from .abstract_state_bcs import StateBCs
 from ..velocities import calculate_velocities
-from ..radiative_heating import calculate_non_dimensional_shortwave_heating
 
 
 def prevent_gas_rise_into_saturated_cell(Vg, state_BCs):

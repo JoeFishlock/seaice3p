@@ -6,7 +6,7 @@ heating.
 
 Unlike temperature forcing this provides dimensional forcing
 """
-from celestine.params import Config
+from ..params import Config
 
 
 def get_SW_forcing(time, cfg: Config):
