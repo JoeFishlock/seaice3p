@@ -7,6 +7,8 @@ Code for simulating gas content of sea ice in 1D using enthalpy method.
 Install via pip (v0.13.0 and above).
 To install a specific version run `pip install git+file:///ABSOLUTE/PATH/TO/LOCAL/GIT/REPO@vX.X.X`.
 Alternatively use poetry to build a wheel for a specific version and pip install this.
+Note oilrad (v0.2.0) is module used to calculate radiative heating and is a local dependency that must be installed separately.
+It does not appear in `pyproject.toml`.
 
 ## Usage ##
 

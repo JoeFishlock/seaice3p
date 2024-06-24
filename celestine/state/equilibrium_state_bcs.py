@@ -8,6 +8,7 @@ from ..RJW14 import (
 )
 from .abstract_state_bcs import StateBCs
 from ..velocities import calculate_velocities
+from ..radiative_heating import calculate_non_dimensional_shortwave_heating
 
 
 def prevent_gas_rise_into_saturated_cell(Vg, state_BCs):
@@ -72,9 +73,30 @@ class EQMStateBCs(StateBCs):
         dz = lambda flux: np.matmul(D_e, flux)
         return np.hstack((dz(heat_flux), dz(salt_flux), dz(gas_flux)))
 
+    def _calculate_radiative_heating(self):
+        """Calculate internal shortwave heating source for enthalpy equation.
+
+        Stack with a zero source term for salt and bulk gas equation.
+        """
+        heating = calculate_non_dimensional_shortwave_heating(self)
+        return np.hstack(
+            (
+                heating,
+                np.zeros_like(heating),
+                np.zeros_like(heating),
+            )
+        )
+
     def calculate_equation(self, D_g, D_e):
         Vg, Wl, V = calculate_velocities(self)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, self)
+
+        if self.cfg.forcing_config.SW_internal_heating:
+            return (
+                -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
+                - self._calculate_brine_convection_sink()
+                + self._calculate_radiative_heating()
+            )
 
         return (
             -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)

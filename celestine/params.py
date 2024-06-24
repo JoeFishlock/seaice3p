@@ -48,6 +48,11 @@ class BoundaryConditionsConfig:
     far_temp: float = 0.1
     far_bulk_salinity: float = 0
 
+    # Non dimensional parameters for summer initial conditions
+    initial_summer_ice_depth: float = 0.5
+    initial_summer_ocean_temperature: float = -0.05
+    initial_summer_ice_temperature: float = -0.1
+
 
 @dataclass
 class DarcyLawParams:
@@ -93,6 +98,15 @@ class ForcingConfig:
 
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+
+    SW_internal_heating: bool = False
+    SW_forcing_choice: str = "constant"
+    constant_SW_irradiance: float = 280  # W/m2
+
+    SW_radiation_model_choice: str = "1L"  # specify oilrad model to use
+    # Parameters for single layer SW radiative transfer model
+    constant_oil_mass_ratio: float = 0  # ng/g
+    SW_scattering_ice_type: str = "FYI"
 
     # class variables with barrow forcing data hard coded in
     DATA_INDEXES: ClassVar[dict[str, int]] = {

@@ -11,6 +11,7 @@ def get_initial_conditions(cfg: Config):
     INITIAL_CONDITIONS = {
         "uniform": get_uniform_initial_conditions,
         "barrow_2009": get_barrow_initial_conditions,
+        "summer": get_summer_initial_conditions,
     }
     choice = cfg.boundary_conditions_config.initial_conditions_choice
     return INITIAL_CONDITIONS[choice](cfg)
@@ -114,3 +115,49 @@ def get_barrow_initial_conditions(cfg: Config):
         return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
     else:
         raise TypeError("Cannot provide barrow initial condition for model choice")
+
+
+def get_summer_initial_conditions(cfg: Config):
+    """initialise domain with an initial ice layer of given temperature and bulk
+    salinity given by values in the configuration.
+
+    This is an idealised initial condition to investigate the impact of shortwave
+    radiative forcing on melting bare ice
+    """
+    ICE_DEPTH = cfg.boundary_conditions_config.initial_summer_ice_depth
+
+    # Initialise with a constant bulk salinity in ice
+    SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
+
+    BOTTOM_TEMP = cfg.boundary_conditions_config.initial_summer_ocean_temperature
+    BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
+    TEMP_IN_ICE = cfg.boundary_conditions_config.initial_summer_ice_temperature
+
+    _, centers, _, _ = initialise_grids(cfg.numerical_params.I)
+    salt = apply_value_in_ice_layer(
+        ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
+    )
+    # Initialise no gas until we have worked out treatment of oil
+    gas = np.zeros_like(salt)
+
+    temp = apply_value_in_ice_layer(
+        ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers
+    )
+    solid_fraction_in_mush = (salt + temp) / (
+        temp - cfg.physical_params.concentration_ratio
+    )
+    enthalpy = apply_value_in_ice_layer(
+        ICE_DEPTH,
+        ice_value=temp - solid_fraction_in_mush * cfg.physical_params.stefan_number,
+        liquid_value=temp,
+        grid=centers,
+    )
+
+    if cfg.model == "EQM":
+        return EQMState(cfg, 0, enthalpy, salt, gas)
+    elif cfg.model == "DISEQ":
+        bulk_dissolved_gas = gas
+        gas_fraction = np.zeros_like(gas)
+        return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+    else:
+        raise TypeError("Cannot provide summer initial condition for model choice")
