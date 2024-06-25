@@ -122,7 +122,7 @@ def find_ghost_cell_temperature(state: State) -> float:
     return (
         state.cfg.numerical_params.step
         * surface_temp_gradient(
-            state.cfg, surface_temp, state.temperature[-1], state.temperature[-2]
+            state.cfg, surface_temperature, state.temperature[-1], state.temperature[-2]
         )
         + state.temperature[-1]
     )
