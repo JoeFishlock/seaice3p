@@ -149,6 +149,9 @@ class DimensionalParams:
     constant_oil_mass_ratio: float = 0  # ng/g
     SW_scattering_ice_type: str = "FYI"
 
+    # surface energy balance forcing parameters
+    surface_energy_balance_forcing: bool = False
+
     # These are the parameters for the sinusoidal temperature cycle in non dimensional
     # units
     offset: float = -1.0
@@ -429,6 +432,7 @@ class DimensionalParams:
             SW_radiation_model_choice=self.SW_radiation_model_choice,
             constant_oil_mass_ratio=self.constant_oil_mass_ratio,
             SW_scattering_ice_type=self.SW_scattering_ice_type,
+            surface_energy_balance_forcing=self.surface_energy_balance_forcing,
         )
 
     def get_numerical_params(self):

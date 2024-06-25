@@ -108,6 +108,8 @@ class ForcingConfig:
     constant_oil_mass_ratio: float = 0  # ng/g
     SW_scattering_ice_type: str = "FYI"
 
+    surface_energy_balance_forcing: bool = False
+
     # class variables with barrow forcing data hard coded in
     DATA_INDEXES: ClassVar[dict[str, int]] = {
         "time": 0,
