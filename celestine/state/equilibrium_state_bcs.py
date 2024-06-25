@@ -54,7 +54,7 @@ class EQMStateBCs(StateBCs):
 
         # here we apply boundary conditions to the secondary variables calculated from
         # the enthalpy method
-        self.temperature = bc.temperature_BCs(state.temperature, state.time, state.cfg)
+        self.temperature = bc.temperature_BCs(state, state.time, state.cfg)
         self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, state.cfg)
         self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
         self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, state.cfg)
