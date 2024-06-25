@@ -589,3 +589,11 @@ class Scales:
             * self.lengthscale**2
             / (self.liquid_thermal_conductivity * self.temperature_difference)
         )
+
+    def convert_from_dimensional_heat_flux(self, dimensional_heat_flux):
+        """convert from heat flux in W/m2 to dimensionless units"""
+        return (
+            dimensional_heat_flux
+            * self.lengthscale
+            / (self.liquid_thermal_conductivity * self.temperature_difference)
+        )
