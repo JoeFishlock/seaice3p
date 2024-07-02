@@ -2,7 +2,44 @@
 quantities between them.
 """
 
+from dataclasses import dataclass
+from functools import cached_property
 import numpy as np
+from numpy.typing import NDArray
+
+
+@dataclass(frozen=True)
+class Grids:
+    """Class initialised from number of grid cells to contain:
+
+    grid cell width, center, edge and ghost grids and difference matrices
+    """
+
+    number_of_cells: int
+
+    @cached_property
+    def step(self) -> float:
+        """Grid cell width"""
+        return 1 / self.number_of_cells
+
+    @cached_property
+    def centers(self) -> NDArray:
+        """Center grid"""
+        return np.array(
+            [-1 + (2 * i + 1) * self.step / 2 for i in range(self.number_of_cells)]
+        )
+
+    @cached_property
+    def edges(self) -> NDArray:
+        """Edge grid"""
+        return np.array([-1 + i * self.step for i in range(self.number_of_cells + 1)])
+
+    @cached_property
+    def ghosts(self) -> NDArray:
+        """Ghost grid"""
+        return np.concatenate(
+            (np.array([-1 - self.step / 2]), self.centers, np.array([self.step / 2]))
+        )
 
 
 def get_number_of_timesteps(total_time, timestep):
