@@ -4,7 +4,7 @@ import numpy as np
 from celestine.state import get_model
 import celestine.logging_config as logs
 from .params import Config
-from .grids import get_difference_matrix
+from .grids import Grids
 from .initial_conditions import get_initial_conditions
 
 
@@ -42,8 +42,8 @@ class Solver:
         self.cfg = cfg
         self.step = cfg.numerical_params.step
         self.I = cfg.numerical_params.I
-        self.D_e = get_difference_matrix(self.I, self.step)
-        self.D_g = get_difference_matrix(self.I + 1, self.step)
+        self.D_e = Grids(cfg.numerical_params.I).D_e
+        self.D_g = Grids(cfg.numerical_params.I).D_g
 
     @property
     def number_of_solution_components(self):

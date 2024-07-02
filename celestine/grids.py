@@ -8,6 +8,18 @@ import numpy as np
 from numpy.typing import NDArray
 
 
+def get_number_of_timesteps(total_time, timestep):
+    return int(total_time / timestep) + 1
+
+
+def get_difference_matrix(size, step):
+    D = np.zeros((size, size + 1))
+    for i in range(size):
+        D[i, i] = -1
+        D[i, i + 1] = 1
+    return D / step
+
+
 @dataclass(frozen=True)
 class Grids:
     """Class initialised from number of grid cells to contain:
@@ -41,17 +53,15 @@ class Grids:
             (np.array([-1 - self.step / 2]), self.centers, np.array([self.step / 2]))
         )
 
+    @cached_property
+    def D_e(self) -> NDArray:
+        """Difference matrix to differentiate edge grid quantities to the center grid"""
+        return get_difference_matrix(self.number_of_cells, self.step)
 
-def get_number_of_timesteps(total_time, timestep):
-    return int(total_time / timestep) + 1
-
-
-def get_difference_matrix(size, step):
-    D = np.zeros((size, size + 1))
-    for i in range(size):
-        D[i, i] = -1
-        D[i, i + 1] = 1
-    return D / step
+    @cached_property
+    def D_g(self) -> NDArray:
+        """Difference matrix to differentiate ghost grid quantities to the edge grid"""
+        return get_difference_matrix(self.number_of_cells + 1, self.step)
 
 
 def upwind(ghosts, velocity):
