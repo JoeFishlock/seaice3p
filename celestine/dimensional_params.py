@@ -149,6 +149,9 @@ class DimensionalParams:
     constant_oil_mass_ratio: float = 0  # ng/g
     SW_scattering_ice_type: str = "FYI"
 
+    # surface energy balance forcing parameters
+    surface_energy_balance_forcing: bool = False
+
     # These are the parameters for the sinusoidal temperature cycle in non dimensional
     # units
     offset: float = -1.0
@@ -429,6 +432,7 @@ class DimensionalParams:
             SW_radiation_model_choice=self.SW_radiation_model_choice,
             constant_oil_mass_ratio=self.constant_oil_mass_ratio,
             SW_scattering_ice_type=self.SW_scattering_ice_type,
+            surface_energy_balance_forcing=self.surface_energy_balance_forcing,
         )
 
     def get_numerical_params(self):
@@ -587,5 +591,13 @@ class Scales:
         return (
             dimensional_heating
             * self.lengthscale**2
+            / (self.liquid_thermal_conductivity * self.temperature_difference)
+        )
+
+    def convert_from_dimensional_heat_flux(self, dimensional_heat_flux):
+        """convert from heat flux in W/m2 to dimensionless units"""
+        return (
+            dimensional_heat_flux
+            * self.lengthscale
             / (self.liquid_thermal_conductivity * self.temperature_difference)
         )
