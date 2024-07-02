@@ -6,7 +6,7 @@ from celestine.logging_config import logger, log_time
 from celestine.__init__ import __version__
 from celestine.dimensional_params import DimensionalParams
 from celestine.run_simulation import solve
-from .grids import initialise_grids
+from .grids import Grids
 from .load import get_array_data, load_data, get_state
 
 DATA_DIRECTORY = Path("example_data")
@@ -133,8 +133,7 @@ def main(
 
     for attr in ["temperature", "salt", "gas_fraction", "solid_fraction", "gas"]:
         plt.figure()
-        _, non_dim_grid, _, _ = initialise_grids(cfg.numerical_params.I)
-        grid = scales.convert_to_dimensional_grid(non_dim_grid)
+        grid = scales.convert_to_dimensional_grid(Grids(cfg.numerical_params.I).centers)
         plt.contourf(times, grid, get_array_data(attr, cfg, times, data))
         plt.colorbar()
         plt.title(f"{attr}")

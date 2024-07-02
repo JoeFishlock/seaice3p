@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod, abstractclassmethod
 import celestine.params as cp
-from celestine.grids import initialise_grids
+from celestine.grids import Grids
 
 
 class State(ABC):
@@ -18,8 +18,7 @@ class State(ABC):
 
     @property
     def grid(self):
-        _, centers, _, _ = initialise_grids(self.cfg.numerical_params.I)
-        return centers
+        return Grids(self.cfg.numerical_params.I).centers
 
     @abstractclassmethod
     def init_from_stacked_state(cls):

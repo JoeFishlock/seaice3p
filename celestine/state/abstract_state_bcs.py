@@ -6,7 +6,7 @@ Solution: store primary variables at each timestep we want to save data
 """
 
 from abc import ABC, abstractmethod
-from celestine.grids import initialise_grids
+from celestine.grids import Grids
 from .abstract_state import State
 
 
@@ -22,13 +22,11 @@ class StateBCs(ABC):
 
     @property
     def grid(self):
-        _, _, _, ghosts = initialise_grids(self.cfg.numerical_params.I)
-        return ghosts
+        return Grids(self.cfg.numerical_params.I).ghosts
 
     @property
     def edge_grid(self):
-        _, _, edges, _ = initialise_grids(self.cfg.numerical_params.I)
-        return edges
+        return Grids(self.cfg.numerical_params.I).edges
 
     @abstractmethod
     def calculate_equation(self, D_g, D_e):

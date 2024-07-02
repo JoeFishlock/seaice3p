@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ..velocities import calculate_velocities
 from ..velocities.mono_distribution import calculate_wall_drag_function
-from celestine.grids import geometric, initialise_grids
+from celestine.grids import geometric, Grids
 from celestine.dimensional_params import DimensionalParams
 
 
@@ -23,9 +23,9 @@ def main(output_dir: Path):
             self.liquid_fraction = liquid_fraction
             self.liquid_salinity = np.zeros_like(liquid_fraction)
             I = np.size(liquid_fraction)
-            _, centers, edges, _ = initialise_grids(I)
-            self.grid = centers
-            self.edge_grid = edges
+            grids = Grids(I)
+            self.grid = grids.centers
+            self.edge_grid = grids.edges
 
     def calculate_volume_average_bubble_radius(max, min, p):
         cubed_radius = ((p - 1) * (max ** (4 - p) - min ** (4 - p))) / (

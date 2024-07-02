@@ -46,15 +46,6 @@ def get_number_of_timesteps(total_time, timestep):
     return int(total_time / timestep) + 1
 
 
-def initialise_grids(number_of_cells):
-    step = 1 / number_of_cells
-    centers = np.array([-1 + (2 * i + 1) * step / 2 for i in range(number_of_cells)])
-    edges = np.array([-1 + i * step for i in range(number_of_cells + 1)])
-    ghosts = np.concatenate((np.array([-1 - step / 2]), centers, np.array([step / 2])))
-
-    return step, centers, edges, ghosts
-
-
 def get_difference_matrix(size, step):
     D = np.zeros((size, size + 1))
     for i in range(size):

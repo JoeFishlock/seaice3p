@@ -4,7 +4,7 @@ simulation.
 import numpy as np
 from celestine.params import Config
 from .state import EQMState, DISEQState
-from celestine.grids import initialise_grids
+from celestine.grids import Grids
 
 
 def get_initial_conditions(cfg: Config):
@@ -83,7 +83,7 @@ def get_barrow_initial_conditions(cfg: Config):
 
     chi = cfg.physical_params.expansion_coefficient
 
-    _, centers, _, _ = initialise_grids(cfg.numerical_params.I)
+    centers = Grids(cfg.numerical_params.I).centers
     salt = apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
@@ -133,7 +133,7 @@ def get_summer_initial_conditions(cfg: Config):
     BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
     TEMP_IN_ICE = cfg.boundary_conditions_config.initial_summer_ice_temperature
 
-    _, centers, _, _ = initialise_grids(cfg.numerical_params.I)
+    centers = Grids(cfg.numerical_params.I).centers
     salt = apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
