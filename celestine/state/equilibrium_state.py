@@ -23,9 +23,43 @@ class EQMState:
     gas: NDArray
 
 
-def get_state_with_bcs(state: EQMState) -> EQMStateBCs:
+@dataclass(frozen=True)
+class EQMStateFull:
+    """Contains all variables variables for solution with equilibrium gas phase
+    after running the enthalpy method on EQMSate.
+
+    principal solution components:
+    bulk enthalpy
+    bulk salinity
+    bulk gas
+
+    enthalpy method variables:
+    temperature
+    liquid_fraction
+    solid_fraction
+    liquid_salinity
+    dissolved_gas
+    gas_fraction
+
+    all on the center grid.
+    """
+
+    time: float
+    enthalpy: NDArray
+    salt: NDArray
+    gas: NDArray
+
+    temperature: NDArray
+    liquid_fraction: NDArray
+    solid_fraction: NDArray
+    liquid_salinity: NDArray
+    dissolved_gas: NDArray
+    gas_fraction: NDArray
+
+
+def get_state_with_bcs(full_state: EQMStateFull) -> EQMStateBCs:
     """Initialise the appropriate StateBCs object"""
-    raise NotImplementedError
+    return EQMStateBCs(full_state)
 
 
 def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
