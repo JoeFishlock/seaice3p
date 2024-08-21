@@ -76,7 +76,7 @@ class Solver:
         # simulation configuration
         state = get_state(self.cfg, time, solution_vector)
         full_state = calculate_enthalpy_method(self.cfg, state)
-        state_BCs = apply_boundary_conditions(full_state)
+        state_BCs = apply_boundary_conditions(self.cfg, full_state)
 
         return state_BCs.calculate_equation(self.D_g, self.D_e)
 

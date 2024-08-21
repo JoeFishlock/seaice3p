@@ -29,11 +29,11 @@ def get_state(cfg, time, solution_vector) -> State:
             raise NotImplementedError
 
 
-def apply_boundary_conditions(full_state: StateFull) -> StateBCs:
+def apply_boundary_conditions(cfg, full_state: StateFull) -> StateBCs:
     match full_state:
         case EQMStateFull():
-            return EQMStateBCs(full_state)
+            return EQMStateBCs(cfg, full_state)
         case DISEQStateFull():
-            return DISEQStateBCs(full_state)
+            return DISEQStateBCs(cfg, full_state)
         case _:
             raise NotImplementedError

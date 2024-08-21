@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
-from .equilibrium_state_bcs import EQMStateBCs
 
 
 @dataclass(frozen=True)

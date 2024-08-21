@@ -1,4 +1,5 @@
 import numpy as np
+from ..params import Config
 from ..forcing import boundary_conditions as bc
 from ..forcing import calculate_non_dimensional_shortwave_heating
 from ..flux import (
@@ -15,6 +16,7 @@ from ..RJW14 import (
 from .abstract_state_bcs import StateBCs
 from .equilibrium_state_bcs import prevent_gas_rise_into_saturated_cell
 from ..velocities import calculate_velocities
+from .disequilibrium_state import DISEQStateFull
 
 
 class DISEQStateBCs(StateBCs):
@@ -23,28 +25,28 @@ class DISEQStateBCs(StateBCs):
 
     Note must initialise once enthalpy method has already run on State."""
 
-    def __init__(self, state):
+    def __init__(self, cfg: Config, state: DISEQStateFull):
         """Initialiase the prime variables for the solver:
         enthalpy, bulk salinity and bulk air
         """
-        self.cfg = state.cfg
+        self.cfg = cfg
         self.time = state.time
-        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, state.cfg)
-        self.salt = bc.salt_BCs(state.salt, state.cfg)
+        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
+        self.salt = bc.salt_BCs(state.salt, cfg)
 
         # here we apply boundary conditions to the secondary variables calculated from
         # the enthalpy method
-        self.temperature = bc.temperature_BCs(state, state.time, state.cfg)
-        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, state.cfg)
-        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
-        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, state.cfg)
+        self.temperature = bc.temperature_BCs(state, state.time, cfg)
+        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
+        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
+        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, cfg)
 
         self.bulk_dissolved_gas = (
-            state.cfg.physical_params.expansion_coefficient
+            cfg.physical_params.expansion_coefficient
             * self.liquid_fraction
             * self.dissolved_gas
         )
-        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, state.cfg)
+        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
 
     def _calculate_brine_convection_sink(self):
         """TODO: check the sink terms for bulk_dissolved_gas and gas fraction

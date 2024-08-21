@@ -1,4 +1,5 @@
 import numpy as np
+from ..params import Config
 from ..forcing import boundary_conditions as bc
 from ..forcing import calculate_non_dimensional_shortwave_heating
 from ..flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
@@ -8,6 +9,7 @@ from ..RJW14 import (
     calculate_gas_sink,
 )
 from .abstract_state_bcs import StateBCs
+from .equilibrium_state import EQMStateFull
 from ..velocities import calculate_velocities
 
 
@@ -42,23 +44,23 @@ class EQMStateBCs(StateBCs):
 
     Note must initialise once enthalpy method has already run on State."""
 
-    def __init__(self, state):
+    def __init__(self, cfg: Config, state: EQMStateFull):
         """Initialiase the prime variables for the solver:
         enthalpy, bulk salinity and bulk air
         """
-        self.cfg = state.cfg
+        self.cfg = cfg
         self.time = state.time
-        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, state.cfg)
-        self.salt = bc.salt_BCs(state.salt, state.cfg)
-        self.gas = bc.gas_BCs(state.gas, state.cfg)
+        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
+        self.salt = bc.salt_BCs(state.salt, cfg)
+        self.gas = bc.gas_BCs(state.gas, cfg)
 
         # here we apply boundary conditions to the secondary variables calculated from
         # the enthalpy method
-        self.temperature = bc.temperature_BCs(state, state.time, state.cfg)
-        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, state.cfg)
-        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, state.cfg)
-        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, state.cfg)
-        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, state.cfg)
+        self.temperature = bc.temperature_BCs(state, state.time, cfg)
+        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
+        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
+        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
+        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, cfg)
 
     def _calculate_brine_convection_sink(self):
         heat_sink = calculate_heat_sink(self)

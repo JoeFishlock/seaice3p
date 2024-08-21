@@ -1,7 +1,6 @@
 from functools import cached_property
 from dataclasses import dataclass
 from numpy.typing import NDArray
-from .disequilibrium_state_bcs import DISEQStateBCs
 
 
 @dataclass(frozen=True)
