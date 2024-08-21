@@ -14,7 +14,23 @@ def get_initial_conditions(cfg: Config):
         "summer": _get_summer_initial_conditions,
     }
     choice = cfg.boundary_conditions_config.initial_conditions_choice
-    return INITIAL_CONDITIONS[choice](cfg)
+    initial_state = INITIAL_CONDITIONS[choice](cfg)
+    match cfg.model:
+        case "EQM":
+            return np.hstack(
+                (initial_state.enthalpy, initial_state.salt, initial_state.gas)
+            )
+        case "DISEQ":
+            return np.hstack(
+                (
+                    initial_state.enthalpy,
+                    initial_state.salt,
+                    initial_state.bulk_dissolved_gas,
+                    initial_state.gas_fraction,
+                )
+            )
+        case _:
+            raise NotImplementedError
 
 
 def _apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):

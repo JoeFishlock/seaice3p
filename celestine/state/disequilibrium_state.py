@@ -108,12 +108,6 @@ def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
     return cls(cfg, time, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
 
 
-def get_stacked_state(self):
-    return np.hstack(
-        (self.enthalpy, self.salt, self.bulk_dissolved_gas, self.gas_fraction)
-    )
-
-
 def calculate_enthalpy_method(self):
     (
         temperature,

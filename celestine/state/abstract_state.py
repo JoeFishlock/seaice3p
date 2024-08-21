@@ -25,9 +25,5 @@ class State(ABC):
         pass
 
     @abstractmethod
-    def get_stacked_state(self):
-        pass
-
-    @abstractmethod
     def calculate_enthalpy_method(self):
         pass

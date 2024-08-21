@@ -89,7 +89,7 @@ class Solver:
         # for the barrow forcing you need to load external data to the forcing config
         self.load_forcing_data_if_needed()
 
-        initial = get_initial_conditions(self.cfg).get_stacked_state()
+        initial = get_initial_conditions(self.cfg)
         T = self.cfg.total_time
         t_eval = np.arange(0, T, self.cfg.savefreq)
 
