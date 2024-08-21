@@ -1,7 +1,8 @@
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import numpy as np
-from .state import get_state
+from .state import get_state, apply_boundary_conditions
+from .enthalpy_method import calculate_enthalpy_method
 import celestine.logging_config as logs
 from .params import Config
 from .grids import Grids
@@ -74,8 +75,8 @@ class Solver:
         # Let state module handle providing the correct State class based on
         # simulation configuration
         state = get_state(self.cfg, time, solution_vector)
-        state.calculate_enthalpy_method()
-        state_BCs = state.get_state_with_bcs()
+        full_state = calculate_enthalpy_method(self.cfg, state)
+        state_BCs = apply_boundary_conditions(full_state)
 
         return state_BCs.calculate_equation(self.D_g, self.D_e)
 

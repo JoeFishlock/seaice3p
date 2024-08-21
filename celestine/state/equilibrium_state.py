@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
-import celestine.params as cp
-from celestine.enthalpy_method import ReducedEnthalpyMethod
 from .equilibrium_state_bcs import EQMStateBCs
 
 
@@ -55,25 +53,3 @@ class EQMStateFull:
     liquid_salinity: NDArray
     dissolved_gas: NDArray
     gas_fraction: NDArray
-
-
-def get_state_with_bcs(full_state: EQMStateFull) -> EQMStateBCs:
-    """Initialise the appropriate StateBCs object"""
-    return EQMStateBCs(full_state)
-
-
-def calculate_enthalpy_method(self):
-    (
-        temperature,
-        liquid_fraction,
-        gas_fraction,
-        solid_fraction,
-        liquid_salinity,
-        dissolved_gas,
-    ) = ReducedEnthalpyMethod(self.cfg.physical_params).calculate_enthalpy_method(self)
-    self.temperature = temperature
-    self.liquid_fraction = liquid_fraction
-    self.gas_fraction = gas_fraction
-    self.solid_fraction = solid_fraction
-    self.liquid_salinity = liquid_salinity
-    self.dissolved_gas = dissolved_gas

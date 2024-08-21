@@ -3,8 +3,64 @@ bulk salinity and bulk gas."""
 
 import numpy as np
 from abc import ABC, abstractmethod
-from celestine.params import PhysicalParams
+from celestine.params import PhysicalParams, Config
 from celestine.phase_boundaries import ReducedPhaseBoundaries
+from celestine.state.disequilibrium_state import DISEQStateFull
+from .state import EQMState, DISEQState, State, StateFull, EQMStateFull
+
+
+def calculate_enthalpy_method(cfg: Config, state: State) -> StateFull:
+    match state:
+        case EQMState():
+            (
+                temperature,
+                liquid_fraction,
+                gas_fraction,
+                solid_fraction,
+                liquid_salinity,
+                dissolved_gas,
+            ) = ReducedEnthalpyMethod(cfg.physical_params).calculate_enthalpy_method(
+                state
+            )
+            return EQMStateFull(
+                state.time,
+                state.enthalpy,
+                state.salt,
+                state.gas,
+                temperature,
+                liquid_fraction,
+                solid_fraction,
+                liquid_salinity,
+                dissolved_gas,
+                gas_fraction,
+            )
+        case DISEQState():
+            (
+                temperature,
+                liquid_fraction,
+                gas_fraction,
+                solid_fraction,
+                liquid_salinity,
+                dissolved_gas,
+            ) = DisequilibriumEnthalpyMethod(
+                cfg.physical_params
+            ).calculate_enthalpy_method(
+                state
+            )
+            return DISEQStateFull(
+                state.time,
+                state.enthalpy,
+                state.salt,
+                state.bulk_dissolved_gas,
+                state.gas_fraction,
+                temperature,
+                liquid_fraction,
+                solid_fraction,
+                liquid_salinity,
+                dissolved_gas,
+            )
+        case _:
+            raise NotImplementedError
 
 
 class EnthalpyMethod(ABC):
