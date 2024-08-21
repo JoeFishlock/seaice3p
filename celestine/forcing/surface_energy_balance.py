@@ -15,7 +15,6 @@ from .turbulent_heat_flux import (
     calculate_sensible_heat_flux,
 )
 from .radiative_forcing import get_LW_forcing, get_SW_forcing
-from ..state.abstract_state import State
 
 STEFAN_BOLTZMANN = 5.670374419e-8  # W/m2 K4
 SW_ALBEDO = 0.7
@@ -111,7 +110,7 @@ def solve_for_surface_temp(
     return solution
 
 
-def find_ghost_cell_temperature(state: State) -> float:
+def find_ghost_cell_temperature(state) -> float:
     surface_temperature = solve_for_surface_temp(
         state.cfg,
         state.time,

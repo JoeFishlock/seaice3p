@@ -7,7 +7,6 @@ Solution: store primary variables at each timestep we want to save data
 
 from abc import ABC, abstractmethod
 from celestine.grids import Grids
-from .abstract_state import State
 
 
 class StateBCs(ABC):
@@ -15,10 +14,6 @@ class StateBCs(ABC):
     cells as well
 
     Note must initialise once enthalpy method has already run on State."""
-
-    @abstractmethod
-    def __init__(self, state: State):
-        self.cfg = state.cfg
 
     @property
     def grid(self):
