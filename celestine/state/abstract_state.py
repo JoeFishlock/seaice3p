@@ -20,10 +20,6 @@ class State(ABC):
     def grid(self):
         return Grids(self.cfg.numerical_params.I).centers
 
-    @abstractclassmethod
-    def init_from_stacked_state(cls):
-        pass
-
     @abstractmethod
     def calculate_enthalpy_method(self):
         pass

@@ -62,12 +62,6 @@ def get_state_with_bcs(full_state: EQMStateFull) -> EQMStateBCs:
     return EQMStateBCs(full_state)
 
 
-def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
-    """initialise from stacked solution vector for use in the solver"""
-    enthalpy, salt, gas = np.split(stacked_state, 3)
-    return cls(cfg, time, enthalpy, salt, gas)
-
-
 def calculate_enthalpy_method(self):
     (
         temperature,

@@ -102,12 +102,6 @@ def get_state_with_bcs(full_state: DISEQStateFull):
     return DISEQStateBCs(full_state)
 
 
-def init_from_stacked_state(cls, cfg: cp.Config, time, stacked_state):
-    """initialise from stacked solution vector for use in the solver"""
-    enthalpy, salt, bulk_dissolved_gas, gas_fraction = np.split(stacked_state, 4)
-    return cls(cfg, time, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
-
-
 def calculate_enthalpy_method(self):
     (
         temperature,
