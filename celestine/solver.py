@@ -1,6 +1,8 @@
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import numpy as np
+
+from .equations import calculate_equations
 from .state import get_state, apply_boundary_conditions
 from .enthalpy_method import calculate_enthalpy_method
 import celestine.logging_config as logs
@@ -79,7 +81,7 @@ class Solver:
         full_state = calculate_enthalpy_method(self.cfg, state)
         state_BCs = apply_boundary_conditions(self.cfg, full_state)
 
-        return state_BCs.calculate_equation(self.cfg, self.grids)
+        return calculate_equations(state_BCs, self.cfg, self.grids)
 
     @logs.time_function
     def solve(self, directory: Path):
