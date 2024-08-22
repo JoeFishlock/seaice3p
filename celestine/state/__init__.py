@@ -1,9 +1,7 @@
 import numpy as np
 from ..forcing import boundary_conditions as bc
-from .equilibrium_state import EQMState, EQMStateFull
-from .disequilibrium_state import DISEQState, DISEQStateFull
-from .equilibrium_state_bcs import EQMStateBCs
-from .disequilibrium_state_bcs import DISEQStateBCs
+from .equilibrium_state import EQMState, EQMStateFull, EQMStateBCs
+from .disequilibrium_state import DISEQState, DISEQStateFull, DISEQStateBCs
 
 State = EQMState | DISEQState
 StateFull = EQMStateFull | DISEQStateFull
