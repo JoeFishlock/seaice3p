@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from numpy.typing import NDArray
 import numpy as np
 from ..params import Config
 from ..forcing import boundary_conditions as bc
@@ -38,29 +40,25 @@ def prevent_gas_rise_into_saturated_cell(Vg, state_BCs):
     return filtered_Vg
 
 
+@dataclass(frozen=True)
 class EQMStateBCs(StateBCs):
     """Stores information needed for solution at one timestep with BCs on ghost
     cells as well
 
-    Note must initialise once enthalpy method has already run on State."""
+    Initialiase the prime variables for the solver:
+    enthalpy, bulk salinity and bulk air
+    """
 
-    def __init__(self, cfg: Config, state: EQMStateFull):
-        """Initialiase the prime variables for the solver:
-        enthalpy, bulk salinity and bulk air
-        """
-        self.cfg = cfg
-        self.time = state.time
-        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
-        self.salt = bc.salt_BCs(state.salt, cfg)
-        self.gas = bc.gas_BCs(state.gas, cfg)
+    time: float
+    enthalpy: NDArray
+    salt: NDArray
+    gas: NDArray
 
-        # here we apply boundary conditions to the secondary variables calculated from
-        # the enthalpy method
-        self.temperature = bc.temperature_BCs(state, state.time, cfg)
-        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
-        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
-        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
-        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, cfg)
+    temperature: NDArray
+    liquid_salinity: NDArray
+    dissolved_gas: NDArray
+    gas_fraction: NDArray
+    liquid_fraction: NDArray
 
     def _calculate_brine_convection_sink(self):
         heat_sink = calculate_heat_sink(self)
