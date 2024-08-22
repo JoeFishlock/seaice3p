@@ -14,15 +14,3 @@ class StateBCs(ABC):
     cells as well
 
     Note must initialise once enthalpy method has already run on State."""
-
-    @property
-    def grid(self):
-        return Grids(self.cfg.numerical_params.I).ghosts
-
-    @property
-    def edge_grid(self):
-        return Grids(self.cfg.numerical_params.I).edges
-
-    @abstractmethod
-    def calculate_equation(self, D_g, D_e):
-        pass

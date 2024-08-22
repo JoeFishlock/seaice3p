@@ -6,16 +6,17 @@ from ..RJW14.brine_drainage import calculate_ice_ocean_boundary_depth
 from .radiative_forcing import get_SW_forcing
 
 
-def calculate_non_dimensional_shortwave_heating(state_bcs):
+def calculate_non_dimensional_shortwave_heating(state_bcs, grids):
     """Calculate internal shortwave heating due to oil droplets on center grid"""
     # To integrate spectrum between in nm
     MIN_WAVELENGTH = 350
     MAX_WAVELENGTH = 700
 
-    center_grid = state_bcs.grid[1:-1]
+    center_grid = grids.centers
+    edge_grid = grids.edges
     heating = np.zeros_like(center_grid)
     ice_ocean_boundary_depth = calculate_ice_ocean_boundary_depth(
-        state_bcs.liquid_fraction, state_bcs.edge_grid
+        state_bcs.liquid_fraction, edge_grid
     )
     is_ice = center_grid > -ice_ocean_boundary_depth
 

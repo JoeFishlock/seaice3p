@@ -45,6 +45,7 @@ class Solver:
         self.I = cfg.numerical_params.I
         self.D_e = Grids(cfg.numerical_params.I).D_e
         self.D_g = Grids(cfg.numerical_params.I).D_g
+        self.grids = Grids(cfg.numerical_params.I)
 
     @property
     def number_of_solution_components(self):
@@ -78,7 +79,7 @@ class Solver:
         full_state = calculate_enthalpy_method(self.cfg, state)
         state_BCs = apply_boundary_conditions(self.cfg, full_state)
 
-        return state_BCs.calculate_equation(self.D_g, self.D_e)
+        return state_BCs.calculate_equation(self.cfg, self.grids)
 
     @logs.time_function
     def solve(self, directory: Path):

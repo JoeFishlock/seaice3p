@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from numpy.typing import NDArray
 import numpy as np
-from ..params import Config
-from ..forcing import boundary_conditions as bc
 from ..forcing import calculate_non_dimensional_shortwave_heating
 from ..flux import calculate_gas_flux, calculate_heat_flux, calculate_salt_flux
 from ..RJW14 import (
@@ -10,8 +8,6 @@ from ..RJW14 import (
     calculate_salt_sink,
     calculate_gas_sink,
 )
-from .abstract_state_bcs import StateBCs
-from .equilibrium_state import EQMStateFull
 from ..velocities import calculate_velocities
 
 
@@ -41,7 +37,7 @@ def prevent_gas_rise_into_saturated_cell(Vg, state_BCs):
 
 
 @dataclass(frozen=True)
-class EQMStateBCs(StateBCs):
+class EQMStateBCs:
     """Stores information needed for solution at one timestep with BCs on ghost
     cells as well
 
@@ -60,25 +56,27 @@ class EQMStateBCs(StateBCs):
     gas_fraction: NDArray
     liquid_fraction: NDArray
 
-    def _calculate_brine_convection_sink(self):
-        heat_sink = calculate_heat_sink(self)
-        salt_sink = calculate_salt_sink(self)
-        gas_sink = calculate_gas_sink(self)
+    def _calculate_brine_convection_sink(self, cfg, grids):
+        heat_sink = calculate_heat_sink(self, cfg, grids)
+        salt_sink = calculate_salt_sink(self, cfg, grids)
+        gas_sink = calculate_gas_sink(self, cfg, grids)
         return np.hstack((heat_sink, salt_sink, gas_sink))
 
-    def _calculate_dz_fluxes(self, Wl, Vg, V, D_g, D_e):
-        heat_flux = calculate_heat_flux(self, Wl, V, D_g, self.cfg)
-        salt_flux = calculate_salt_flux(self, Wl, V, D_g, self.cfg)
-        gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, self.cfg)
+    def _calculate_dz_fluxes(self, Wl, Vg, V, cfg, grids):
+        D_g = grids.D_g
+        D_e = grids.D_e
+        heat_flux = calculate_heat_flux(self, Wl, V, D_g, cfg)
+        salt_flux = calculate_salt_flux(self, Wl, V, D_g, cfg)
+        gas_flux = calculate_gas_flux(self, Wl, V, Vg, D_g, cfg)
         dz = lambda flux: np.matmul(D_e, flux)
         return np.hstack((dz(heat_flux), dz(salt_flux), dz(gas_flux)))
 
-    def _calculate_radiative_heating(self):
+    def _calculate_radiative_heating(self, grids):
         """Calculate internal shortwave heating source for enthalpy equation.
 
         Stack with a zero source term for salt and bulk gas equation.
         """
-        heating = calculate_non_dimensional_shortwave_heating(self)
+        heating = calculate_non_dimensional_shortwave_heating(self, grids)
         return np.hstack(
             (
                 heating,
@@ -87,18 +85,18 @@ class EQMStateBCs(StateBCs):
             )
         )
 
-    def calculate_equation(self, D_g, D_e):
-        Vg, Wl, V = calculate_velocities(self)
+    def calculate_equation(self, cfg, grids):
+        D_e, D_g = grids.D_e, grids.D_g
+        Vg, Wl, V = calculate_velocities(self, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, self)
 
-        if self.cfg.forcing_config.SW_internal_heating:
+        if cfg.forcing_config.SW_internal_heating:
             return (
-                -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
-                - self._calculate_brine_convection_sink()
-                + self._calculate_radiative_heating()
+                -self._calculate_dz_fluxes(Wl, Vg, V, cfg, grids)
+                - self._calculate_brine_convection_sink(cfg, grids)
+                + self._calculate_radiative_heating(grids)
             )
 
-        return (
-            -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
-            - self._calculate_brine_convection_sink()
-        )
+        return -self._calculate_dz_fluxes(
+            Wl, Vg, V, cfg, grids
+        ) - self._calculate_brine_convection_sink(cfg, grids)

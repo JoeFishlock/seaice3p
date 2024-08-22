@@ -13,13 +13,12 @@ from ..RJW14 import (
     calculate_salt_sink,
     calculate_bulk_dissolved_gas_sink,
 )
-from .abstract_state_bcs import StateBCs
 from .equilibrium_state_bcs import prevent_gas_rise_into_saturated_cell
 from ..velocities import calculate_velocities
 from .disequilibrium_state import DISEQStateFull
 
 
-class DISEQStateBCs(StateBCs):
+class DISEQStateBCs:
     """Stores information needed for solution at one timestep with BCs on ghost
     cells as well
 
@@ -48,14 +47,14 @@ class DISEQStateBCs(StateBCs):
         )
         self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
 
-    def _calculate_brine_convection_sink(self):
+    def _calculate_brine_convection_sink(self, cfg, grids):
         """TODO: check the sink terms for bulk_dissolved_gas and gas fraction
 
         For now neglect the coupling of bubbles to the horizontal or vertical flow
         """
-        heat_sink = calculate_heat_sink(self)
-        salt_sink = calculate_salt_sink(self)
-        bulk_dissolved_gas_sink = calculate_bulk_dissolved_gas_sink(self)
+        heat_sink = calculate_heat_sink(self, cfg, grids)
+        salt_sink = calculate_salt_sink(self, cfg, grids)
+        bulk_dissolved_gas_sink = calculate_bulk_dissolved_gas_sink(self, cfg, grids)
         gas_fraction_sink = np.zeros_like(heat_sink)
         return np.hstack(
             (heat_sink, salt_sink, bulk_dissolved_gas_sink, gas_fraction_sink)
@@ -104,12 +103,12 @@ class DISEQStateBCs(StateBCs):
             )
         )
 
-    def _calculate_radiative_heating(self):
+    def _calculate_radiative_heating(self, grids):
         """Calculate internal shortwave heating source for enthalpy equation.
 
         Stack with a zero source term for salt, bubble and dissolved gas equation.
         """
-        heating = calculate_non_dimensional_shortwave_heating(self)
+        heating = calculate_non_dimensional_shortwave_heating(self, grids)
         return np.hstack(
             (
                 heating,
@@ -119,20 +118,21 @@ class DISEQStateBCs(StateBCs):
             )
         )
 
-    def calculate_equation(self, D_g, D_e):
-        Vg, Wl, V = calculate_velocities(self)
+    def calculate_equation(self, cfg, grids):
+        D_e, D_g = grids.D_e, grids.D_g
+        Vg, Wl, V = calculate_velocities(self, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, self)
 
         if self.cfg.forcing_config.SW_internal_heating:
             return (
                 -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
-                - self._calculate_brine_convection_sink()
+                - self._calculate_brine_convection_sink(cfg, grids)
                 + self._calculate_nucleation()
-                + self._calculate_radiative_heating()
+                + self._calculate_radiative_heating(grids)
             )
 
         return (
             -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
-            - self._calculate_brine_convection_sink()
+            - self._calculate_brine_convection_sink(cfg, grids)
             + self._calculate_nucleation()
         )
