@@ -1,6 +1,6 @@
+from dataclasses import dataclass
 import numpy as np
-from ..params import Config
-from ..forcing import boundary_conditions as bc
+from numpy.typing import NDArray
 from ..forcing import calculate_non_dimensional_shortwave_heating
 from ..flux import (
     calculate_heat_flux,
@@ -15,37 +15,27 @@ from ..RJW14 import (
 )
 from .equilibrium_state_bcs import prevent_gas_rise_into_saturated_cell
 from ..velocities import calculate_velocities
-from .disequilibrium_state import DISEQStateFull
 
 
+@dataclass(frozen=True)
 class DISEQStateBCs:
     """Stores information needed for solution at one timestep with BCs on ghost
     cells as well
 
-    Note must initialise once enthalpy method has already run on State."""
+    Initialiase the prime variables for the solver:
+    enthalpy, bulk salinity and bulk air
+    """
 
-    def __init__(self, cfg: Config, state: DISEQStateFull):
-        """Initialiase the prime variables for the solver:
-        enthalpy, bulk salinity and bulk air
-        """
-        self.cfg = cfg
-        self.time = state.time
-        self.enthalpy = bc.enthalpy_BCs(state.enthalpy, cfg)
-        self.salt = bc.salt_BCs(state.salt, cfg)
+    time: float
+    enthalpy: NDArray
+    salt: NDArray
 
-        # here we apply boundary conditions to the secondary variables calculated from
-        # the enthalpy method
-        self.temperature = bc.temperature_BCs(state, state.time, cfg)
-        self.liquid_salinity = bc.liquid_salinity_BCs(state.liquid_salinity, cfg)
-        self.dissolved_gas = bc.dissolved_gas_BCs(state.dissolved_gas, cfg)
-        self.liquid_fraction = bc.liquid_fraction_BCs(state.liquid_fraction, cfg)
-
-        self.bulk_dissolved_gas = (
-            cfg.physical_params.expansion_coefficient
-            * self.liquid_fraction
-            * self.dissolved_gas
-        )
-        self.gas_fraction = bc.gas_fraction_BCs(state.gas_fraction, cfg)
+    temperature: NDArray
+    liquid_salinity: NDArray
+    dissolved_gas: NDArray
+    liquid_fraction: NDArray
+    bulk_dissolved_gas: NDArray
+    gas_fraction: NDArray
 
     def _calculate_brine_convection_sink(self, cfg, grids):
         """TODO: check the sink terms for bulk_dissolved_gas and gas fraction
@@ -60,10 +50,10 @@ class DISEQStateBCs:
             (heat_sink, salt_sink, bulk_dissolved_gas_sink, gas_fraction_sink)
         )
 
-    def _calculate_nucleation(self):
+    def _calculate_nucleation(self, cfg):
         """implement nucleation term"""
-        chi = self.cfg.physical_params.expansion_coefficient
-        Da = self.cfg.physical_params.damkohler_number
+        chi = cfg.physical_params.expansion_coefficient
+        Da = cfg.physical_params.damkohler_number
         centers = np.s_[1:-1]
         bulk_dissolved_gas = self.bulk_dissolved_gas[centers]
         liquid_fraction = self.liquid_fraction[centers]
@@ -86,11 +76,12 @@ class DISEQStateBCs:
             )
         )
 
-    def _calculate_dz_fluxes(self, Wl, Vg, V, D_g, D_e):
-        heat_flux = calculate_heat_flux(self, Wl, V, D_g, self.cfg)
-        salt_flux = calculate_salt_flux(self, Wl, V, D_g, self.cfg)
+    def _calculate_dz_fluxes(self, Wl, Vg, V, cfg, grids):
+        D_g, D_e = grids.D_g, grids.D_e
+        heat_flux = calculate_heat_flux(self, Wl, V, D_g, cfg)
+        salt_flux = calculate_salt_flux(self, Wl, V, D_g, cfg)
         bulk_dissolved_gas_flux = calculate_bulk_dissolved_gas_flux(
-            self, Wl, V, D_g, self.cfg
+            self, Wl, V, D_g, cfg
         )
         gas_fraction_flux = calculate_gas_fraction_flux(self, V, Vg)
         dz = lambda flux: np.matmul(D_e, flux)
@@ -123,16 +114,16 @@ class DISEQStateBCs:
         Vg, Wl, V = calculate_velocities(self, cfg)
         Vg = prevent_gas_rise_into_saturated_cell(Vg, self)
 
-        if self.cfg.forcing_config.SW_internal_heating:
+        if cfg.forcing_config.SW_internal_heating:
             return (
-                -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
+                -self._calculate_dz_fluxes(Wl, Vg, V, cfg, grids)
                 - self._calculate_brine_convection_sink(cfg, grids)
-                + self._calculate_nucleation()
+                + self._calculate_nucleation(cfg)
                 + self._calculate_radiative_heating(grids)
             )
 
         return (
-            -self._calculate_dz_fluxes(Wl, Vg, V, D_g, D_e)
+            -self._calculate_dz_fluxes(Wl, Vg, V, cfg, grids)
             - self._calculate_brine_convection_sink(cfg, grids)
-            + self._calculate_nucleation()
+            + self._calculate_nucleation(cfg)
         )
