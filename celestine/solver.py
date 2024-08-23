@@ -4,7 +4,7 @@ import numpy as np
 
 import celestine.logging_config as logs
 from .equations import calculate_equations
-from .state import get_state
+from .state import get_unpacker
 from .forcing import get_boundary_conditions
 from .enthalpy_method import get_enthalpy_method
 from .params import Config
@@ -51,6 +51,7 @@ class Solver:
         self.grids = Grids(cfg.numerical_params.I)
         self.enthalpy_method = get_enthalpy_method(cfg)
         self.boundary_conditions = get_boundary_conditions(cfg)
+        self.unpack = get_unpacker(cfg)
 
     @property
     def number_of_solution_components(self):
@@ -80,7 +81,7 @@ class Solver:
 
         # Let state module handle providing the correct State class based on
         # simulation configuration
-        state = get_state(self.cfg, time, solution_vector)
+        state = self.unpack(time, solution_vector)
         full_state = self.enthalpy_method(state)
         state_BCs = self.boundary_conditions(full_state)
 
