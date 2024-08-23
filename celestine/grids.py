@@ -80,17 +80,6 @@ def geometric(ghosts):
     return np.sqrt(upper_ghosts * lower_ghosts)
 
 
-def average(ghosts):
-    """Returns arithmetic mean pairwise of first dimension of an array
-
-    This should get values on the ghost grid and returns the arithmetic average
-    onto the edge grid
-    """
-    upper_ghosts = ghosts[1:]
-    lower_ghosts = ghosts[:-1]
-    return 0.5 * (upper_ghosts + lower_ghosts)
-
-
 def add_ghost_cells(centers, bottom, top):
     """Add specified bottom and top value to center grid
 
