@@ -7,8 +7,8 @@ calculates the phase boundaries neglecting the gas fraction so that
 """
 
 import numpy as np
-from .state import State
-from .params import PhysicalParams
+from ..state import State
+from ..params import PhysicalParams
 
 
 def _calculate_liquidus(salt):
