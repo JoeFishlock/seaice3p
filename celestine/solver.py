@@ -2,10 +2,11 @@ from scipy.integrate import solve_ivp
 from pathlib import Path
 import numpy as np
 
-from .equations import calculate_equations
-from .state import get_state, apply_boundary_conditions
-from .enthalpy_method import get_enthalpy_method
 import celestine.logging_config as logs
+from .equations import calculate_equations
+from .state import get_state
+from .forcing import get_boundary_conditions
+from .enthalpy_method import get_enthalpy_method
 from .params import Config
 from .grids import Grids
 from .initial_conditions import get_initial_conditions
@@ -49,6 +50,7 @@ class Solver:
         self.D_g = Grids(cfg.numerical_params.I).D_g
         self.grids = Grids(cfg.numerical_params.I)
         self.enthalpy_method = get_enthalpy_method(cfg)
+        self.boundary_conditions = get_boundary_conditions(cfg)
 
     @property
     def number_of_solution_components(self):
@@ -80,7 +82,7 @@ class Solver:
         # simulation configuration
         state = get_state(self.cfg, time, solution_vector)
         full_state = self.enthalpy_method(state)
-        state_BCs = apply_boundary_conditions(self.cfg, full_state)
+        state_BCs = self.boundary_conditions(full_state)
 
         return calculate_equations(state_BCs, self.cfg, self.grids)
 
