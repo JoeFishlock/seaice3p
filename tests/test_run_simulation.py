@@ -1,6 +1,6 @@
 import pytest
-from celestine.run_simulation import solve
-from celestine.dimensional_params import DimensionalParams
+from celestine import solve
+from celestine import DimensionalParams
 
 
 @pytest.mark.parametrize(

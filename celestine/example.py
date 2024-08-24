@@ -3,7 +3,7 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
 from . import __version__
-from .dimensional_params import DimensionalParams
+from .params import DimensionalParams
 from .run_simulation import solve
 from .grids import Grids
 from .load import get_array_data, load_data, get_state

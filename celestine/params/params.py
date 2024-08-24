@@ -3,11 +3,12 @@
 The config class contains all the parameters needed to run a simulation as well
 as methods to save and load this configuration to a yaml file."""
 
-from yaml import safe_load, dump
-from dataclasses import dataclass, asdict, field
-import numpy as np
-from typing import ClassVar
 from pathlib import Path
+from dataclasses import dataclass, asdict, field
+from yaml import safe_load, dump
+import numpy as np
+
+from .forcing import ForcingConfig
 
 
 @dataclass
@@ -30,12 +31,6 @@ class PhysicalParams:
 
     # only used in DISEQ model
     damkohler_number: float = 1
-
-
-def filter_missing_values(air_temp, days):
-    """Filter out missing values are recorded as 9999"""
-    is_missing = np.abs(air_temp) > 100
-    return air_temp[~is_missing], days[~is_missing]
 
 
 @dataclass
@@ -83,71 +78,6 @@ class DarcyLawParams:
 
     couple_bubble_to_horizontal_flow: bool = True
     couple_bubble_to_vertical_flow: bool = True
-
-
-@dataclass
-class ForcingConfig:
-    """choice of top boundary (atmospheric) forcing and required parameters"""
-
-    temperature_forcing_choice: str = "constant"
-    constant_top_temperature: float = -1.5
-    offset: float = -1.0
-    amplitude: float = 0.75
-    period: float = 4.0
-
-    Barrow_top_temperature_data_choice: str = "air"
-    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
-
-    SW_internal_heating: bool = False
-    SW_forcing_choice: str = "constant"
-    constant_SW_irradiance: float = 280  # W/m2
-
-    SW_radiation_model_choice: str = "1L"  # specify oilrad model to use
-    # Parameters for single layer SW radiative transfer model
-    constant_oil_mass_ratio: float = 0  # ng/g
-    SW_scattering_ice_type: str = "FYI"
-
-    surface_energy_balance_forcing: bool = False
-
-    # class variables with barrow forcing data hard coded in
-    DATA_INDEXES: ClassVar[dict[str, int]] = {
-        "time": 0,
-        "air": 8,
-        "bottom_snow": 18,
-        "top_ice": 19,
-        "ocean": 43,
-    }
-    BARROW_DATA_PATH: ClassVar[Path] = Path(__file__).parent / "forcing_data/BRW09.txt"
-
-    def load_forcing_data(self):
-        """populate class attributes with barrow dimensional air temperature
-        and time in days (with missing values filtered out).
-
-        Note the metadata explaining how to use the barrow temperature data is also
-        in celestine/forcing_data. The indices corresponding to days and air temp are
-        hard coded in as class variables.
-        """
-        data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
-        top_temp_index = self.DATA_INDEXES[self.Barrow_top_temperature_data_choice]
-        ocean_temp_index = self.DATA_INDEXES["ocean"]
-        time_index = self.DATA_INDEXES["time"]
-
-        barrow_top_temp = data[:, top_temp_index]
-        barrow_days = data[:, time_index] - data[0, time_index]
-        barrow_top_temp, barrow_days = filter_missing_values(
-            barrow_top_temp, barrow_days
-        )
-
-        barrow_bottom_temp = data[:, ocean_temp_index]
-        barrow_ocean_days = data[:, time_index] - data[0, time_index]
-        barrow_bottom_temp, barrow_ocean_days = filter_missing_values(
-            barrow_bottom_temp, barrow_ocean_days
-        )
-
-        self.barrow_top_temp = barrow_top_temp
-        self.barrow_bottom_temp = barrow_bottom_temp
-        self.barrow_ocean_days = barrow_ocean_days
-        self.barrow_days = barrow_days
 
 
 @dataclass

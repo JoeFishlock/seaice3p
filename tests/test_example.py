@@ -13,8 +13,7 @@ from celestine.example import (
     create_and_save_config,
     main,
 )
-from celestine.params import Config
-from celestine.dimensional_params import DimensionalParams
+from celestine import Config, DimensionalParams
 
 
 def test_example_configuration(tmp_path):

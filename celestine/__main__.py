@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 from celestine import __version__
-from celestine.dimensional_params import DimensionalParams
+from .params import DimensionalParams
 from celestine.params import Config
 from celestine.run_simulation import run_batch
 
