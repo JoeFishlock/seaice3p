@@ -14,7 +14,7 @@ parameterisation.
 
 import numpy as np
 from scipy.stats import hmean
-from ..params import Config
+from ...params import Config
 
 
 def calculate_permeability(liquid_fraction, cfg: Config):

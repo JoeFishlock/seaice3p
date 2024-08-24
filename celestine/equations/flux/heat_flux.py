@@ -1,5 +1,5 @@
 import numpy as np
-from ..grids import upwind, geometric
+from ...grids import upwind, geometric
 
 
 def calculate_conductive_heat_flux(state_BCs, D_g, cfg):

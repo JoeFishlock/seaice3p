@@ -1,5 +1,5 @@
 import numpy as np
-from ..grids import upwind, geometric
+from ...grids import upwind, geometric
 
 
 def calculate_diffusive_salt_flux(liquid_salinity, liquid_fraction, D_g, cfg):

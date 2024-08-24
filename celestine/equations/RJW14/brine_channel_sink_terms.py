@@ -2,13 +2,13 @@ import numpy as np
 
 from .brine_drainage import calculate_brine_channel_sink
 
-from ..params import Config
+from ...params import Config
 from ..velocities.power_law_distribution import calculate_power_law_lag_factor
 from ..velocities.mono_distribution import calculate_mono_lag_factor
-from ..grids import geometric
+from ...grids import geometric
 
 
-def calculate_heat_sink(state_BCs, cfg, grids):
+def calculate_heat_sink(state_BCs, cfg: Config, grids):
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]
     temperature = state_BCs.temperature[1:-1]
@@ -24,7 +24,7 @@ def calculate_heat_sink(state_BCs, cfg, grids):
     return sink * temperature
 
 
-def calculate_salt_sink(state_BCs, cfg, grids):
+def calculate_salt_sink(state_BCs, cfg: Config, grids):
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]
     center_grid = grids.centers
@@ -39,7 +39,7 @@ def calculate_salt_sink(state_BCs, cfg, grids):
     return sink * (liquid_salinity + cfg.physical_params.concentration_ratio)
 
 
-def calculate_gas_sink(state_BCs, cfg, grids):
+def calculate_gas_sink(state_BCs, cfg: Config, grids):
     """This is for the EQM model
 
     TODO: fix bug in bubble coupling to flow
@@ -76,7 +76,7 @@ def calculate_gas_sink(state_BCs, cfg, grids):
     return sink * (dissolved_gas_term + bubble_term)
 
 
-def calculate_bulk_dissolved_gas_sink(state_BCs, cfg, grids):
+def calculate_bulk_dissolved_gas_sink(state_BCs, cfg: Config, grids):
     """This is for the DISEQ model"""
     liquid_fraction = state_BCs.liquid_fraction[1:-1]
     liquid_salinity = state_BCs.liquid_salinity[1:-1]

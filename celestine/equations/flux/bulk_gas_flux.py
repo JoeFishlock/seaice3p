@@ -1,5 +1,5 @@
 import numpy as np
-from ..grids import upwind, geometric
+from ...grids import upwind, geometric
 
 
 def calculate_diffusive_gas_flux(dissolved_gas, liquid_fraction, D_g, cfg):

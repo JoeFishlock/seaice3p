@@ -3,8 +3,8 @@
 #######################################################################
 
 import numpy as np
-from ..params import Config
-from ..grids import geometric
+from ...params import Config
+from ...grids import geometric
 from .bubble_parameters import calculate_bubble_size_fraction
 
 
