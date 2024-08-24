@@ -6,4 +6,4 @@ convecting region when using this parameterisation
 """
 
 from .brine_drainage import calculate_brine_convection_liquid_velocity
-from .brine_channel_sink_terms import calculate_brine_convection_sink
+from .brine_channel_sink_terms import get_brine_convection_sink

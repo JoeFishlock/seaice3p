@@ -1,1 +1,1 @@
-from .equations import calculate_equations
+from .equations import get_equations

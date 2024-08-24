@@ -1,3 +1,4 @@
+from typing import Callable
 import numpy as np
 from numpy.typing import NDArray
 
@@ -5,31 +6,45 @@ from .brine_drainage import calculate_brine_channel_sink
 from ...params import Config
 from ..velocities.power_law_distribution import calculate_power_law_lag_factor
 from ..velocities.mono_distribution import calculate_mono_lag_factor
-from ...grids import geometric
+from ...grids import geometric, Grids
 from ...state import StateBCs, EQMStateBCs, DISEQStateBCs
 
 
-def calculate_brine_convection_sink(state_BCs: StateBCs, cfg, grids) -> NDArray:
+def get_brine_convection_sink(
+    cfg: Config, grids: Grids
+) -> Callable[[StateBCs], NDArray]:
+    fun_map = {
+        "EQM": _EQM_brine_convection_sink,
+        "DISEQ": _DISEQ_brine_convection_sink,
+    }
+
+    def brine_convection_sink(state_BCs: StateBCs) -> NDArray:
+        return fun_map[cfg.model](state_BCs, cfg, grids)
+
+    return brine_convection_sink
+
+
+def _EQM_brine_convection_sink(state_BCs: EQMStateBCs, cfg, grids) -> NDArray:
     """TODO: check the sink terms for bulk_dissolved_gas and gas fraction
 
     For now neglect the coupling of bubbles to the horizontal or vertical flow
     """
     heat_sink = _calculate_heat_sink(state_BCs, cfg, grids)
     salt_sink = _calculate_salt_sink(state_BCs, cfg, grids)
-    match state_BCs:
-        case EQMStateBCs():
-            gas_sink = _calculate_gas_sink(state_BCs, cfg, grids)
-            return np.hstack((heat_sink, salt_sink, gas_sink))
-        case DISEQStateBCs():
-            bulk_dissolved_gas_sink = _calculate_bulk_dissolved_gas_sink(
-                state_BCs, cfg, grids
-            )
-            gas_fraction_sink = np.zeros_like(heat_sink)
-            return np.hstack(
-                (heat_sink, salt_sink, bulk_dissolved_gas_sink, gas_fraction_sink)
-            )
-        case _:
-            raise NotImplementedError
+    gas_sink = _calculate_gas_sink(state_BCs, cfg, grids)
+    return np.hstack((heat_sink, salt_sink, gas_sink))
+
+
+def _DISEQ_brine_convection_sink(state_BCs: DISEQStateBCs, cfg, grids) -> NDArray:
+    """TODO: check the sink terms for bulk_dissolved_gas and gas fraction
+
+    For now neglect the coupling of bubbles to the horizontal or vertical flow
+    """
+    heat_sink = _calculate_heat_sink(state_BCs, cfg, grids)
+    salt_sink = _calculate_salt_sink(state_BCs, cfg, grids)
+    bulk_dissolved_gas_sink = _calculate_bulk_dissolved_gas_sink(state_BCs, cfg, grids)
+    gas_fraction_sink = np.zeros_like(heat_sink)
+    return np.hstack((heat_sink, salt_sink, bulk_dissolved_gas_sink, gas_fraction_sink))
 
 
 def _calculate_heat_sink(state_BCs, cfg: Config, grids):

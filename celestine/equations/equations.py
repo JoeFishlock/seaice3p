@@ -1,9 +1,10 @@
+from typing import Callable
 import numpy as np
 from numpy.typing import NDArray
-from .RJW14 import calculate_brine_convection_sink
-from .nucleation import calculate_nucleation
-from .flux import calculate_dz_fluxes
-from .radiative_heating import calculate_radiative_heating
+from .RJW14 import get_brine_convection_sink
+from .nucleation import get_nucleation
+from .flux import get_dz_fluxes
+from .radiative_heating import get_radiative_heating
 from ..state import StateBCs
 from .velocities import calculate_velocities
 
@@ -33,52 +34,28 @@ def _prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs) -> NDArray:
     return filtered_Vg
 
 
-# Idea to improve performance by returning the appropriate function for ode solve
-# determined ahead of time by the configuration instead of checking at each timestep
-# which model we are running
-# def _get_brine_convection_sink(cfg, grids) -> Callable[[StateBCs], NDArray]:
-#     heat_sink = partial(calculate_heat_sink, cfg=cfg, grids=grids)
-#     salt_sink = partial(calculate_salt_sink, cfg=cfg, grids=grids)
-#     gas_sink = partial(calculate_gas_sink, cfg=cfg, grids=grids)
+def get_equations(cfg, grids) -> Callable[[StateBCs], NDArray]:
+    dz_fluxes = get_dz_fluxes(cfg, grids)
+    brine_convection_sink = get_brine_convection_sink(cfg, grids)
+    nucleation = get_nucleation(cfg)
+    radiative_heating = get_radiative_heating(cfg, grids)
 
-#     def _EQM(state_BCs: StateBCs) -> NDArray:
-#         return np.hstack(
-#             (heat_sink(state_BCs), salt_sink(state_BCs), gas_sink(state_BCs))
-#         )
+    def equations(state_BCs: StateBCs) -> NDArray:
+        Vg, Wl, V = calculate_velocities(state_BCs, cfg)
+        Vg = _prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
-#     if cfg.model == "EQM":
-#         return _EQM
+        if cfg.forcing_config.SW_internal_heating:
+            return (
+                -dz_fluxes(state_BCs, Wl, Vg, V)
+                - brine_convection_sink(state_BCs)
+                + nucleation(state_BCs)
+                + radiative_heating(state_BCs)
+            )
 
-#     bulk_dissolved_gas_sink = partial(
-#         calculate_bulk_dissolved_gas_sink, cfg=cfg, grids=grids
-#     )
-#     gas_fraction_sink = lambda S: np.zeros_like(heat_sink(S))
+        return (
+            -dz_fluxes(state_BCs, Wl, Vg, V)
+            - brine_convection_sink(state_BCs)
+            + nucleation(state_BCs)
+        )
 
-#     def _DISEQ(state_BCs: StateBCs) -> NDArray:
-#         return np.hstack(
-#             (
-#                 heat_sink(state_BCs),
-#                 salt_sink(state_BCs),
-#                 bulk_dissolved_gas_sink(state_BCs),
-#                 gas_fraction_sink(state_BCs),
-#             )
-#         )
-
-#     if cfg.model == "DISEQ":
-#         return _DISEQ
-#     raise NotImplementedError
-
-
-def calculate_equations(state_BCs: StateBCs, cfg, grids):
-    Vg, Wl, V = calculate_velocities(state_BCs, cfg)
-    Vg = _prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
-
-    dz_fluxes = calculate_dz_fluxes(state_BCs, Wl, Vg, V, cfg, grids)
-    brine_convection_sink = calculate_brine_convection_sink(state_BCs, cfg, grids)
-    nucleation = calculate_nucleation(state_BCs, cfg)
-
-    if cfg.forcing_config.SW_internal_heating:
-        radiative_heating = calculate_radiative_heating(state_BCs, cfg, grids)
-        return -dz_fluxes - brine_convection_sink + nucleation + radiative_heating
-
-    return -dz_fluxes - brine_convection_sink + nucleation
+    return equations
