@@ -6,7 +6,6 @@ as methods to save and load this configuration to a yaml file."""
 from yaml import safe_load, dump
 from dataclasses import dataclass, asdict, field
 import numpy as np
-from celestine.logging_config import logger
 from typing import ClassVar
 from pathlib import Path
 
@@ -215,4 +214,4 @@ class Config:
         explicit method and if it isn't log a warning.
         """
         if self.numerical_params.Courant > 0.5:
-            logger.warning(f"Courant number is {self.numerical_params.Courant}")
+            print(f"Courant number is {self.numerical_params.Courant}")

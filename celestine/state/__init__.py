@@ -9,11 +9,6 @@ StateFull = EQMStateFull | DISEQStateFull
 StateBCs = EQMStateBCs | DISEQStateBCs
 
 
-def get_model(cfg) -> State:
-    MODEL_CHOICES = {"EQM": EQMState, "DISEQ": DISEQState}
-    return MODEL_CHOICES[cfg.model]
-
-
 def get_unpacker(cfg) -> Callable[[float, NDArray], State]:
     fun_map = {
         "EQM": _unpack_EQM,
