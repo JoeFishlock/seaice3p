@@ -3,7 +3,7 @@
 import numpy as np
 from oilrad import calculate_SW_heating_in_ice
 from ..grids import calculate_ice_ocean_boundary_depth
-from .radiative_forcing import get_SW_forcing
+from ..forcing import get_SW_forcing
 
 
 def calculate_non_dimensional_shortwave_heating(state_bcs, cfg, grids):

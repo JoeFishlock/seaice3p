@@ -15,7 +15,7 @@ from .flux import (
     calculate_bulk_dissolved_gas_flux,
     calculate_gas_fraction_flux,
 )
-from ..forcing import calculate_non_dimensional_shortwave_heating
+from .radiative_heating import calculate_non_dimensional_shortwave_heating
 from ..state import StateBCs, DISEQStateBCs, EQMStateBCs
 from .velocities.velocities import calculate_velocities
 
