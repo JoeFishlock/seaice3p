@@ -2,20 +2,14 @@
 quantities between them.
 """
 
+from dataclasses import dataclass
+from functools import cached_property
 import numpy as np
+from numpy.typing import NDArray
 
 
 def get_number_of_timesteps(total_time, timestep):
     return int(total_time / timestep) + 1
-
-
-def initialise_grids(number_of_cells):
-    step = 1 / number_of_cells
-    centers = np.array([-1 + (2 * i + 1) * step / 2 for i in range(number_of_cells)])
-    edges = np.array([-1 + i * step for i in range(number_of_cells + 1)])
-    ghosts = np.concatenate((np.array([-1 - step / 2]), centers, np.array([step / 2])))
-
-    return step, centers, edges, ghosts
 
 
 def get_difference_matrix(size, step):
@@ -24,6 +18,50 @@ def get_difference_matrix(size, step):
         D[i, i] = -1
         D[i, i + 1] = 1
     return D / step
+
+
+@dataclass(frozen=True)
+class Grids:
+    """Class initialised from number of grid cells to contain:
+
+    grid cell width, center, edge and ghost grids and difference matrices
+    """
+
+    number_of_cells: int
+
+    @cached_property
+    def step(self) -> float:
+        """Grid cell width"""
+        return 1 / self.number_of_cells
+
+    @cached_property
+    def centers(self) -> NDArray:
+        """Center grid"""
+        return np.array(
+            [-1 + (2 * i + 1) * self.step / 2 for i in range(self.number_of_cells)]
+        )
+
+    @cached_property
+    def edges(self) -> NDArray:
+        """Edge grid"""
+        return np.array([-1 + i * self.step for i in range(self.number_of_cells + 1)])
+
+    @cached_property
+    def ghosts(self) -> NDArray:
+        """Ghost grid"""
+        return np.concatenate(
+            (np.array([-1 - self.step / 2]), self.centers, np.array([self.step / 2]))
+        )
+
+    @cached_property
+    def D_e(self) -> NDArray:
+        """Difference matrix to differentiate edge grid quantities to the center grid"""
+        return get_difference_matrix(self.number_of_cells, self.step)
+
+    @cached_property
+    def D_g(self) -> NDArray:
+        """Difference matrix to differentiate ghost grid quantities to the edge grid"""
+        return get_difference_matrix(self.number_of_cells + 1, self.step)
 
 
 def upwind(ghosts, velocity):
@@ -42,17 +80,6 @@ def geometric(ghosts):
     return np.sqrt(upper_ghosts * lower_ghosts)
 
 
-def average(ghosts):
-    """Returns arithmetic mean pairwise of first dimension of an array
-
-    This should get values on the ghost grid and returns the arithmetic average
-    onto the edge grid
-    """
-    upper_ghosts = ghosts[1:]
-    lower_ghosts = ghosts[:-1]
-    return 0.5 * (upper_ghosts + lower_ghosts)
-
-
 def add_ghost_cells(centers, bottom, top):
     """Add specified bottom and top value to center grid
 
@@ -65,3 +92,37 @@ def add_ghost_cells(centers, bottom, top):
     :return: numpy array on ghost grid (size I+2).
     """
     return np.concatenate((np.array([bottom]), centers, np.array([top])))
+
+
+def calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid):
+    r"""Calculate the depth of the ice ocean boundary as the edge position of the
+    first cell from the bottom to be not completely liquid. I.e the first time the
+    liquid fraction goes below 1.
+
+    If the ice has made it to the bottom of the domain raise an error.
+
+    If the domain is completely liquid set h=0.
+
+    NOTE: depth is a positive quantity and our grid coordinate increases from -1 at the
+    bottom of the domain to 0 at the top.
+
+    :param liquid_fraction: liquid fraction on center grid
+    :type liquid_fraction: Numpy Array (size I)
+    :param edge_grid: The vertical coordinate positions of the edge grid.
+    :type edge_grid: Numpy Array (size I+1)
+    :return: positive depth value of ice ocean interface
+    """
+    # locate index on center grid where liquid fraction first drops below 1
+    index = np.argmax(liquid_fraction < 1)
+
+    # if domain is completely liquid set h=0
+    if np.all(liquid_fraction == 1):
+        index = edge_grid.size - 1
+
+    # raise error if bottom of domain freezes
+    if index == 0:
+        raise ValueError("Ice ocean interface has reached bottom of domain")
+
+    # ice interface is at bottom edge of first frozen cell
+    depth = (-1) * edge_grid[index]
+    return depth

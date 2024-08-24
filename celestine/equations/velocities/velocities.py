@@ -1,5 +1,5 @@
 import numpy as np
-from celestine.grids import geometric
+from celestine.grids import geometric, Grids
 from celestine.params import Config
 from ..RJW14 import calculate_brine_convection_liquid_velocity
 from .mono_distribution import (
@@ -81,16 +81,17 @@ def calculate_gas_interstitial_velocity(
     return Vg
 
 
-def calculate_velocities(state_BCs):
+def calculate_velocities(state_BCs, cfg: Config):
     """Inputs on ghost grid, outputs on edge grid
 
     needs the simulation config, liquid fraction, liquid salinity and grids
     """
     liquid_fraction = state_BCs.liquid_fraction
     liquid_salinity = state_BCs.liquid_salinity
-    center_grid = state_BCs.grid[1:-1]
-    edge_grid = state_BCs.edge_grid
-    cfg = state_BCs.cfg
+    center_grid, edge_grid = (
+        Grids(cfg.numerical_params.I).centers,
+        Grids(cfg.numerical_params.I).edges,
+    )
 
     if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
         wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)

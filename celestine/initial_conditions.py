@@ -2,22 +2,50 @@
 simulation.
 """
 import numpy as np
-from celestine.params import Config
+from .params import Config
 from .state import EQMState, DISEQState
-from celestine.grids import initialise_grids
+from .grids import Grids
 
 
 def get_initial_conditions(cfg: Config):
     INITIAL_CONDITIONS = {
-        "uniform": get_uniform_initial_conditions,
-        "barrow_2009": get_barrow_initial_conditions,
-        "summer": get_summer_initial_conditions,
+        "uniform": _get_uniform_initial_conditions,
+        "barrow_2009": _get_barrow_initial_conditions,
+        "summer": _get_summer_initial_conditions,
     }
     choice = cfg.boundary_conditions_config.initial_conditions_choice
-    return INITIAL_CONDITIONS[choice](cfg)
+    initial_state = INITIAL_CONDITIONS[choice](cfg)
+    match cfg.model:
+        case "EQM":
+            return np.hstack(
+                (initial_state.enthalpy, initial_state.salt, initial_state.gas)
+            )
+        case "DISEQ":
+            return np.hstack(
+                (
+                    initial_state.enthalpy,
+                    initial_state.salt,
+                    initial_state.bulk_dissolved_gas,
+                    initial_state.gas_fraction,
+                )
+            )
+        case _:
+            raise NotImplementedError
 
 
-def get_uniform_initial_conditions(cfg):
+def _apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
+    """assume that top part of domain contains mushy ice of given depth and lower part
+    of domain is liquid. This function returns output on the given grid where the ice
+    part of the domain takes one value and the liquid a different.
+
+    This is useful for initialising the barrow simulation where we have an initial ice
+    layer.
+    """
+    output = np.where(grid > -depth_of_ice, ice_value, liquid_value)
+    return output
+
+
+def _get_uniform_initial_conditions(cfg):
     """Generate uniform initial solution on the ghost grid
 
     :returns: initial solution arrays on ghost grid (enthalpy, salt, gas)
@@ -35,28 +63,16 @@ def get_uniform_initial_conditions(cfg):
     gas = np.full_like(enthalpy, bottom_bulk_gas)
 
     if cfg.model == "EQM":
-        return EQMState(cfg, 0, enthalpy, salt, gas)
+        return EQMState(0, enthalpy, salt, gas)
     elif cfg.model == "DISEQ":
         bulk_dissolved_gas = gas
         gas_fraction = np.zeros_like(gas)
-        return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+        return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
     else:
         raise TypeError("Cannot provide uniform initial condition for model choice")
 
 
-def apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
-    """assume that top part of domain contains mushy ice of given depth and lower part
-    of domain is liquid. This function returns output on the given grid where the ice
-    part of the domain takes one value and the liquid a different.
-
-    This is useful for initialising the barrow simulation where we have an initial ice
-    layer.
-    """
-    output = np.where(grid > -depth_of_ice, ice_value, liquid_value)
-    return output
-
-
-def get_barrow_initial_conditions(cfg: Config):
+def _get_barrow_initial_conditions(cfg: Config):
     """initialise domain with an initial ice layer of given temperature and bulk
     salinity. These values are hard coded in from Moreau paper to match barrow study.
     They also assume that the initial ice layer has 1/5 the saturation amount in pure
@@ -83,24 +99,24 @@ def get_barrow_initial_conditions(cfg: Config):
 
     chi = cfg.physical_params.expansion_coefficient
 
-    _, centers, _, _ = initialise_grids(cfg.numerical_params.I)
-    salt = apply_value_in_ice_layer(
+    centers = Grids(cfg.numerical_params.I).centers
+    salt = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
-    gas = apply_value_in_ice_layer(
+    gas = _apply_value_in_ice_layer(
         ICE_DEPTH,
         ice_value=cfg.forcing_config.Barrow_initial_bulk_gas_in_ice * chi,
         liquid_value=chi * far_gas_sat,
         grid=centers,
     )
 
-    temp = apply_value_in_ice_layer(
+    temp = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers
     )
     solid_fraction_in_mush = (salt + temp) / (
         temp - cfg.physical_params.concentration_ratio
     )
-    enthalpy = apply_value_in_ice_layer(
+    enthalpy = _apply_value_in_ice_layer(
         ICE_DEPTH,
         ice_value=temp - solid_fraction_in_mush * cfg.physical_params.stefan_number,
         liquid_value=temp,
@@ -108,16 +124,16 @@ def get_barrow_initial_conditions(cfg: Config):
     )
 
     if cfg.model == "EQM":
-        return EQMState(cfg, 0, enthalpy, salt, gas)
+        return EQMState(0, enthalpy, salt, gas)
     elif cfg.model == "DISEQ":
         bulk_dissolved_gas = gas
         gas_fraction = np.zeros_like(gas)
-        return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+        return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
     else:
         raise TypeError("Cannot provide barrow initial condition for model choice")
 
 
-def get_summer_initial_conditions(cfg: Config):
+def _get_summer_initial_conditions(cfg: Config):
     """initialise domain with an initial ice layer of given temperature and bulk
     salinity given by values in the configuration.
 
@@ -133,20 +149,20 @@ def get_summer_initial_conditions(cfg: Config):
     BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
     TEMP_IN_ICE = cfg.boundary_conditions_config.initial_summer_ice_temperature
 
-    _, centers, _, _ = initialise_grids(cfg.numerical_params.I)
-    salt = apply_value_in_ice_layer(
+    centers = Grids(cfg.numerical_params.I).centers
+    salt = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
     # Initialise no gas until we have worked out treatment of oil
     gas = np.zeros_like(salt)
 
-    temp = apply_value_in_ice_layer(
+    temp = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers
     )
     solid_fraction_in_mush = (salt + temp) / (
         temp - cfg.physical_params.concentration_ratio
     )
-    enthalpy = apply_value_in_ice_layer(
+    enthalpy = _apply_value_in_ice_layer(
         ICE_DEPTH,
         ice_value=temp - solid_fraction_in_mush * cfg.physical_params.stefan_number,
         liquid_value=temp,
@@ -154,10 +170,10 @@ def get_summer_initial_conditions(cfg: Config):
     )
 
     if cfg.model == "EQM":
-        return EQMState(cfg, 0, enthalpy, salt, gas)
+        return EQMState(0, enthalpy, salt, gas)
     elif cfg.model == "DISEQ":
         bulk_dissolved_gas = gas
         gas_fraction = np.zeros_like(gas)
-        return DISEQState(cfg, 0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+        return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
     else:
         raise TypeError("Cannot provide summer initial condition for model choice")

@@ -2,12 +2,12 @@
 
 from pathlib import Path
 import matplotlib.pyplot as plt
-from celestine.logging_config import logger, log_time
-from celestine.__init__ import __version__
-from celestine.dimensional_params import DimensionalParams
-from celestine.run_simulation import solve
-from .grids import initialise_grids
+from . import __version__
+from .dimensional_params import DimensionalParams
+from .run_simulation import solve
+from .grids import Grids
 from .load import get_array_data, load_data, get_state
+from .enthalpy_method import get_enthalpy_method
 
 DATA_DIRECTORY = Path("example_data")
 FRAMES_DIR = Path("example_data/frames")
@@ -39,11 +39,10 @@ def main(
     config then run simulation and save data.
     """
 
-    logger.info(f"Celestine version {__version__}")
+    print(f"Celestine version {__version__}")
 
     cfg = create_and_save_config(data_directory, simulation_dimensional_params)
-    _, duration = solve(cfg, data_directory)
-    log_time(logger, duration, message="solve ran in ")
+    solve(cfg, data_directory)
 
     # Analysis load simulation data
     # plot:
@@ -75,9 +74,10 @@ def main(
 
     for n, time in enumerate(times):
 
-        state = get_state(time, times, data, cfg)
-        state.calculate_enthalpy_method()
-        dimensional_grid = scales.convert_to_dimensional_grid(state.grid)
+        centers = Grids(cfg.numerical_params.I).centers
+        enthalpy_method = get_enthalpy_method(cfg)
+        state = enthalpy_method(get_state(time, times, data, cfg))
+        dimensional_grid = scales.convert_to_dimensional_grid(centers)
 
         plt.figure(figsize=(5, 5))
         plt.plot(
@@ -133,8 +133,7 @@ def main(
 
     for attr in ["temperature", "salt", "gas_fraction", "solid_fraction", "gas"]:
         plt.figure()
-        _, non_dim_grid, _, _ = initialise_grids(cfg.numerical_params.I)
-        grid = scales.convert_to_dimensional_grid(non_dim_grid)
+        grid = scales.convert_to_dimensional_grid(centers)
         plt.contourf(times, grid, get_array_data(attr, cfg, times, data))
         plt.colorbar()
         plt.title(f"{attr}")

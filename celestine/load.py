@@ -1,6 +1,9 @@
 from pathlib import Path
 import numpy as np
-from . import Config, DimensionalParams, get_model
+
+from . import Config, DimensionalParams
+from .state import get_unpacker
+from .enthalpy_method import get_enthalpy_method
 
 
 def load_data(
@@ -49,14 +52,16 @@ def load_data(
 def get_state(non_dimensional_time, times, data, cfg):
     index = np.argmin(np.abs(times - non_dimensional_time))
     data_at_time = [quantity[:, index] for quantity in data]
-    return get_model(cfg)(cfg, times[index], *data_at_time)
+    unpacker = get_unpacker(cfg)
+    return unpacker(times[index], np.concatenate(tuple(data_at_time)))
 
 
 def get_array_data(attr: str, cfg, times, data):
     data_slices = []
     for time in times:
-        st = get_state(time, times, data, cfg)
-        st.calculate_enthalpy_method()
-        data_slices.append(getattr(st, attr))
+        state = get_state(time, times, data, cfg)
+        enthalpy_method = get_enthalpy_method(cfg)
+        full_state = enthalpy_method(state)
+        data_slices.append(getattr(full_state, attr))
 
     return np.vstack(tuple(data_slices)).T

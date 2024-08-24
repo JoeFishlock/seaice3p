@@ -1,4 +1,4 @@
-from ..params import Config
+from ...params import Config
 
 
 def calculate_bubble_size_fraction(bubble_radius_scaled, liquid_fraction, cfg: Config):

@@ -1,8 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from ..RJW14.brine_drainage import (
-    calculate_ice_ocean_boundary_depth,
+from ..equations.RJW14.brine_drainage import (
     calculate_integrated_mean_permeability,
     calculate_Rayleigh,
     get_convecting_region_height,
@@ -11,7 +10,8 @@ from ..RJW14.brine_drainage import (
     calculate_brine_convection_liquid_velocity,
     calculate_brine_channel_sink,
 )
-from celestine.params import Config, NumericalParams, DarcyLawParams
+from ..params import Config, NumericalParams, DarcyLawParams
+from ..grids import calculate_ice_ocean_boundary_depth
 
 
 def main(output_dir: Path):
