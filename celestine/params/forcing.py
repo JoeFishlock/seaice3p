@@ -47,7 +47,7 @@ class BRW09Forcing:
         Path(__file__).parent.parent / "forcing_data/BRW09.txt"
     )
 
-    def load_forcing_data(self):
+    def __post_init__(self):
         """populate class attributes with barrow dimensional air temperature
         and time in days (with missing values filtered out).
 
