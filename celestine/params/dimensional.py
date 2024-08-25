@@ -21,6 +21,7 @@ from .params import (
 from .convert import (
     get_dimensionless_forcing_config,
     get_dimensionless_initial_conditions_config,
+    get_dimensionless_physical_params,
     calculate_timescale_in_days,
     calculate_velocity_scale_in_m_day,
     Scales,
@@ -36,6 +37,7 @@ class DimensionalParams:
     """
 
     name: str
+    model: str = "EQM"
     total_time_in_days: float = 365  # days
     savefreq_in_days: float = 1  # save data after this amount of time in days
 
@@ -45,7 +47,6 @@ class DimensionalParams:
 
     # DISEQ: the bubbles and dissolved gas are not in equilibirum so we prescribe a
     # nucleation rate
-    model: str = "EQM"
 
     lengthscale: float = 1  # domain height in m
     liquid_density: float = 1028  # kg/m3
@@ -336,21 +337,6 @@ class DimensionalParams:
         """
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
 
-    def get_physical_params(self):
-        """return a PhysicalParams object"""
-        return PhysicalParams(
-            expansion_coefficient=self.expansion_coefficient,
-            concentration_ratio=self.concentration_ratio,
-            stefan_number=self.stefan_number,
-            lewis_salt=self.lewis_salt,
-            lewis_gas=self.lewis_gas,
-            frame_velocity=self.frame_velocity,
-            phase_average_conductivity=self.phase_average_conductivity,
-            conductivity_ratio=self.conductivity_ratio,
-            tolerable_super_saturation_fraction=self.tolerable_super_saturation_fraction,
-            damkohler_number=self.damkohler_number,
-        )
-
     def get_darcy_law_params(self):
         """return a DarcyLawParams object"""
         return DarcyLawParams(
@@ -385,7 +371,7 @@ class DimensionalParams:
         physical parameters and Darcy law parameters are calculated from the dimensional
         input. You can modify the numerical parameters and boundary conditions and
         forcing provided for the simulation."""
-        physical_params = self.get_physical_params()
+        physical_params = get_dimensionless_physical_params(self)
         darcy_law_params = self.get_darcy_law_params()
         initial_conditions_config = get_dimensionless_initial_conditions_config(self)
         forcing_config = get_dimensionless_forcing_config(self)

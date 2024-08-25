@@ -11,10 +11,10 @@ from .initial_conditions import (
     BRW09InitialConditions,
     UniformInitialConditions,
 )
+from .physical import PhysicalParams, DISEQPhysicalParams, EQMPhysicalParams
 from .numerical import NumericalParams
 from .params import (
     DarcyLawParams,
-    PhysicalParams,
     Config,
 )
 from .dimensional import DimensionalParams

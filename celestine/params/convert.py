@@ -18,6 +18,7 @@ from .initial_conditions import (
     BRW09InitialConditions,
     SummerInitialConditions,
 )
+from .physical import DISEQPhysicalParams, EQMPhysicalParams
 
 
 def get_dimensionless_forcing_config(
@@ -74,6 +75,38 @@ def get_dimensionless_initial_conditions_config(
                 initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
                     dimensional_params.initial_summer_ice_temperature
                 ),
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_physical_params(dimensional_params: "DimensionalParams"):
+    """return a PhysicalParams object"""
+    match dimensional_params.model:
+        case "EQM":
+            return EQMPhysicalParams(
+                expansion_coefficient=dimensional_params.expansion_coefficient,
+                concentration_ratio=dimensional_params.concentration_ratio,
+                stefan_number=dimensional_params.stefan_number,
+                lewis_salt=dimensional_params.lewis_salt,
+                lewis_gas=dimensional_params.lewis_gas,
+                frame_velocity=dimensional_params.frame_velocity,
+                phase_average_conductivity=dimensional_params.phase_average_conductivity,
+                conductivity_ratio=dimensional_params.conductivity_ratio,
+                tolerable_super_saturation_fraction=dimensional_params.tolerable_super_saturation_fraction,
+            )
+        case "DISEQ":
+            return DISEQPhysicalParams(
+                expansion_coefficient=dimensional_params.expansion_coefficient,
+                concentration_ratio=dimensional_params.concentration_ratio,
+                stefan_number=dimensional_params.stefan_number,
+                lewis_salt=dimensional_params.lewis_salt,
+                lewis_gas=dimensional_params.lewis_gas,
+                frame_velocity=dimensional_params.frame_velocity,
+                phase_average_conductivity=dimensional_params.phase_average_conductivity,
+                conductivity_ratio=dimensional_params.conductivity_ratio,
+                tolerable_super_saturation_fraction=dimensional_params.tolerable_super_saturation_fraction,
+                damkohler_number=dimensional_params.damkohler_number,
             )
         case _:
             raise NotImplementedError
