@@ -11,6 +11,7 @@ import numpy as np
 
 from .forcing import BRW09Forcing, ForcingConfig
 from .initial_conditions import InitialConditionsConfig, BRW09InitialConditions
+from .numerical import NumericalParams
 from .convert import Scales
 
 
@@ -66,18 +67,6 @@ class DarcyLawParams:
 
     couple_bubble_to_horizontal_flow: bool = True
     couple_bubble_to_vertical_flow: bool = True
-
-
-@serde(type_check=coerce)
-class NumericalParams:
-    """parameters needed for discretisation and choice of numerical method"""
-
-    I: int = 50
-    regularisation: float = 1e-6
-
-    @property
-    def step(self):
-        return 1 / self.I
 
 
 @serde(type_check=coerce)

@@ -11,9 +11,9 @@ from .initial_conditions import (
     BRW09InitialConditions,
     UniformInitialConditions,
 )
+from .numerical import NumericalParams
 from .params import (
     DarcyLawParams,
-    NumericalParams,
     PhysicalParams,
     Config,
 )
