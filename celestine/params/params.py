@@ -5,13 +5,15 @@ as methods to save and load this configuration to a yaml file."""
 
 from pathlib import Path
 from dataclasses import dataclass, asdict, field
-from yaml import safe_load, dump
+from serde import serde, coerce
+from serde.yaml import from_yaml, to_yaml
 import numpy as np
 
 from .forcing import BRW09Forcing, ForcingConfig
+from .convert import Scales
 
 
-@dataclass
+@serde(type_check=coerce)
 class PhysicalParams:
     """non dimensional numbers for the mushy layer"""
 
@@ -33,7 +35,7 @@ class PhysicalParams:
     damkohler_number: float = 1
 
 
-@dataclass
+@serde(type_check=coerce)
 class BoundaryConditionsConfig:
     """values for bottom (ocean) boundary"""
 
@@ -48,7 +50,7 @@ class BoundaryConditionsConfig:
     initial_summer_ice_temperature: float = -0.1
 
 
-@dataclass
+@serde(type_check=coerce)
 class DarcyLawParams:
     """non dimensional parameters for calculating liquid and gas darcy velocities"""
 
@@ -80,7 +82,7 @@ class DarcyLawParams:
     couple_bubble_to_vertical_flow: bool = True
 
 
-@dataclass
+@serde(type_check=coerce)
 class NumericalParams:
     """parameters needed for discretisation and choice of numerical method"""
 
@@ -98,7 +100,7 @@ class NumericalParams:
         return self.timestep / (self.step**2)
 
 
-@dataclass
+@serde(type_check=coerce)
 class Config:
     """contains all information needed to run a simulation and save output
 
@@ -113,31 +115,19 @@ class Config:
     darcy_law_params: DarcyLawParams = field(default_factory=DarcyLawParams)
     forcing_config: ForcingConfig = field(default_factory=BRW09Forcing)
     numerical_params: NumericalParams = field(default_factory=NumericalParams)
-    scales: int = None
+    scales: Scales | None = None
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
 
     def save(self, directory: Path):
         with open(directory / f"{self.name}.yml", "w") as outfile:
-            dump(asdict(self), outfile)
+            outfile.write(to_yaml(self))
 
     @classmethod
     def load(cls, path):
         with open(path, "r") as infile:
-            dictionary = safe_load(infile)
-        return cls(
-            name=dictionary["name"],
-            model=dictionary["model"],
-            total_time=dictionary["total_time"],
-            savefreq=dictionary["savefreq"],
-            physical_params=PhysicalParams(**dictionary["physical_params"]),
-            boundary_conditions_config=BoundaryConditionsConfig(
-                **dictionary["boundary_conditions_config"]
-            ),
-            darcy_law_params=DarcyLawParams(**dictionary["darcy_law_params"]),
-            forcing_config=ForcingConfig(**dictionary["forcing_config"]),
-            numerical_params=NumericalParams(**dictionary["numerical_params"]),
-        )
+            yaml = infile.read()
+        return from_yaml(cls, yaml)
 
     def check_thermal_Courant_number(self):
         """Check if courant number for thermal diffusion term is low enough for
