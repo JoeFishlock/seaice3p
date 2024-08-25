@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict, field
 from yaml import safe_load, dump
 import numpy as np
 
-from .forcing import ForcingConfig
+from .forcing import BRW09Forcing, ForcingConfig
 
 
 @dataclass
@@ -111,7 +111,7 @@ class Config:
         default_factory=BoundaryConditionsConfig
     )
     darcy_law_params: DarcyLawParams = field(default_factory=DarcyLawParams)
-    forcing_config: ForcingConfig = field(default_factory=ForcingConfig)
+    forcing_config: ForcingConfig = field(default_factory=BRW09Forcing)
     numerical_params: NumericalParams = field(default_factory=NumericalParams)
     scales: int = None
     total_time: float = 4.0

@@ -12,14 +12,14 @@ from yaml import safe_load, dump
 from dataclasses import dataclass, asdict
 from pathlib import Path
 import numpy as np
-from celestine.params import (
+from .params import (
     Config,
     PhysicalParams,
     BoundaryConditionsConfig,
-    ForcingConfig,
     NumericalParams,
     DarcyLawParams,
 )
+from .convert import get_dimensionless_forcing_config
 
 SECONDS_TO_DAYS = 1 / (60 * 60 * 24)
 
@@ -414,27 +414,6 @@ class DimensionalParams:
             ),
         )
 
-    def get_forcing_config(self):
-        return ForcingConfig(
-            temperature_forcing_choice=self.temperature_forcing_choice,
-            constant_top_temperature=(
-                self.constant_top_temperature - self.ocean_freezing_temperature
-            )
-            / self.temperature_difference,
-            offset=self.offset,
-            amplitude=self.amplitude,
-            period=self.period,
-            Barrow_top_temperature_data_choice=self.Barrow_top_temperature_data_choice,
-            Barrow_initial_bulk_gas_in_ice=self.Barrow_initial_bulk_gas_in_ice,
-            SW_internal_heating=self.SW_internal_heating,
-            SW_forcing_choice=self.SW_forcing_choice,
-            constant_SW_irradiance=self.constant_SW_irradiance,
-            SW_radiation_model_choice=self.SW_radiation_model_choice,
-            constant_oil_mass_ratio=self.constant_oil_mass_ratio,
-            SW_scattering_ice_type=self.SW_scattering_ice_type,
-            surface_energy_balance_forcing=self.surface_energy_balance_forcing,
-        )
-
     def get_numerical_params(self):
         return NumericalParams(
             I=self.I,
@@ -451,7 +430,7 @@ class DimensionalParams:
         physical_params = self.get_physical_params()
         darcy_law_params = self.get_darcy_law_params()
         boundary_conditions_config = self.get_boundary_conditions_config()
-        forcing_config = self.get_forcing_config()
+        forcing_config = get_dimensionless_forcing_config(self)
         numerical_params = self.get_numerical_params()
         return Config(
             name=self.name,

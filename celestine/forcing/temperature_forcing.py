@@ -4,27 +4,26 @@ Note that the barrow temperature data is read in from a file if needed by the
 simulation configuration.
 """
 import numpy as np
-from celestine.params import Config
+from ..params import Config
+from ..params.forcing import BRW09Forcing, YearlyForcing, ConstantForcing
 
 
 def get_temperature_forcing(time, cfg: Config):
     TEMPERATURE_FORCINGS = {
-        "constant": constant_temperature_forcing,
-        "yearly": yearly_temperature_forcing,
-        "barrow_2009": barrow_temperature_forcing,
+        ConstantForcing: constant_temperature_forcing,
+        YearlyForcing: yearly_temperature_forcing,
+        BRW09Forcing: barrow_temperature_forcing,
     }
-    choice = cfg.forcing_config.temperature_forcing_choice
-    return TEMPERATURE_FORCINGS[choice](time, cfg)
+    return TEMPERATURE_FORCINGS[type(cfg.forcing_config)](time, cfg)
 
 
 def get_bottom_temperature_forcing(time, cfg: Config):
     OCEAN_TEMPERATURE_FORCINGS = {
-        "constant": constant_ocean_temperature_forcing,
-        "yearly": yearly_ocean_temperature_forcing,
-        "barrow_2009": barrow_ocean_temperature_forcing,
+        ConstantForcing: constant_ocean_temperature_forcing,
+        YearlyForcing: yearly_ocean_temperature_forcing,
+        BRW09Forcing: barrow_ocean_temperature_forcing,
     }
-    choice = cfg.forcing_config.temperature_forcing_choice
-    return OCEAN_TEMPERATURE_FORCINGS[choice](time, cfg)
+    return OCEAN_TEMPERATURE_FORCINGS[type(cfg.forcing_config)](time, cfg)
 
 
 def constant_temperature_forcing(time, cfg: Config):

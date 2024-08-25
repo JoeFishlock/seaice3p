@@ -15,11 +15,13 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
 
+
 from .equations import get_equations
 from .state import get_unpacker
 from .forcing import get_boundary_conditions
 from .enthalpy_method import get_enthalpy_method
 from .params import Config
+from .params.forcing import BRW09Forcing
 from .grids import Grids
 from .initial_conditions import get_initial_conditions
 
@@ -59,7 +61,7 @@ def solve(cfg: Config, directory: Path) -> Literal[0]:
         raise NotImplementedError
 
     # for the barrow forcing you need to load external data to the forcing config
-    if cfg.forcing_config.temperature_forcing_choice == "barrow_2009":
+    if isinstance(cfg.forcing_config, BRW09Forcing):
         cfg.forcing_config.load_forcing_data()
 
     initial = get_initial_conditions(cfg)

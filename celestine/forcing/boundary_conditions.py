@@ -3,10 +3,12 @@ centered grid that needs to be on the ghost grid for the upwind scheme.
 """
 
 from typing import Callable
+
 from .temperature_forcing import get_temperature_forcing, get_bottom_temperature_forcing
 from .surface_energy_balance import find_ghost_cell_temperature
 from ..grids import add_ghost_cells
 from ..params import Config
+from ..params.forcing import RadForcing
 from ..state import (
     StateFull,
     StateBCs,
@@ -114,7 +116,7 @@ def _temperature_BCs(state, time, cfg: Config):
     Note this needs the current time as well as top temperature is forced."""
     far_temp = get_bottom_temperature_forcing(time, cfg)
 
-    if cfg.forcing_config.surface_energy_balance_forcing:
+    if isinstance(cfg.forcing_config, RadForcing):
         return add_ghost_cells(
             state.temperature, bottom=far_temp, top=find_ghost_cell_temperature(state)
         )
