@@ -10,10 +10,11 @@ def _filter_missing_values(air_temp, days):
 
 
 @serde(type_check=coerce)
-class ConstantForcing:
-    """Constant temperature forcing"""
-
-    constant_top_temperature: float = -1.5
+class BaseOceanForcing:
+    """Not to be used directly but provides parameters for fixed ocean properties:
+    gas saturation, temperature and bulk salinity to other forcing configuration
+    classes
+    """
 
     ocean_gas_sat: float = 1.0
     ocean_temp: float = 0.1
@@ -21,30 +22,29 @@ class ConstantForcing:
 
 
 @serde(type_check=coerce)
-class YearlyForcing:
+class ConstantForcing(BaseOceanForcing):
+    """Constant temperature forcing"""
+
+    constant_top_temperature: float = -1.5
+
+
+@serde(type_check=coerce)
+class YearlyForcing(BaseOceanForcing):
     """Yearly sinusoidal temperature forcing"""
 
     offset: float = -1.0
     amplitude: float = 0.75
     period: float = 4.0
 
-    ocean_gas_sat: float = 1.0
-    ocean_temp: float = 0.1
-    ocean_bulk_salinity: float = 0
-
 
 @serde(type_check=coerce)
-class BRW09Forcing:
+class BRW09Forcing(BaseOceanForcing):
     """Surface and ocean temperature data loaded from thermistor temperature record
     during the Barrow 2009 field study.
     """
 
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
-
-    ocean_gas_sat: float = 1.0
-    ocean_temp: float = 0.1
-    ocean_bulk_salinity: float = 0
 
     def __post_init__(self):
         """populate class attributes with barrow dimensional air temperature
@@ -87,7 +87,7 @@ class BRW09Forcing:
 
 
 @serde(type_check=coerce)
-class RadForcing:
+class RadForcing(BaseOceanForcing):
     """Forcing parameters for radiative transfer simulation with oil drops"""
 
     surface_energy_balance_forcing: bool = True
@@ -100,10 +100,6 @@ class RadForcing:
     # Parameters for single layer SW radiative transfer model
     constant_oil_mass_ratio: float = 0  # ng/g
     SW_scattering_ice_type: str = "FYI"
-
-    ocean_gas_sat: float = 1.0
-    ocean_temp: float = 0.1
-    ocean_bulk_salinity: float = 0
 
 
 ForcingConfig = ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing
