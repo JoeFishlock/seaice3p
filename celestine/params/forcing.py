@@ -35,18 +35,6 @@ class BRW09Forcing:
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
-    # class variables with barrow forcing data hard coded in
-    DATA_INDEXES: ClassVar[dict[str, int]] = {
-        "time": 0,
-        "air": 8,
-        "bottom_snow": 18,
-        "top_ice": 19,
-        "ocean": 43,
-    }
-    BARROW_DATA_PATH: ClassVar[Path] = (
-        Path(__file__).parent.parent / "forcing_data/BRW09.txt"
-    )
-
     def __post_init__(self):
         """populate class attributes with barrow dimensional air temperature
         and time in days (with missing values filtered out).
@@ -55,10 +43,19 @@ class BRW09Forcing:
         in celestine/forcing_data. The indices corresponding to days and air temp are
         hard coded in as class variables.
         """
-        data = np.genfromtxt(self.BARROW_DATA_PATH, delimiter="\t")
-        top_temp_index = self.DATA_INDEXES[self.Barrow_top_temperature_data_choice]
-        ocean_temp_index = self.DATA_INDEXES["ocean"]
-        time_index = self.DATA_INDEXES["time"]
+        DATA_INDICES = {
+            "time": 0,
+            "air": 8,
+            "bottom_snow": 18,
+            "top_ice": 19,
+            "ocean": 43,
+        }
+        data = np.genfromtxt(
+            Path(__file__).parent.parent / "forcing_data/BRW09.txt", delimiter="\t"
+        )
+        top_temp_index = DATA_INDICES[self.Barrow_top_temperature_data_choice]
+        ocean_temp_index = DATA_INDICES["ocean"]
+        time_index = DATA_INDICES["time"]
 
         barrow_top_temp = data[:, top_temp_index]
         barrow_days = data[:, time_index] - data[0, time_index]
