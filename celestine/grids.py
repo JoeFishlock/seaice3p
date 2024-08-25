@@ -8,10 +8,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-def get_number_of_timesteps(total_time, timestep):
-    return int(total_time / timestep) + 1
-
-
 def get_difference_matrix(size, step):
     D = np.zeros((size, size + 1))
     for i in range(size):

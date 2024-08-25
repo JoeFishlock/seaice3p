@@ -138,7 +138,6 @@ class DimensionalParams:
 
     # Numerical Params
     I: int = 50
-    timestep: float = 2e-4
     regularisation: float = 1e-6
 
     @property
@@ -377,7 +376,6 @@ class DimensionalParams:
     def get_numerical_params(self):
         return NumericalParams(
             I=self.I,
-            timestep=self.timestep,
             regularisation=self.regularisation,
         )
 

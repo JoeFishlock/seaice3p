@@ -73,17 +73,11 @@ class NumericalParams:
     """parameters needed for discretisation and choice of numerical method"""
 
     I: int = 50
-    timestep: float = 2e-4
     regularisation: float = 1e-6
 
     @property
     def step(self):
         return 1 / self.I
-
-    @property
-    def Courant(self):
-        """This number must be <0.5 for stability of temperature diffusion terms"""
-        return self.timestep / (self.step**2)
 
 
 @serde(type_check=coerce)
@@ -114,10 +108,3 @@ class Config:
         with open(path, "r") as infile:
             yaml = infile.read()
         return from_yaml(cls, yaml)
-
-    def check_thermal_Courant_number(self):
-        """Check if courant number for thermal diffusion term is low enough for
-        explicit method and if it isn't log a warning.
-        """
-        if self.numerical_params.Courant > 0.5:
-            print(f"Courant number is {self.numerical_params.Courant}")
