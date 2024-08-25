@@ -86,7 +86,7 @@ def _DISEQ_boundary_conditions(full_state: DISEQStateFull, cfg: Config) -> State
 def _dissolved_gas_BCs(dissolved_gas_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
     return add_ghost_cells(
-        dissolved_gas_centers, bottom=cfg.boundary_conditions_config.far_gas_sat, top=1
+        dissolved_gas_centers, bottom=cfg.forcing_config.ocean_gas_sat, top=1
     )
 
 
@@ -98,13 +98,13 @@ def _gas_fraction_BCs(gas_fraction_centers):
 def _gas_BCs(gas_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
     chi = cfg.physical_params.expansion_coefficient
-    far_gas_sat = cfg.boundary_conditions_config.far_gas_sat
+    far_gas_sat = cfg.forcing_config.ocean_gas_sat
     return add_ghost_cells(gas_centers, bottom=chi * far_gas_sat, top=chi)
 
 
 def _liquid_salinity_BCs(liquid_salinity_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
-    far_bulk_salt = cfg.boundary_conditions_config.far_bulk_salinity
+    far_bulk_salt = cfg.forcing_config.ocean_bulk_salinity
     return add_ghost_cells(
         liquid_salinity_centers, bottom=far_bulk_salt, top=liquid_salinity_centers[-1]
     )
@@ -127,13 +127,13 @@ def _temperature_BCs(state, time, cfg: Config):
 
 def _enthalpy_BCs(enthalpy_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
-    far_temp = cfg.boundary_conditions_config.far_temp
+    far_temp = cfg.forcing_config.ocean_temp
     return add_ghost_cells(enthalpy_centers, bottom=far_temp, top=enthalpy_centers[-1])
 
 
 def _salt_BCs(salt_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
-    far_bulk_salt = cfg.boundary_conditions_config.far_bulk_salinity
+    far_bulk_salt = cfg.forcing_config.ocean_bulk_salinity
     return add_ghost_cells(salt_centers, bottom=far_bulk_salt, top=salt_centers[-1])
 
 

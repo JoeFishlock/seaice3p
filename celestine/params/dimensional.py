@@ -15,12 +15,12 @@ from serde.yaml import from_yaml, to_yaml
 from .params import (
     Config,
     PhysicalParams,
-    BoundaryConditionsConfig,
     NumericalParams,
     DarcyLawParams,
 )
 from .convert import (
     get_dimensionless_forcing_config,
+    get_dimensionless_initial_conditions_config,
     calculate_timescale_in_days,
     calculate_velocity_scale_in_m_day,
     Scales,
@@ -374,24 +374,6 @@ class DimensionalParams:
             couple_bubble_to_vertical_flow=self.couple_bubble_to_vertical_flow,
         )
 
-    def get_boundary_conditions_config(self):
-        scales = self.get_scales()
-        return BoundaryConditionsConfig(
-            initial_conditions_choice=self.initial_conditions_choice,
-            far_gas_sat=self.far_gas_sat / self.saturation_concentration,
-            far_temp=(self.far_temp - self.ocean_freezing_temperature)
-            / self.temperature_difference,
-            far_bulk_salinity=(self.far_bulk_salinity - self.ocean_salinity)
-            / self.salinity_difference,
-            initial_summer_ice_depth=self.initial_summer_ice_depth / self.lengthscale,
-            initial_summer_ocean_temperature=scales.convert_from_dimensional_temperature(
-                self.initial_summer_ocean_temperature
-            ),
-            initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
-                self.initial_summer_ice_temperature
-            ),
-        )
-
     def get_numerical_params(self):
         return NumericalParams(
             I=self.I,
@@ -407,13 +389,13 @@ class DimensionalParams:
         forcing provided for the simulation."""
         physical_params = self.get_physical_params()
         darcy_law_params = self.get_darcy_law_params()
-        boundary_conditions_config = self.get_boundary_conditions_config()
+        initial_conditions_config = get_dimensionless_initial_conditions_config(self)
         forcing_config = get_dimensionless_forcing_config(self)
         numerical_params = self.get_numerical_params()
         return Config(
             name=self.name,
             physical_params=physical_params,
-            boundary_conditions_config=boundary_conditions_config,
+            initial_conditions_config=initial_conditions_config,
             darcy_law_params=darcy_law_params,
             forcing_config=forcing_config,
             numerical_params=numerical_params,

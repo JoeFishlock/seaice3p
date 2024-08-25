@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 from serde import serde, coerce
 
+
 if TYPE_CHECKING:
     from .dimensional import DimensionalParams
 
@@ -10,6 +11,12 @@ from .forcing import (
     BRW09Forcing,
     YearlyForcing,
     RadForcing,
+)
+from .initial_conditions import (
+    InitialConditionsConfig,
+    UniformInitialConditions,
+    BRW09InitialConditions,
+    SummerInitialConditions,
 )
 
 
@@ -43,6 +50,30 @@ def get_dimensionless_forcing_config(
                 SW_radiation_model_choice=dimensional_params.SW_radiation_model_choice,
                 constant_oil_mass_ratio=dimensional_params.constant_oil_mass_ratio,
                 SW_scattering_ice_type=dimensional_params.SW_scattering_ice_type,
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_initial_conditions_config(
+    dimensional_params: "DimensionalParams",
+) -> InitialConditionsConfig:
+    scales = dimensional_params.get_scales()
+    match dimensional_params.initial_conditions_choice:
+        case "uniform":
+            return UniformInitialConditions()
+        case "barrow_2009":
+            return BRW09InitialConditions()
+        case "summer":
+            return SummerInitialConditions(
+                initial_summer_ice_depth=dimensional_params.initial_summer_ice_depth
+                / dimensional_params.lengthscale,
+                initial_summer_ocean_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_summer_ocean_temperature
+                ),
+                initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_summer_ice_temperature
+                ),
             )
         case _:
             raise NotImplementedError

@@ -62,11 +62,11 @@ def barrow_temperature_forcing(time, cfg):
 
 
 def constant_ocean_temperature_forcing(time, cfg: Config):
-    return cfg.boundary_conditions_config.far_temp
+    return cfg.forcing_config.ocean_temp
 
 
 def yearly_ocean_temperature_forcing(time, cfg: Config):
-    return cfg.boundary_conditions_config.far_temp
+    return cfg.forcing_config.ocean_temp
 
 
 def dimensional_barrow_ocean_temperature_forcing(time_in_days, cfg: Config):

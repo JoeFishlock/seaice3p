@@ -10,6 +10,7 @@ from serde.yaml import from_yaml, to_yaml
 import numpy as np
 
 from .forcing import BRW09Forcing, ForcingConfig
+from .initial_conditions import InitialConditionsConfig, BRW09InitialConditions
 from .convert import Scales
 
 
@@ -33,21 +34,6 @@ class PhysicalParams:
 
     # only used in DISEQ model
     damkohler_number: float = 1
-
-
-@serde(type_check=coerce)
-class BoundaryConditionsConfig:
-    """values for bottom (ocean) boundary"""
-
-    initial_conditions_choice: str = "uniform"
-    far_gas_sat: float = 1.0
-    far_temp: float = 0.1
-    far_bulk_salinity: float = 0
-
-    # Non dimensional parameters for summer initial conditions
-    initial_summer_ice_depth: float = 0.5
-    initial_summer_ocean_temperature: float = -0.05
-    initial_summer_ice_temperature: float = -0.1
 
 
 @serde(type_check=coerce)
@@ -109,8 +95,8 @@ class Config:
     name: str
     model: str = "EQM"
     physical_params: PhysicalParams = field(default_factory=PhysicalParams)
-    boundary_conditions_config: BoundaryConditionsConfig = field(
-        default_factory=BoundaryConditionsConfig
+    initial_conditions_config: InitialConditionsConfig = field(
+        default_factory=BRW09InitialConditions
     )
     darcy_law_params: DarcyLawParams = field(default_factory=DarcyLawParams)
     forcing_config: ForcingConfig = field(default_factory=BRW09Forcing)

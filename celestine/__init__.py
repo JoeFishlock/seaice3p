@@ -6,7 +6,7 @@ from .params import (
     NumericalParams,
     DarcyLawParams,
     ForcingConfig,
-    BoundaryConditionsConfig,
+    InitialConditionsConfig,
     PhysicalParams,
     DimensionalParams,
 )

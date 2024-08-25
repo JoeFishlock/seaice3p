@@ -2,19 +2,23 @@
 simulation.
 """
 import numpy as np
-from .params import Config
+from .params import (
+    Config,
+    UniformInitialConditions,
+    BRW09InitialConditions,
+    SummerInitialConditions,
+)
 from .state import EQMState, DISEQState
 from .grids import Grids
 
 
 def get_initial_conditions(cfg: Config):
     INITIAL_CONDITIONS = {
-        "uniform": _get_uniform_initial_conditions,
-        "barrow_2009": _get_barrow_initial_conditions,
-        "summer": _get_summer_initial_conditions,
+        UniformInitialConditions: _get_uniform_initial_conditions,
+        BRW09InitialConditions: _get_barrow_initial_conditions,
+        SummerInitialConditions: _get_summer_initial_conditions,
     }
-    choice = cfg.boundary_conditions_config.initial_conditions_choice
-    initial_state = INITIAL_CONDITIONS[choice](cfg)
+    initial_state = INITIAL_CONDITIONS[type(cfg.initial_conditions_config)](cfg)
     match cfg.model:
         case "EQM":
             return np.hstack(
@@ -45,16 +49,16 @@ def _apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
     return output
 
 
-def _get_uniform_initial_conditions(cfg):
+def _get_uniform_initial_conditions(cfg: Config):
     """Generate uniform initial solution on the ghost grid
 
     :returns: initial solution arrays on ghost grid (enthalpy, salt, gas)
     """
     chi = cfg.physical_params.expansion_coefficient
 
-    bottom_temp = cfg.boundary_conditions_config.far_temp
-    bottom_bulk_salinity = cfg.boundary_conditions_config.far_bulk_salinity
-    bottom_dissolved_gas = cfg.boundary_conditions_config.far_gas_sat
+    bottom_temp = cfg.forcing_config.ocean_temp
+    bottom_bulk_salinity = cfg.forcing_config.ocean_bulk_salinity
+    bottom_dissolved_gas = cfg.forcing_config.ocean_gas_sat
     bottom_bulk_gas = bottom_dissolved_gas * chi
 
     # Initialise uniform enthalpy assuming completely liquid initial domain
@@ -84,17 +88,17 @@ def _get_barrow_initial_conditions(cfg: Config):
     Ice temperature is given as -8.15 degC and ocean is the far value from boundary
     config.
     """
-    far_gas_sat = cfg.boundary_conditions_config.far_gas_sat
+    far_gas_sat = cfg.forcing_config.ocean_gas_sat
     ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
 
     # if we are going to have brine convection ice will desalinate on its own
     if cfg.darcy_law_params.brine_convection_parameterisation:
-        SALT_IN_ICE = cfg.boundary_conditions_config.far_bulk_salinity
+        SALT_IN_ICE = cfg.forcing_config.ocean_bulk_salinity
     else:
         SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
 
     BOTTOM_TEMP = cfg.scales.convert_from_dimensional_temperature(-1.8)
-    BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
+    BOTTOM_SALT = cfg.forcing_config.ocean_bulk_salinity
     TEMP_IN_ICE = cfg.scales.convert_from_dimensional_temperature(-8.15)
 
     chi = cfg.physical_params.expansion_coefficient
@@ -140,14 +144,14 @@ def _get_summer_initial_conditions(cfg: Config):
     This is an idealised initial condition to investigate the impact of shortwave
     radiative forcing on melting bare ice
     """
-    ICE_DEPTH = cfg.boundary_conditions_config.initial_summer_ice_depth
+    ICE_DEPTH = cfg.initial_conditions_config.initial_summer_ice_depth
 
     # Initialise with a constant bulk salinity in ice
     SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
 
-    BOTTOM_TEMP = cfg.boundary_conditions_config.initial_summer_ocean_temperature
-    BOTTOM_SALT = cfg.boundary_conditions_config.far_bulk_salinity
-    TEMP_IN_ICE = cfg.boundary_conditions_config.initial_summer_ice_temperature
+    BOTTOM_TEMP = cfg.initial_conditions_config.initial_summer_ocean_temperature
+    BOTTOM_SALT = cfg.forcing_config.ocean_bulk_salinity
+    TEMP_IN_ICE = cfg.initial_conditions_config.initial_summer_ice_temperature
 
     centers = Grids(cfg.numerical_params.I).centers
     salt = _apply_value_in_ice_layer(

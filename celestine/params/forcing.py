@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import ClassVar
 from serde import serde, coerce
 import numpy as np
 
@@ -16,6 +15,10 @@ class ConstantForcing:
 
     constant_top_temperature: float = -1.5
 
+    ocean_gas_sat: float = 1.0
+    ocean_temp: float = 0.1
+    ocean_bulk_salinity: float = 0
+
 
 @serde(type_check=coerce)
 class YearlyForcing:
@@ -24,6 +27,10 @@ class YearlyForcing:
     offset: float = -1.0
     amplitude: float = 0.75
     period: float = 4.0
+
+    ocean_gas_sat: float = 1.0
+    ocean_temp: float = 0.1
+    ocean_bulk_salinity: float = 0
 
 
 @serde(type_check=coerce)
@@ -34,6 +41,10 @@ class BRW09Forcing:
 
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+
+    ocean_gas_sat: float = 1.0
+    ocean_temp: float = 0.1
+    ocean_bulk_salinity: float = 0
 
     def __post_init__(self):
         """populate class attributes with barrow dimensional air temperature
@@ -89,6 +100,10 @@ class RadForcing:
     # Parameters for single layer SW radiative transfer model
     constant_oil_mass_ratio: float = 0  # ng/g
     SW_scattering_ice_type: str = "FYI"
+
+    ocean_gas_sat: float = 1.0
+    ocean_temp: float = 0.1
+    ocean_bulk_salinity: float = 0
 
 
 ForcingConfig = ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing
