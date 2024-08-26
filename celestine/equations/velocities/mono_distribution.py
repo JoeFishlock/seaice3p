@@ -37,22 +37,16 @@ def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
     for 0<lambda<1. Edge cases are given by K(0)=1 and K(1) = 0 for values outside
     this range.
     """
-    exponent = cfg.darcy_law_params.drag_exponent
     drag = np.full_like(bubble_size_fraction, np.NaN)
     intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
     large = bubble_size_fraction >= 1
     drag[bubble_size_fraction < 0] = 1
-    if cfg.darcy_law_params.wall_drag_law_choice == "power":
-        drag[intermediate] = (1 - bubble_size_fraction[intermediate]) ** exponent
-    elif cfg.darcy_law_params.wall_drag_law_choice == "Haberman":
-        drag[intermediate] = (
-            1
-            - 1.5 * bubble_size_fraction[intermediate]
-            + 1.5 * bubble_size_fraction[intermediate] ** 5
-            - bubble_size_fraction[intermediate] ** 6
-        ) / (1 + 1.5 * bubble_size_fraction[intermediate] ** 5)
-    else:
-        raise KeyError("Wrong choice for wall drag law")
+    drag[intermediate] = (
+        1
+        - 1.5 * bubble_size_fraction[intermediate]
+        + 1.5 * bubble_size_fraction[intermediate] ** 5
+        - bubble_size_fraction[intermediate] ** 6
+    ) / (1 + 1.5 * bubble_size_fraction[intermediate] ** 5)
     drag[large] = 0
     return drag
 

@@ -76,10 +76,8 @@ class DimensionalParams:
     bubble_radius: float = 1e-3  # bubble radius in m
     pore_radius: float = 1e-3  # pore throat size scale in m
     pore_throat_scaling: float = 1 / 2
-    drag_exponent: float = 6.0
 
     bubble_size_distribution_type: str = "mono"
-    wall_drag_law_choice: str = "power"
     bubble_distribution_power: float = 1.5
     minimum_bubble_radius: float = 1e-6
     maximum_bubble_radius: float = 1e-3
@@ -343,9 +341,7 @@ class DimensionalParams:
             B=self.B,
             bubble_radius_scaled=self.bubble_radius_scaled,
             pore_throat_scaling=self.pore_throat_scaling,
-            drag_exponent=self.drag_exponent,
             bubble_size_distribution_type=self.bubble_size_distribution_type,
-            wall_drag_law_choice=self.wall_drag_law_choice,
             bubble_distribution_power=self.bubble_distribution_power,
             minimum_bubble_radius_scaled=self.minimum_bubble_radius_scaled,
             maximum_bubble_radius_scaled=self.maximum_bubble_radius_scaled,

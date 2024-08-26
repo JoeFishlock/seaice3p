@@ -21,30 +21,23 @@ class DarcyLawParams:
 
     B: float = 100
     pore_throat_scaling: float = 1 / 2
+    porosity_threshold: bool = False
+    porosity_threshold_value: float = 0.024
+
     bubble_size_distribution_type: str = "mono"
-    wall_drag_law_choice: str = "power"
-
-    # needed for power fit wall drag function
-    drag_exponent: float = 6.0
-
     # for mono size distribution
     bubble_radius_scaled: float = 1.0
-
     # for power law size distribution
     bubble_distribution_power: float = 1.5
     minimum_bubble_radius_scaled: float = 1e-3
     maximum_bubble_radius_scaled: float = 1
 
-    porosity_threshold: bool = False
-    porosity_threshold_value: float = 0.024
-
     brine_convection_parameterisation: bool = False
     Rayleigh_salt: float = 44105
     Rayleigh_critical: float = 40
     convection_strength: float = 0.03
-
-    couple_bubble_to_horizontal_flow: bool = True
-    couple_bubble_to_vertical_flow: bool = True
+    couple_bubble_to_horizontal_flow: bool = False
+    couple_bubble_to_vertical_flow: bool = False
 
 
 @serde(type_check=coerce)

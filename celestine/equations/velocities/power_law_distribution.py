@@ -19,27 +19,19 @@ def calculate_wall_drag_integrand(bubble_size_fraction: float, cfg: Config):
     where the wall drag enhancement funciton K can be given by a power law fit
     or taken from the Haberman paper.
     """
-    drag_exponent = cfg.darcy_law_params.drag_exponent
     power_law = cfg.darcy_law_params.bubble_distribution_power
     if bubble_size_fraction < 0:
         return 0
     elif (bubble_size_fraction >= 0) and (bubble_size_fraction < 1):
-        if cfg.darcy_law_params.wall_drag_law_choice == "power":
-            return ((1 - bubble_size_fraction) ** drag_exponent) * (
-                bubble_size_fraction ** (5 - power_law)
+        return (
+            (
+                1
+                - 1.5 * bubble_size_fraction
+                + 1.5 * bubble_size_fraction**5
+                - bubble_size_fraction**6
             )
-        elif cfg.darcy_law_params.wall_drag_law_choice == "Haberman":
-            return (
-                (
-                    1
-                    - 1.5 * bubble_size_fraction
-                    + 1.5 * bubble_size_fraction**5
-                    - bubble_size_fraction**6
-                )
-                / (1 + 1.5 * bubble_size_fraction**5)
-            ) * (bubble_size_fraction ** (5 - power_law))
-        else:
-            raise KeyError("Wrong choice for wall drag law")
+            / (1 + 1.5 * bubble_size_fraction**5)
+        ) * (bubble_size_fraction ** (5 - power_law))
     else:
         return 0
 
@@ -52,7 +44,6 @@ def calculate_lag_integrand(bubble_size_fraction: float, cfg: Config):
     .. math:: \lambda^{3-p} G(\lambda)
 
     """
-    drag_exponent = cfg.darcy_law_params.drag_exponent
     power_law = cfg.darcy_law_params.bubble_distribution_power
     if bubble_size_fraction < 0:
         return 0
