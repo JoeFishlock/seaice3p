@@ -13,8 +13,9 @@ from .initial_conditions import (
 )
 from .physical import PhysicalParams, DISEQPhysicalParams, EQMPhysicalParams
 from .numerical import NumericalParams
+from .bubble import BubbleParams, MonoBubbleParams, PowerLawBubbleParams
+from .convection import NoBrineConvection, BrineConvectionParams, RJW14Params
 from .params import (
-    DarcyLawParams,
     Config,
 )
 from .dimensional import DimensionalParams

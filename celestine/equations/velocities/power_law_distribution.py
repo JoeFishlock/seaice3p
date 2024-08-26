@@ -19,7 +19,7 @@ def calculate_wall_drag_integrand(bubble_size_fraction: float, cfg: Config):
     where the wall drag enhancement funciton K can be given by a power law fit
     or taken from the Haberman paper.
     """
-    power_law = cfg.darcy_law_params.bubble_distribution_power
+    power_law = cfg.bubble_params.bubble_distribution_power
     if bubble_size_fraction < 0:
         return 0
     elif (bubble_size_fraction >= 0) and (bubble_size_fraction < 1):
@@ -44,7 +44,7 @@ def calculate_lag_integrand(bubble_size_fraction: float, cfg: Config):
     .. math:: \lambda^{3-p} G(\lambda)
 
     """
-    power_law = cfg.darcy_law_params.bubble_distribution_power
+    power_law = cfg.bubble_params.bubble_distribution_power
     if bubble_size_fraction < 0:
         return 0
     elif (bubble_size_fraction >= 0) and (bubble_size_fraction < 1):
@@ -63,7 +63,7 @@ def calculate_volume_integrand(bubble_size_fraction: float, cfg: Config):
 
     in terms of the bubble size fraction.
     """
-    p = cfg.darcy_law_params.bubble_distribution_power
+    p = cfg.bubble_params.bubble_distribution_power
     return bubble_size_fraction ** (3 - p)
 
 
@@ -106,12 +106,12 @@ def calculate_power_law_wall_drag_factor(liquid_fraction, cfg: Config):
     Return on edge grid
     """
     minimum_size_fractions = calculate_bubble_size_fraction(
-        cfg.darcy_law_params.minimum_bubble_radius_scaled,
+        cfg.bubble_params.minimum_bubble_radius_scaled,
         geometric(liquid_fraction),
         cfg,
     )
     maximum_size_fractions = calculate_bubble_size_fraction(
-        cfg.darcy_law_params.maximum_bubble_radius_scaled,
+        cfg.bubble_params.maximum_bubble_radius_scaled,
         geometric(liquid_fraction),
         cfg,
     )
@@ -128,12 +128,12 @@ def calculate_power_law_lag_factor(liquid_fraction, cfg: Config):
     Return on edge grid
     """
     minimum_size_fractions = calculate_bubble_size_fraction(
-        cfg.darcy_law_params.minimum_bubble_radius_scaled,
+        cfg.bubble_params.minimum_bubble_radius_scaled,
         geometric(liquid_fraction),
         cfg,
     )
     maximum_size_fractions = calculate_bubble_size_fraction(
-        cfg.darcy_law_params.maximum_bubble_radius_scaled,
+        cfg.bubble_params.maximum_bubble_radius_scaled,
         geometric(liquid_fraction),
         cfg,
     )

@@ -2,11 +2,13 @@
 simulation.
 """
 import numpy as np
+
 from .params import (
     Config,
     UniformInitialConditions,
     BRW09InitialConditions,
     SummerInitialConditions,
+    NoBrineConvection,
 )
 from .state import EQMState, DISEQState
 from .grids import Grids
@@ -92,7 +94,7 @@ def _get_barrow_initial_conditions(cfg: Config):
     ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
 
     # if we are going to have brine convection ice will desalinate on its own
-    if cfg.darcy_law_params.brine_convection_parameterisation:
+    if not isinstance(cfg.brine_convection_params, NoBrineConvection):
         SALT_IN_ICE = cfg.forcing_config.ocean_bulk_salinity
     else:
         SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)

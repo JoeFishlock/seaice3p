@@ -3,8 +3,9 @@ __version__ = "0.14.0"
 # Exported functions and classes
 from .params import (
     Config,
+    BubbleParams,
+    BrineConvectionParams,
     NumericalParams,
-    DarcyLawParams,
     ForcingConfig,
     InitialConditionsConfig,
     PhysicalParams,

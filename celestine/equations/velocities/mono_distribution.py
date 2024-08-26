@@ -59,7 +59,7 @@ def calculate_mono_wall_drag_factor(liquid_fraction, cfg: Config):
 
     returns wall drag factor on the edge grid
     """
-    bubble_radius_scaled = cfg.darcy_law_params.bubble_radius_scaled
+    bubble_radius_scaled = cfg.bubble_params.bubble_radius_scaled
     bubble_size_fraction = calculate_bubble_size_fraction(
         bubble_radius_scaled, geometric(liquid_fraction), cfg
     )
@@ -76,7 +76,7 @@ def calculate_mono_lag_factor(liquid_fraction, cfg: Config):
 
     returns lag factor on the edge grid
     """
-    bubble_radius_scaled = cfg.darcy_law_params.bubble_radius_scaled
+    bubble_radius_scaled = cfg.bubble_params.bubble_radius_scaled
     bubble_size_fraction = calculate_bubble_size_fraction(
         bubble_radius_scaled, geometric(liquid_fraction), cfg
     )

@@ -1,6 +1,9 @@
 from typing import TYPE_CHECKING
 from serde import serde, coerce
 
+from celestine.params.bubble import MonoBubbleParams, PowerLawBubbleParams
+from celestine.params.convection import NoBrineConvection, RJW14Params
+
 
 if TYPE_CHECKING:
     from .dimensional import DimensionalParams
@@ -110,6 +113,43 @@ def get_dimensionless_physical_params(dimensional_params: "DimensionalParams"):
             )
         case _:
             raise NotImplementedError
+
+
+def get_dimensionless_bubble_params(dimensional_params: "DimensionalParams"):
+    common_params = {
+        "B": dimensional_params.B,
+        "pore_throat_scaling": dimensional_params.pore_throat_scaling,
+        "porosity_threshold": dimensional_params.porosity_threshold,
+        "porosity_threshold_value": dimensional_params.porosity_threshold_value,
+    }
+    match dimensional_params.bubble_size_distribution_type:
+        case "mono":
+            return MonoBubbleParams(
+                **common_params,
+                bubble_radius_scaled=dimensional_params.bubble_radius_scaled
+            )
+        case "power_law":
+            return PowerLawBubbleParams(
+                **common_params,
+                bubble_distribution_power=dimensional_params.bubble_distribution_power,
+                minimum_bubble_radius_scaled=dimensional_params.minimum_bubble_radius_scaled,
+                maximum_bubble_radius_scaled=dimensional_params.maximum_bubble_radius_scaled
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_brine_convection_params(dimensional_params: "DimensionalParams"):
+    if dimensional_params.brine_convection_parameterisation:
+        return RJW14Params(
+            Rayleigh_salt=dimensional_params.Rayleigh_salt,
+            Rayleigh_critical=dimensional_params.Rayleigh_critical,
+            convection_strength=dimensional_params.convection_strength,
+            couple_bubble_to_horizontal_flow=dimensional_params.couple_bubble_to_horizontal_flow,
+            couple_bubble_to_vertical_flow=dimensional_params.couple_bubble_to_vertical_flow,
+        )
+    else:
+        return NoBrineConvection()
 
 
 SECONDS_TO_DAYS = 1 / (60 * 60 * 24)

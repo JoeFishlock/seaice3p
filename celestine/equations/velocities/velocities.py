@@ -1,6 +1,11 @@
 import numpy as np
 from celestine.grids import geometric, Grids
-from celestine.params import Config
+from celestine.params import (
+    Config,
+    MonoBubbleParams,
+    PowerLawBubbleParams,
+    NoBrineConvection,
+)
 from ..RJW14 import calculate_brine_convection_liquid_velocity
 from .mono_distribution import (
     calculate_mono_wall_drag_factor,
@@ -35,7 +40,7 @@ def calculate_liquid_darcy_velocity(
     :type cfg: celestine.params.Config
     :return: liquid darcy velocity on edge grid
     """
-    if not cfg.darcy_law_params.brine_convection_parameterisation:
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
         return np.zeros_like(geometric(liquid_fraction))
 
     Wl = calculate_brine_convection_liquid_velocity(
@@ -57,8 +62,8 @@ def calculate_gas_interstitial_velocity(
 
     Return Vg on edge grid
     """
-    B = cfg.darcy_law_params.B
-    exponent = cfg.darcy_law_params.pore_throat_scaling
+    B = cfg.bubble_params.B
+    exponent = cfg.bubble_params.pore_throat_scaling
 
     REGULARISATION = 1e-10
     liquid_interstitial_velocity = (
@@ -72,9 +77,9 @@ def calculate_gas_interstitial_velocity(
 
     # apply a porosity cutoff to the gas interstitial velocity if necking occurs below
     # critical porosity.
-    if cfg.darcy_law_params.porosity_threshold:
+    if cfg.bubble_params.porosity_threshold:
         return Vg * np.heaviside(
-            geometric(liquid_fraction) - cfg.darcy_law_params.porosity_threshold_value,
+            geometric(liquid_fraction) - cfg.bubble_params.porosity_threshold_value,
             0,
         )
 
@@ -93,20 +98,22 @@ def calculate_velocities(state_BCs, cfg: Config):
         Grids(cfg.numerical_params.I).edges,
     )
 
-    if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
-        wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)
-        lag_factor = calculate_mono_lag_factor(liquid_fraction, cfg)
-    elif cfg.darcy_law_params.bubble_size_distribution_type == "power_law":
-        wall_drag_factor = calculate_power_law_wall_drag_factor(liquid_fraction, cfg)
-        lag_factor = calculate_power_law_lag_factor(liquid_fraction, cfg)
-    else:
-        raise ValueError(
-            f"Bubble size distribution of type {cfg.darcy_law_params.bubble_size_distribution_type} not recognised"
-        )
+    match cfg.bubble_params:
+        case MonoBubbleParams():
+            wall_drag_factor = calculate_mono_wall_drag_factor(liquid_fraction, cfg)
+            lag_factor = calculate_mono_lag_factor(liquid_fraction, cfg)
+        case PowerLawBubbleParams():
+            wall_drag_factor = calculate_power_law_wall_drag_factor(
+                liquid_fraction, cfg
+            )
+            lag_factor = calculate_power_law_lag_factor(liquid_fraction, cfg)
+        case _:
+            raise NotImplementedError
 
     # check if we want to couple the bubble to fluid motion in the vertical
-    if not cfg.darcy_law_params.couple_bubble_to_vertical_flow:
-        lag_factor = np.zeros_like(wall_drag_factor)
+    if not isinstance(cfg.brine_convection_params, NoBrineConvection):
+        if not cfg.brine_convection_params.couple_bubble_to_vertical_flow:
+            lag_factor = np.zeros_like(wall_drag_factor)
 
     Wl = calculate_liquid_darcy_velocity(
         liquid_fraction, liquid_salinity, center_grid, edge_grid, cfg

@@ -14,11 +14,11 @@ from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 from .params import (
     Config,
-    PhysicalParams,
     NumericalParams,
-    DarcyLawParams,
 )
 from .convert import (
+    get_dimensionless_brine_convection_params,
+    get_dimensionless_bubble_params,
     get_dimensionless_forcing_config,
     get_dimensionless_initial_conditions_config,
     get_dimensionless_physical_params,
@@ -335,26 +335,6 @@ class DimensionalParams:
         """
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
 
-    def get_darcy_law_params(self):
-        """return a DarcyLawParams object"""
-        return DarcyLawParams(
-            B=self.B,
-            bubble_radius_scaled=self.bubble_radius_scaled,
-            pore_throat_scaling=self.pore_throat_scaling,
-            bubble_size_distribution_type=self.bubble_size_distribution_type,
-            bubble_distribution_power=self.bubble_distribution_power,
-            minimum_bubble_radius_scaled=self.minimum_bubble_radius_scaled,
-            maximum_bubble_radius_scaled=self.maximum_bubble_radius_scaled,
-            porosity_threshold=self.porosity_threshold,
-            porosity_threshold_value=self.porosity_threshold_value,
-            brine_convection_parameterisation=self.brine_convection_parameterisation,
-            Rayleigh_salt=self.Rayleigh_salt,
-            Rayleigh_critical=self.Rayleigh_critical,
-            convection_strength=self.convection_strength,
-            couple_bubble_to_horizontal_flow=self.couple_bubble_to_horizontal_flow,
-            couple_bubble_to_vertical_flow=self.couple_bubble_to_vertical_flow,
-        )
-
     def get_numerical_params(self):
         return NumericalParams(
             I=self.I,
@@ -368,15 +348,17 @@ class DimensionalParams:
         input. You can modify the numerical parameters and boundary conditions and
         forcing provided for the simulation."""
         physical_params = get_dimensionless_physical_params(self)
-        darcy_law_params = self.get_darcy_law_params()
         initial_conditions_config = get_dimensionless_initial_conditions_config(self)
+        brine_convection_params = get_dimensionless_brine_convection_params(self)
+        bubble_params = get_dimensionless_bubble_params(self)
         forcing_config = get_dimensionless_forcing_config(self)
         numerical_params = self.get_numerical_params()
         return Config(
             name=self.name,
             physical_params=physical_params,
             initial_conditions_config=initial_conditions_config,
-            darcy_law_params=darcy_law_params,
+            brine_convection_params=brine_convection_params,
+            bubble_params=bubble_params,
             forcing_config=forcing_config,
             numerical_params=numerical_params,
             scales=self.get_scales(),

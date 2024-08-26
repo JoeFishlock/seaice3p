@@ -3,7 +3,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .brine_drainage import calculate_brine_channel_sink
-from ...params import Config
+from ...params import Config, NoBrineConvection, MonoBubbleParams, PowerLawBubbleParams
 from ..velocities.power_law_distribution import calculate_power_law_lag_factor
 from ..velocities.mono_distribution import calculate_mono_lag_factor
 from ...grids import geometric, Grids
@@ -54,7 +54,7 @@ def _calculate_heat_sink(state_BCs, cfg: Config, grids):
     center_grid = grids.centers
     edge_grid = grids.edges
 
-    if not cfg.darcy_law_params.brine_convection_parameterisation:
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
         return np.zeros_like(liquid_fraction)
 
     sink = calculate_brine_channel_sink(
@@ -69,7 +69,7 @@ def _calculate_salt_sink(state_BCs, cfg: Config, grids):
     center_grid = grids.centers
     edge_grid = grids.edges
 
-    if not cfg.darcy_law_params.brine_convection_parameterisation:
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
         return np.zeros_like(liquid_fraction)
 
     sink = calculate_brine_channel_sink(
@@ -90,7 +90,7 @@ def _calculate_gas_sink(state_BCs, cfg: Config, grids):
     center_grid = grids.centers
     edge_grid = grids.edges
 
-    if not cfg.darcy_law_params.brine_convection_parameterisation:
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
         return np.zeros_like(liquid_fraction)
 
     sink = calculate_brine_channel_sink(
@@ -99,15 +99,14 @@ def _calculate_gas_sink(state_BCs, cfg: Config, grids):
 
     dissolved_gas_term = cfg.physical_params.expansion_coefficient * dissolved_gas
 
-    if cfg.darcy_law_params.couple_bubble_to_horizontal_flow:
-        if cfg.darcy_law_params.bubble_size_distribution_type == "mono":
+    if cfg.brine_convection_params.couple_bubble_to_horizontal_flow:
+        if isinstance(cfg.bubble_params, MonoBubbleParams):
             lag_factor = calculate_mono_lag_factor(liquid_fraction, cfg)
-        elif cfg.darcy_law_params.bubble_size_distribution_type == "power_law":
+        elif isinstance(cfg.bubble_params, PowerLawBubbleParams):
             lag_factor = calculate_power_law_lag_factor(liquid_fraction, cfg)
         else:
-            raise ValueError(
-                f"Bubble size distribution of type {cfg.darcy_law_params.bubble_size_distribution_type} not recognised"
-            )
+            raise NotImplementedError
+
         bubble_term = 2 * gas_fraction * geometric(lag_factor) / liquid_fraction
     else:
         bubble_term = np.zeros_like(liquid_fraction)
@@ -123,7 +122,7 @@ def _calculate_bulk_dissolved_gas_sink(state_BCs, cfg: Config, grids):
     center_grid = grids.centers
     edge_grid = grids.edges
 
-    if not cfg.darcy_law_params.brine_convection_parameterisation:
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
         return np.zeros_like(liquid_fraction)
 
     sink = calculate_brine_channel_sink(

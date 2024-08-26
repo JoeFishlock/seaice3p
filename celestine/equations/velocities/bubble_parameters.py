@@ -9,7 +9,7 @@ def calculate_bubble_size_fraction(bubble_radius_scaled, liquid_fraction, cfg: C
 
     Returns the bubble size fraction on the edge grid.
     """
-    exponent = cfg.darcy_law_params.pore_throat_scaling
+    exponent = cfg.bubble_params.pore_throat_scaling
     reg = cfg.numerical_params.regularisation
     effective_tube_radius = liquid_fraction**exponent + reg
     return bubble_radius_scaled / effective_tube_radius
