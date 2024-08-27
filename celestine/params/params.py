@@ -24,7 +24,6 @@ class Config:
     this config object can be saved and loaded to a yaml file."""
 
     name: str
-    model: str = "EQM"
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
 

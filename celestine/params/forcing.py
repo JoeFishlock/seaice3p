@@ -16,9 +16,9 @@ class BaseOceanForcing:
     classes
     """
 
-    ocean_gas_sat: float = 1.0
     ocean_temp: float = 0.1
     ocean_bulk_salinity: float = 0
+    ocean_gas_sat: float = 1.0
 
 
 @serde(type_check=coerce)
@@ -38,11 +38,13 @@ class YearlyForcing(BaseOceanForcing):
 
 
 @serde(type_check=coerce)
-class BRW09Forcing(BaseOceanForcing):
+class BRW09Forcing:
     """Surface and ocean temperature data loaded from thermistor temperature record
     during the Barrow 2009 field study.
     """
 
+    ocean_bulk_salinity: float = 0
+    ocean_gas_sat: float = 1.0
     Barrow_top_temperature_data_choice: str = "air"
     Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
