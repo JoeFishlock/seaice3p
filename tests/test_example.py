@@ -24,7 +24,7 @@ def test_example_configuration(tmp_path):
     """
     REFERENCE_CONFIG_FILE_PATH = Path(__file__).parent / "reference_data/example.yml"
     create_and_save_config(tmp_path, SIMULATION_DIMENSIONAL_PARAMS)
-    config_file_path = tmp_path / (SIMULATION_DIMENSIONAL_PARAMS["name"] + ".yml")
+    config_file_path = tmp_path / (SIMULATION_DIMENSIONAL_PARAMS.name + ".yml")
     test_cfg = Config.load(config_file_path)
 
     reference_cfg = Config.load(REFERENCE_CONFIG_FILE_PATH)
@@ -43,7 +43,7 @@ def test_example_dimensional_configuration(tmp_path):
     )
     create_and_save_config(tmp_path, SIMULATION_DIMENSIONAL_PARAMS)
     config_file_path = tmp_path / (
-        SIMULATION_DIMENSIONAL_PARAMS["name"] + "_dimensional.yml"
+        SIMULATION_DIMENSIONAL_PARAMS.name + "_dimensional.yml"
     )
     test_cfg = DimensionalParams.load(config_file_path)
 
