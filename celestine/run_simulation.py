@@ -15,12 +15,11 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
 
-
 from .equations import get_equations
 from .state import get_unpacker
 from .forcing import get_boundary_conditions
 from .enthalpy_method import get_enthalpy_method
-from .params import Config
+from .params import Config, EQMPhysicalParams, DISEQPhysicalParams
 from .grids import Grids
 from .initial_conditions import get_initial_conditions
 
@@ -52,9 +51,9 @@ THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
 
 
 def solve(cfg: Config, directory: Path) -> Literal[0]:
-    if cfg.model == "EQM":
+    if isinstance(cfg.physical_params, EQMPhysicalParams):
         number_of_solution_components = 3
-    elif cfg.model == "DISEQ":
+    elif isinstance(cfg.physical_params, DISEQPhysicalParams):
         number_of_solution_components = 4
     else:
         raise NotImplementedError

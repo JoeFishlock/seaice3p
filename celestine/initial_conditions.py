@@ -9,8 +9,10 @@ from .params import (
     BRW09InitialConditions,
     SummerInitialConditions,
     NoBrineConvection,
+    EQMPhysicalParams,
+    DISEQPhysicalParams,
 )
-from .state import EQMState, DISEQState
+from .state import EQMState, DISEQState, State
 from .grids import Grids
 
 
@@ -21,12 +23,12 @@ def get_initial_conditions(cfg: Config):
         SummerInitialConditions: _get_summer_initial_conditions,
     }
     initial_state = INITIAL_CONDITIONS[type(cfg.initial_conditions_config)](cfg)
-    match cfg.model:
-        case "EQM":
+    match cfg.physical_params:
+        case EQMPhysicalParams():
             return np.hstack(
                 (initial_state.enthalpy, initial_state.salt, initial_state.gas)
             )
-        case "DISEQ":
+        case DISEQPhysicalParams():
             return np.hstack(
                 (
                     initial_state.enthalpy,
@@ -68,14 +70,7 @@ def _get_uniform_initial_conditions(cfg: Config):
     salt = np.full_like(enthalpy, bottom_bulk_salinity)
     gas = np.full_like(enthalpy, bottom_bulk_gas)
 
-    if cfg.model == "EQM":
-        return EQMState(0, enthalpy, salt, gas)
-    elif cfg.model == "DISEQ":
-        bulk_dissolved_gas = gas
-        gas_fraction = np.zeros_like(gas)
-        return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
-    else:
-        raise TypeError("Cannot provide uniform initial condition for model choice")
+    return _pack_initial_state(cfg, enthalpy, salt, gas)
 
 
 def _get_barrow_initial_conditions(cfg: Config):
@@ -129,14 +124,7 @@ def _get_barrow_initial_conditions(cfg: Config):
         grid=centers,
     )
 
-    if cfg.model == "EQM":
-        return EQMState(0, enthalpy, salt, gas)
-    elif cfg.model == "DISEQ":
-        bulk_dissolved_gas = gas
-        gas_fraction = np.zeros_like(gas)
-        return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
-    else:
-        raise TypeError("Cannot provide barrow initial condition for model choice")
+    return _pack_initial_state(cfg, enthalpy, salt, gas)
 
 
 def _get_summer_initial_conditions(cfg: Config):
@@ -175,11 +163,16 @@ def _get_summer_initial_conditions(cfg: Config):
         grid=centers,
     )
 
-    if cfg.model == "EQM":
-        return EQMState(0, enthalpy, salt, gas)
-    elif cfg.model == "DISEQ":
-        bulk_dissolved_gas = gas
-        gas_fraction = np.zeros_like(gas)
-        return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
-    else:
-        raise TypeError("Cannot provide summer initial condition for model choice")
+    return _pack_initial_state(cfg, enthalpy, salt, gas)
+
+
+def _pack_initial_state(cfg: Config, enthalpy, salt, gas) -> State:
+    match cfg.physical_params:
+        case EQMPhysicalParams():
+            return EQMState(0, enthalpy, salt, gas)
+        case DISEQPhysicalParams():
+            bulk_dissolved_gas = gas
+            gas_fraction = np.zeros_like(gas)
+            return DISEQState(0, enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+        case _:
+            raise NotImplementedError

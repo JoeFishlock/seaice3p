@@ -1,7 +1,9 @@
 from pathlib import Path
 import numpy as np
 
+
 from . import Config, DimensionalParams
+from .params.physical import DISEQPhysicalParams, EQMPhysicalParams
 from .state import get_unpacker
 from .enthalpy_method import get_enthalpy_method
 
@@ -26,25 +28,26 @@ def load_data(
         sim_cfg = Config.load(data_directory / f"{sim_config_name}.{config_extension}")
 
     with np.load(SIM_DATA_PATH) as data:
-        if sim_cfg.model == "EQM":
-            times = data["arr_0"]
-            enthalpy = data["arr_1"]
-            salt = data["arr_2"]
-            bulk_gas = data["arr_3"]
+        match sim_cfg.physical_params:
+            case EQMPhysicalParams():
+                times = data["arr_0"]
+                enthalpy = data["arr_1"]
+                salt = data["arr_2"]
+                bulk_gas = data["arr_3"]
 
-            data_tuple = (enthalpy, salt, bulk_gas)
+                data_tuple = (enthalpy, salt, bulk_gas)
 
-        elif sim_cfg.model == "DISEQ":
-            times = data["arr_0"]
-            enthalpy = data["arr_1"]
-            salt = data["arr_2"]
-            bulk_dissolved_gas = data["arr_3"]
-            gas_fraction = data["arr_4"]
+            case DISEQPhysicalParams():
+                times = data["arr_0"]
+                enthalpy = data["arr_1"]
+                salt = data["arr_2"]
+                bulk_dissolved_gas = data["arr_3"]
+                gas_fraction = data["arr_4"]
 
-            data_tuple = (enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+                data_tuple = (enthalpy, salt, bulk_dissolved_gas, gas_fraction)
 
-        else:
-            raise TypeError(f"Cannot load data for {sim_cfg.model} model")
+            case _:
+                raise NotImplementedError
 
     return sim_cfg, times, data_tuple
 

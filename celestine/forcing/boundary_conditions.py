@@ -3,11 +3,12 @@ centered grid that needs to be on the ghost grid for the upwind scheme.
 """
 
 from typing import Callable
+import numpy as np
 
 from .temperature_forcing import get_temperature_forcing, get_bottom_temperature_forcing
 from .surface_energy_balance import find_ghost_cell_temperature
 from ..grids import add_ghost_cells
-from ..params import Config
+from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams
 from ..params.forcing import RadForcing
 from ..state import (
     StateFull,
@@ -21,22 +22,22 @@ from ..state import (
 
 def get_boundary_conditions(cfg: Config) -> Callable[[StateFull], StateBCs]:
     fun_map = {
-        "EQM": _EQM_boundary_conditions,
-        "DISEQ": _DISEQ_boundary_conditions,
+        EQMPhysicalParams: _EQM_boundary_conditions,
+        DISEQPhysicalParams: _DISEQ_boundary_conditions,
     }
 
     def boundary_conditions(full_state: StateFull) -> StateBCs:
-        return fun_map[cfg.model](full_state, cfg)
+        return fun_map[type(cfg.physical_params)](full_state, cfg)
 
     return boundary_conditions
 
 
 def _EQM_boundary_conditions(full_state: EQMStateFull, cfg: Config) -> StateBCs:
     time = full_state.time
-    enthalpy = _enthalpy_BCs(full_state.enthalpy, cfg)
+    temperature = _temperature_BCs(full_state, time, cfg)
+    enthalpy = _enthalpy_BCs(full_state.enthalpy, cfg, temperature[0])
     salt = _salt_BCs(full_state.salt, cfg)
 
-    temperature = _temperature_BCs(full_state, time, cfg)
     liquid_salinity = _liquid_salinity_BCs(full_state.liquid_salinity, cfg)
     dissolved_gas = _dissolved_gas_BCs(full_state.dissolved_gas, cfg)
     gas_fraction = _gas_fraction_BCs(full_state.gas_fraction)
@@ -58,10 +59,10 @@ def _EQM_boundary_conditions(full_state: EQMStateFull, cfg: Config) -> StateBCs:
 
 def _DISEQ_boundary_conditions(full_state: DISEQStateFull, cfg: Config) -> StateBCs:
     time = full_state.time
-    enthalpy = _enthalpy_BCs(full_state.enthalpy, cfg)
+    temperature = _temperature_BCs(full_state, time, cfg)
+    enthalpy = _enthalpy_BCs(full_state.enthalpy, cfg, temperature[0])
     salt = _salt_BCs(full_state.salt, cfg)
 
-    temperature = _temperature_BCs(full_state, time, cfg)
     liquid_salinity = _liquid_salinity_BCs(full_state.liquid_salinity, cfg)
     dissolved_gas = _dissolved_gas_BCs(full_state.dissolved_gas, cfg)
     gas_fraction = _gas_fraction_BCs(full_state.gas_fraction)
@@ -125,10 +126,12 @@ def _temperature_BCs(state, time, cfg: Config):
     return add_ghost_cells(state.temperature, bottom=far_temp, top=top_temp)
 
 
-def _enthalpy_BCs(enthalpy_centers, cfg: Config):
+def _enthalpy_BCs(enthalpy_centers, cfg: Config, bottom_temperature):
     """Add ghost cells with BCs to center quantity"""
-    far_temp = cfg.forcing_config.ocean_temp
-    return add_ghost_cells(enthalpy_centers, bottom=far_temp, top=enthalpy_centers[-1])
+    # bottom_temp = cfg.forcing_config.ocean_temp
+    return add_ghost_cells(
+        enthalpy_centers, bottom=bottom_temperature, top=enthalpy_centers[-1]
+    )
 
 
 def _salt_BCs(salt_centers, cfg: Config):

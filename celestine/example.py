@@ -3,7 +3,13 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
 from . import __version__
-from .params import DimensionalParams
+from .params import (
+    DimensionalParams,
+    BRW09InitialConditions,
+    NoBrineConvection,
+    NumericalParams,
+)
+from .params.dimensional import DimensionalBRW09Forcing, DimensionalMonoBubbleParams
 from .run_simulation import solve
 from .grids import Grids
 from .load import get_array_data, load_data, get_state
@@ -11,29 +17,33 @@ from .enthalpy_method import get_enthalpy_method
 
 DATA_DIRECTORY = Path("example_data")
 FRAMES_DIR = Path("example_data/frames")
-SIMULATION_DIMENSIONAL_PARAMS = {
-    "name": "example",
-    "total_time_in_days": 164,
-    "savefreq_in_days": 3,
-    "bubble_radius": 0.2e-3,
-    "lengthscale": 2.4,
-    "I": 24,
-    "temperature_forcing_choice": "barrow_2009",
-    "initial_conditions_choice": "barrow_2009",
-}
+SIMULATION_DIMENSIONAL_PARAMS = DimensionalParams(
+    name="example",
+    total_time_in_days=164,
+    savefreq_in_days=3,
+    bubble_params=DimensionalMonoBubbleParams(bubble_radius=0.2e-3),
+    lengthscale=2.4,
+    numerical_params=NumericalParams(I=24),
+    initial_conditions_config=BRW09InitialConditions(),
+    forcing_config=DimensionalBRW09Forcing(),
+    brine_convection_params=NoBrineConvection(),
+)
 
 
-def create_and_save_config(data_directory: Path, simulation_dimensional_params: dict):
+def create_and_save_config(
+    data_directory: Path, simulation_dimensional_params: DimensionalParams
+):
     data_directory.mkdir(exist_ok=True, parents=True)
-    dimensional_params = DimensionalParams(**simulation_dimensional_params)
-    dimensional_params.save(data_directory)
-    cfg = dimensional_params.get_config()
+    simulation_dimensional_params.save(data_directory)
+    cfg = simulation_dimensional_params.get_config()
     cfg.save(data_directory)
     return cfg
 
 
 def main(
-    data_directory: Path, frames_directory: Path, simulation_dimensional_params: dict
+    data_directory: Path,
+    frames_directory: Path,
+    simulation_dimensional_params: DimensionalParams,
 ):
     """Generate non dimensional simulation config and save along with dimensional
     config then run simulation and save data.
@@ -51,7 +61,7 @@ def main(
     # temperature
     # solid_fraction
     # save as frames in frames/gas_fraction etc...
-    simulation_name = simulation_dimensional_params["name"]
+    simulation_name = simulation_dimensional_params.name
     DIMENSIONAL_CONFIG_DATA_PATH = data_directory / f"{simulation_name}_dimensional.yml"
 
     cfg, times, data = load_data(simulation_name, data_directory, is_dimensional=True)

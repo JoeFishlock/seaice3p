@@ -3,7 +3,14 @@ import numpy as np
 from numpy.typing import NDArray
 
 from .brine_drainage import calculate_brine_channel_sink
-from ...params import Config, NoBrineConvection, MonoBubbleParams, PowerLawBubbleParams
+from ...params import (
+    Config,
+    NoBrineConvection,
+    MonoBubbleParams,
+    PowerLawBubbleParams,
+    EQMPhysicalParams,
+    DISEQPhysicalParams,
+)
 from ..velocities.power_law_distribution import calculate_power_law_lag_factor
 from ..velocities.mono_distribution import calculate_mono_lag_factor
 from ...grids import geometric, Grids
@@ -14,12 +21,12 @@ def get_brine_convection_sink(
     cfg: Config, grids: Grids
 ) -> Callable[[StateBCs], NDArray]:
     fun_map = {
-        "EQM": _EQM_brine_convection_sink,
-        "DISEQ": _DISEQ_brine_convection_sink,
+        EQMPhysicalParams: _EQM_brine_convection_sink,
+        DISEQPhysicalParams: _DISEQ_brine_convection_sink,
     }
 
     def brine_convection_sink(state_BCs: StateBCs) -> NDArray:
-        return fun_map[cfg.model](state_BCs, cfg, grids)
+        return fun_map[type(cfg.physical_params)](state_BCs, cfg, grids)
 
     return brine_convection_sink
 

@@ -10,7 +10,7 @@ from .bulk_dissolved_gas_flux import calculate_bulk_dissolved_gas_flux
 from .gas_fraction_flux import calculate_gas_fraction_flux
 
 from ...state import StateBCs, EQMStateBCs, DISEQStateBCs
-from ...params import Config
+from ...params import Config, EQMPhysicalParams, DISEQPhysicalParams
 from ...grids import Grids
 
 
@@ -18,12 +18,12 @@ def get_dz_fluxes(
     cfg: Config, grids: Grids
 ) -> Callable[[StateBCs, NDArray, NDArray, NDArray], NDArray]:
     fun_map = {
-        "EQM": _EQM_dz_fluxes,
-        "DISEQ": _DISEQ_dz_fluxes,
+        EQMPhysicalParams: _EQM_dz_fluxes,
+        DISEQPhysicalParams: _DISEQ_dz_fluxes,
     }
 
     def dz_fluxes(state_BCs: StateBCs, Wl, Vg, V) -> NDArray:
-        return fun_map[cfg.model](state_BCs, Wl, Vg, V, cfg, grids)
+        return fun_map[type(cfg.physical_params)](state_BCs, Wl, Vg, V, cfg, grids)
 
     return dz_fluxes
 

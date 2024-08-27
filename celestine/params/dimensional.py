@@ -14,25 +14,31 @@ from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 from dataclasses import field
 
-from celestine.params.convection import NoBrineConvection
-from celestine.params.initial_conditions import (
-    BRW09InitialConditions,
-    UniformInitialConditions,
-)
 from .params import (
     Config,
     NumericalParams,
 )
 from .convert import (
-    get_dimensionless_brine_convection_params,
-    get_dimensionless_bubble_params,
-    get_dimensionless_forcing_config,
-    get_dimensionless_initial_conditions_config,
-    get_dimensionless_physical_params,
     calculate_timescale_in_days,
     calculate_velocity_scale_in_m_day,
     Scales,
 )
+from .physical import EQMPhysicalParams, DISEQPhysicalParams
+from .initial_conditions import (
+    SummerInitialConditions,
+    InitialConditionsConfig,
+    BRW09InitialConditions,
+    UniformInitialConditions,
+)
+from .forcing import (
+    ForcingConfig,
+    ConstantForcing,
+    YearlyForcing,
+    BRW09Forcing,
+    RadForcing,
+)
+from .bubble import MonoBubbleParams, PowerLawBubbleParams
+from .convection import RJW14Params, NoBrineConvection
 
 
 @serde(type_check=coerce)
@@ -138,7 +144,7 @@ class DimensionalWaterParams:
 
 
 @serde(type_check=coerce)
-class DimensionalGasParams:
+class DimensionalEQMGasParams:
     gas_density: float = 1  # kg/m3
     saturation_concentration: float = 1e-5  # kg(gas)/kg(liquid)
     ocean_saturation_state: float = 1.0  # fraction of saturation in ocean
@@ -146,6 +152,9 @@ class DimensionalGasParams:
     # Option to change tolerable super saturation in brines
     tolerable_super_saturation_fraction: float = 1
 
+
+@serde(type_check=coerce)
+class DimensionalDISEQGasParams(DimensionalEQMGasParams):
     # timescale of nucleation to set damkohler number (in seconds)
     nucleation_timescale: float = 6869075
 
@@ -268,7 +277,9 @@ class DimensionalParams:
     gravity: float = 9.81  # m/s2
 
     water_params: DimensionalWaterParams = field(default_factory=DimensionalWaterParams)
-    gas_params: DimensionalGasParams = field(default_factory=DimensionalGasParams)
+    gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams = field(
+        default_factory=DimensionalEQMGasParams
+    )
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams = (
         field(default_factory=DimensionalMonoBubbleParams)
     )
@@ -288,6 +299,9 @@ class DimensionalParams:
         r"""Return damkohler number as ratio of thermal timescale to nucleation
         timescale
         """
+        if isinstance(self.gas_params, DimensionalEQMGasParams):
+            return None
+
         return (
             (self.lengthscale**2) / self.water_params.thermal_diffusivity
         ) / self.gas_params.nucleation_timescale
@@ -341,19 +355,24 @@ class DimensionalParams:
         .. math:: \text{Ra}_S = \frac{\rho_l g \beta \Delta S H K_0}{\kappa \mu}
 
         """
-        return (
-            self.water_params.liquid_density
-            * self.gravity
-            * self.brine_convection_params.haline_contraction_coefficient
-            * self.water_params.salinity_difference
-            * self.lengthscale
-            * self.brine_convection_params.reference_permeability
-            / (
-                self.water_params.thermal_diffusivity
-                * self.water_params.liquid_viscosity
-            )
-        )
+        match self.brine_convection_params:
+            case DimensionalRJW14Params():
+                return (
+                    self.water_params.liquid_density
+                    * self.gravity
+                    * self.brine_convection_params.haline_contraction_coefficient
+                    * self.water_params.salinity_difference
+                    * self.lengthscale
+                    * self.brine_convection_params.reference_permeability
+                    / (
+                        self.water_params.thermal_diffusivity
+                        * self.water_params.liquid_viscosity
+                    )
+                )
+            case NoBrineConvection():
+                return None
 
+    @property
     def expansion_coefficient(self):
         r"""calculate
 
@@ -432,3 +451,151 @@ class DimensionalParams:
         with open(path, "r") as infile:
             yaml = infile.read()
         return from_yaml(cls, yaml)
+
+
+def get_dimensionless_physical_params(dimensional_params: DimensionalParams):
+    """return a PhysicalParams object"""
+    match dimensional_params.gas_params:
+        case DimensionalEQMGasParams():
+            return EQMPhysicalParams(
+                expansion_coefficient=dimensional_params.expansion_coefficient,
+                concentration_ratio=dimensional_params.water_params.concentration_ratio,
+                stefan_number=dimensional_params.water_params.stefan_number,
+                lewis_salt=dimensional_params.water_params.lewis_salt,
+                lewis_gas=dimensional_params.lewis_gas,
+                frame_velocity=dimensional_params.frame_velocity,
+                phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
+                conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
+                tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
+            )
+        case DimensionalDISEQGasParams():
+            return DISEQPhysicalParams(
+                expansion_coefficient=dimensional_params.expansion_coefficient,
+                concentration_ratio=dimensional_params.water_params.concentration_ratio,
+                stefan_number=dimensional_params.water_params.stefan_number,
+                lewis_salt=dimensional_params.water_params.lewis_salt,
+                lewis_gas=dimensional_params.lewis_gas,
+                frame_velocity=dimensional_params.frame_velocity,
+                phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
+                conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
+                tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
+                damkohler_number=dimensional_params.damkohler_number,
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_forcing_config(
+    dimensional_params: DimensionalParams,
+) -> ForcingConfig:
+    ocean_temp = (
+        dimensional_params.water_params.ocean_temperature
+        - dimensional_params.water_params.ocean_freezing_temperature
+    ) / dimensional_params.water_params.temperature_difference
+    ocean_bulk_salinity = 0
+    ocean_gas_sat = dimensional_params.gas_params.ocean_saturation_state
+    match dimensional_params.forcing_config:
+        case DimensionalConstantForcing():
+            top_temp = (
+                dimensional_params.forcing_config.constant_top_temperature
+                - dimensional_params.water_params.ocean_freezing_temperature
+            ) / dimensional_params.water_params.temperature_difference
+            return ConstantForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                constant_top_temperature=top_temp,
+            )
+        case DimensionalYearlyForcing():
+            return YearlyForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                offset=dimensional_params.forcing_config.offset,
+                amplitude=dimensional_params.forcing_config.amplitude,
+                period=dimensional_params.forcing_config.period,
+            )
+        case DimensionalBRW09Forcing():
+            return BRW09Forcing(
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                Barrow_top_temperature_data_choice=dimensional_params.forcing_config.Barrow_top_temperature_data_choice,
+                Barrow_initial_bulk_gas_in_ice=dimensional_params.forcing_config.Barrow_initial_bulk_gas_in_ice,
+            )
+        case DimensionalRadForcing():
+            return RadForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                surface_energy_balance_forcing=dimensional_params.forcing_config.surface_energy_balance_forcing,
+                SW_internal_heating=dimensional_params.forcing_config.SW_internal_heating,
+                SW_forcing_choice=dimensional_params.forcing_config.SW_forcing_choice,
+                constant_SW_irradiance=dimensional_params.forcing_config.constant_SW_irradiance,
+                SW_radiation_model_choice=dimensional_params.forcing_config.SW_radiation_model_choice,
+                constant_oil_mass_ratio=dimensional_params.forcing_config.constant_oil_mass_ratio,
+                SW_scattering_ice_type=dimensional_params.forcing_config.SW_scattering_ice_type,
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_initial_conditions_config(
+    dimensional_params: DimensionalParams,
+) -> InitialConditionsConfig:
+    scales = dimensional_params.get_scales()
+    match dimensional_params.initial_conditions_config:
+        case UniformInitialConditions():
+            return UniformInitialConditions()
+        case BRW09InitialConditions():
+            return BRW09InitialConditions()
+        case DimensionalSummerInitialcConditions():
+            return SummerInitialConditions(
+                initial_summer_ice_depth=dimensional_params.initial_conditions_config.initial_summer_ice_depth
+                / dimensional_params.lengthscale,
+                initial_summer_ocean_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_conditions_config.initial_summer_ocean_temperature
+                ),
+                initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_conditions_config.initial_summer_ice_temperature
+                ),
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_bubble_params(dimensional_params: DimensionalParams):
+    common_params = {
+        "B": dimensional_params.B,
+        "pore_throat_scaling": dimensional_params.bubble_params.pore_throat_scaling,
+        "porosity_threshold": dimensional_params.bubble_params.porosity_threshold,
+        "porosity_threshold_value": dimensional_params.bubble_params.porosity_threshold_value,
+    }
+    match dimensional_params.bubble_params:
+        case DimensionalMonoBubbleParams():
+            return MonoBubbleParams(
+                **common_params,
+                bubble_radius_scaled=dimensional_params.bubble_params.bubble_radius_scaled,
+            )
+        case DimensionalPowerLawBubbleParams():
+            return PowerLawBubbleParams(
+                **common_params,
+                bubble_distribution_power=dimensional_params.bubble_params.bubble_distribution_power,
+                minimum_bubble_radius_scaled=dimensional_params.bubble_params.minimum_bubble_radius_scaled,
+                maximum_bubble_radius_scaled=dimensional_params.bubble_params.maximum_bubble_radius_scaled,
+            )
+        case _:
+            raise NotImplementedError
+
+
+def get_dimensionless_brine_convection_params(dimensional_params: DimensionalParams):
+    match dimensional_params.brine_convection_params:
+        case DimensionalRJW14Params():
+            return RJW14Params(
+                Rayleigh_salt=dimensional_params.Rayleigh_salt,
+                Rayleigh_critical=dimensional_params.brine_convection_params.Rayleigh_critical,
+                convection_strength=dimensional_params.brine_convection_params.convection_strength,
+                couple_bubble_to_horizontal_flow=dimensional_params.brine_convection_params.couple_bubble_to_horizontal_flow,
+                couple_bubble_to_vertical_flow=dimensional_params.brine_convection_params.couple_bubble_to_vertical_flow,
+            )
+        case NoBrineConvection():
+            return NoBrineConvection()
