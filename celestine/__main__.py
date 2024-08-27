@@ -3,6 +3,7 @@ from pathlib import Path
 from celestine import __version__
 from celestine.dimensional_params import DimensionalParams
 from celestine.params import Config
+from celestine.printing import get_printer
 from celestine.run_simulation import run_batch
 
 
@@ -31,8 +32,10 @@ if __name__ == "__main__":
         help="""Use this option to give the file for a single configuration to run
         in the configuration directory instead of running all of the yaml files.""",
     )
+    parser.add_argument("-v", "--verbose", action="count", default=0)
 
     args = parser.parse_args()
+    optprint = get_printer(args.verbose)
 
     is_dimensional_configuration = args.dimensional
     configuration_directory_path = Path(args.configuration_directory)
@@ -43,10 +46,10 @@ if __name__ == "__main__":
         output_directory_path = Path(args.output_directory)
     output_directory_path.mkdir(parents=True, exist_ok=True)
 
-    print(f"Running celestine version: {__version__}")
-    print(f"Save simulation output to: {output_directory_path}")
-    print(f"Looking for configurations in: {configuration_directory_path}")
-    print(f"Dimensional configuration option is {is_dimensional_configuration}")
+    optprint(f"Running celestine version: {__version__}")
+    optprint(f"Save simulation output to: {output_directory_path}")
+    optprint(f"Looking for configurations in: {configuration_directory_path}")
+    optprint(f"Dimensional configuration option is {is_dimensional_configuration}")
 
     if args.single is not None:
         list_of_configs = [configuration_directory_path / args.single]
@@ -61,4 +64,4 @@ if __name__ == "__main__":
         else:
             cfgs.append(Config.load(config_path))
 
-    run_batch(cfgs, output_directory_path)
+    run_batch(cfgs, output_directory_path, verbosity_level=args.verbose)

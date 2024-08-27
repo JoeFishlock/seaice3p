@@ -15,6 +15,8 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
 
+from celestine.printing import get_printer
+
 from .equations import get_equations
 from .state import get_unpacker
 from .forcing import get_boundary_conditions
@@ -24,7 +26,7 @@ from .grids import Grids
 from .initial_conditions import get_initial_conditions
 
 
-def run_batch(list_of_cfg: List[Config], directory: Path) -> None:
+def run_batch(list_of_cfg: List[Config], directory: Path, verbosity_level=0) -> None:
     """Run a batch of simulations from a list of configurations.
 
     Each simulation name is logged, as well as if it successfully runs or crashes.
@@ -34,12 +36,13 @@ def run_batch(list_of_cfg: List[Config], directory: Path) -> None:
     :type list_of_cfg: List[celestine.params.Config]
 
     """
+    optprint = get_printer(verbosity_level)
     for cfg in list_of_cfg:
         try:
-            solve(cfg, directory)
+            solve(cfg, directory, verbosity_level=verbosity_level)
         except Exception as e:
-            print(f"{cfg.name} crashed")
-            print(f"{e}")
+            optprint(f"{cfg.name} crashed")
+            optprint(f"{e}")
 
 
 # For explicit heat diffusion stability we require timestep < 0.5 * step^2
@@ -50,7 +53,7 @@ def run_batch(list_of_cfg: List[Config], directory: Path) -> None:
 THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
 
 
-def solve(cfg: Config, directory: Path) -> Literal[0]:
+def solve(cfg: Config, directory: Path, verbosity_level=0) -> Literal[0]:
     if cfg.model == "EQM":
         number_of_solution_components = 3
     elif cfg.model == "DISEQ":
@@ -65,7 +68,7 @@ def solve(cfg: Config, directory: Path) -> Literal[0]:
     initial = get_initial_conditions(cfg)
     T = cfg.total_time
     t_eval = np.arange(0, T, cfg.savefreq)
-    ode_fun = _get_ode_fun(cfg)
+    ode_fun = _get_ode_fun(cfg, verbosity_level=verbosity_level)
 
     sol = solve_ivp(
         ode_fun,
@@ -83,11 +86,12 @@ def solve(cfg: Config, directory: Path) -> Literal[0]:
         sol.t,
         *np.split(sol.y, number_of_solution_components),
     )
-    print("")
+    optprint = get_printer(verbosity_level)
+    optprint("")
     return 0
 
 
-def _get_ode_fun(cfg: Config) -> Callable[[float, NDArray], NDArray]:
+def _get_ode_fun(cfg: Config, verbosity_level=0) -> Callable[[float, NDArray], NDArray]:
 
     grids = Grids(cfg.numerical_params.I)
     enthalpy_method = get_enthalpy_method(cfg)
@@ -95,8 +99,10 @@ def _get_ode_fun(cfg: Config) -> Callable[[float, NDArray], NDArray]:
     unpack = get_unpacker(cfg)
     equations = get_equations(cfg, grids)
 
+    optprint = get_printer(verbosity_level)
+
     def ode_fun(time, solution_vector):
-        print(
+        optprint(
             f"{cfg.name}: time={time:.3f}/{cfg.total_time}\r",
             end="",
         )
