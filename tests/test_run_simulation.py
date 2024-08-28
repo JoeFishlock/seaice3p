@@ -1,4 +1,6 @@
 import pytest
+from glob import glob
+from pathlib import Path
 from celestine import solve
 from celestine import DimensionalParams
 from celestine.params.dimensional import (
@@ -12,6 +14,7 @@ from celestine.params.dimensional import (
 )
 from celestine.params.initial_conditions import UniformInitialConditions
 from celestine.params.numerical import NumericalParams
+from celestine.params import Config
 
 COMMON_PARAMS = {
     "total_time_in_days": 1,
@@ -65,3 +68,24 @@ NUM = NumericalParams(I=24)
 )
 def test_short_solve(tmp_path, simulation_parameters: DimensionalParams):
     solve(simulation_parameters.get_config(), tmp_path)
+
+
+@pytest.mark.slow
+def test_best_barrow_config(tmp_path):
+    solve(
+        DimensionalParams.load(
+            Path("tests/test_configurations/best_barrow/best_barrow_dimensional.yml")
+        ).get_config(),
+        tmp_path,
+    )
+
+
+@pytest.mark.parametrize(
+    "cfg_path",
+    list(glob("tests/test_configurations/yearly_forcing/*.yml"))
+    + list(glob("tests/test_configurations/constant_forcing/*.yml")),
+)
+@pytest.mark.slow
+def test_yearly_and_constant_forcing_configurations(tmp_path, cfg_path: str):
+    cfg = Config.load(Path(cfg_path))
+    solve(cfg, tmp_path)
