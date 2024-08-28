@@ -9,7 +9,6 @@ bubble_params:
     porosity_threshold_value: 0.024
 forcing_config:
   DimensionalBRW09Forcing:
-    Barrow_initial_bulk_gas_in_ice: 0.2
     Barrow_top_temperature_data_choice: air
 frame_velocity_dimensional: 0.0
 gas_params:
@@ -21,7 +20,8 @@ gas_params:
     tolerable_super_saturation_fraction: 1.0
 gravity: 9.81
 initial_conditions_config:
-  BRW09InitialConditions: {}
+  BRW09InitialConditions:
+    Barrow_initial_bulk_gas_in_ice: 0.2
 lengthscale: 2.4
 name: example
 numerical_params:

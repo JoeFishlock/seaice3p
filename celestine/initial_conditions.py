@@ -106,7 +106,7 @@ def _get_barrow_initial_conditions(cfg: Config):
     )
     gas = _apply_value_in_ice_layer(
         ICE_DEPTH,
-        ice_value=cfg.forcing_config.Barrow_initial_bulk_gas_in_ice * chi,
+        ice_value=cfg.initial_conditions_config.Barrow_initial_bulk_gas_in_ice * chi,
         liquid_value=chi * far_gas_sat,
         grid=centers,
     )

@@ -219,7 +219,7 @@ class DimensionalRJW14Params:
 
 
 @serde(type_check=coerce)
-class DimensionalSummerInitialcConditions:
+class DimensionalSummerInitialConditions:
     # Parameters for summer initial conditions
     initial_summer_ice_depth: float = 1  # in m
     initial_summer_ocean_temperature: float = -2  # in deg C
@@ -258,7 +258,6 @@ class DimensionalConstantForcing:
 @serde(type_check=coerce)
 class DimensionalBRW09Forcing:
     Barrow_top_temperature_data_choice: str = "air"
-    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
 
 @serde(type_check=coerce)
@@ -289,7 +288,7 @@ class DimensionalParams:
     forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing = field(
         default_factory=DimensionalBRW09Forcing
     )
-    initial_conditions_config: DimensionalSummerInitialcConditions | UniformInitialConditions | BRW09InitialConditions = field(
+    initial_conditions_config: DimensionalSummerInitialConditions | UniformInitialConditions | BRW09InitialConditions = field(
         default_factory=BRW09InitialConditions
     )
     numerical_params: NumericalParams = field(default_factory=NumericalParams)
@@ -520,7 +519,6 @@ def get_dimensionless_forcing_config(
                 ocean_bulk_salinity=ocean_bulk_salinity,
                 ocean_gas_sat=ocean_gas_sat,
                 Barrow_top_temperature_data_choice=dimensional_params.forcing_config.Barrow_top_temperature_data_choice,
-                Barrow_initial_bulk_gas_in_ice=dimensional_params.forcing_config.Barrow_initial_bulk_gas_in_ice,
             )
         case DimensionalRadForcing():
             return RadForcing(
@@ -547,8 +545,10 @@ def get_dimensionless_initial_conditions_config(
         case UniformInitialConditions():
             return UniformInitialConditions()
         case BRW09InitialConditions():
-            return BRW09InitialConditions()
-        case DimensionalSummerInitialcConditions():
+            return BRW09InitialConditions(
+                Barrow_initial_bulk_gas_in_ice=dimensional_params.initial_conditions_config.Barrow_initial_bulk_gas_in_ice
+            )
+        case DimensionalSummerInitialConditions():
             return SummerInitialConditions(
                 initial_summer_ice_depth=dimensional_params.initial_conditions_config.initial_summer_ice_depth
                 / dimensional_params.lengthscale,

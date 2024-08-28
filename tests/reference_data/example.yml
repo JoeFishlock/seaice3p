@@ -9,12 +9,12 @@ bubble_params:
     porosity_threshold_value: 0.024
 forcing_config:
   BRW09Forcing:
-    Barrow_initial_bulk_gas_in_ice: 0.2
     Barrow_top_temperature_data_choice: air
     ocean_bulk_salinity: 0.0
     ocean_gas_sat: 1.0
 initial_conditions_config:
-  BRW09InitialConditions: {}
+  BRW09InitialConditions:
+    Barrow_initial_bulk_gas_in_ice: 0.2
 name: example
 numerical_params:
   I: 24

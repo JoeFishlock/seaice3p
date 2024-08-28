@@ -46,7 +46,6 @@ class BRW09Forcing:
     ocean_bulk_salinity: float = 0
     ocean_gas_sat: float = 1.0
     Barrow_top_temperature_data_choice: str = "air"
-    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
 
     def __post_init__(self):
         """populate class attributes with barrow dimensional air temperature

@@ -10,6 +10,8 @@ class UniformInitialConditions:
 class BRW09InitialConditions:
     """values for bottom (ocean) boundary"""
 
+    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+
 
 @serde(type_check=coerce)
 class SummerInitialConditions:
