@@ -8,6 +8,7 @@ from celestine.params.dimensional import (
     DimensionalDISEQGasParams,
     DimensionalRJW14Params,
     NoBrineConvection,
+    DimensionalPowerLawBubbleParams,
 )
 from celestine.params.initial_conditions import UniformInitialConditions
 from celestine.params.numerical import NumericalParams
@@ -29,6 +30,16 @@ NUM = NumericalParams(I=24)
             forcing_config=DimensionalBRW09Forcing(),
             initial_conditions_config=BRW09InitialConditions(),
             gas_params=DimensionalEQMGasParams(),
+            numerical_params=NUM,
+            **COMMON_PARAMS
+        ),
+        DimensionalParams(
+            name="power_law_bubbles",
+            brine_convection_params=NoBrineConvection(),
+            forcing_config=DimensionalBRW09Forcing(),
+            initial_conditions_config=BRW09InitialConditions(),
+            gas_params=DimensionalEQMGasParams(),
+            bubble_params=DimensionalPowerLawBubbleParams(),
             numerical_params=NUM,
             **COMMON_PARAMS
         ),
