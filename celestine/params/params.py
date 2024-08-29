@@ -8,21 +8,18 @@ from dataclasses import dataclass
 from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 
-from .forcing import ConstantForcing, ForcingConfig, get_dimensionless_forcing_config
+from .forcing import ForcingConfig, get_dimensionless_forcing_config
 from .initial_conditions import (
     InitialConditionsConfig,
-    UniformInitialConditions,
     get_dimensionless_initial_conditions_config,
 )
 from .physical import (
     PhysicalParams,
-    EQMPhysicalParams,
     get_dimensionless_physical_params,
 )
-from .bubble import BubbleParams, MonoBubbleParams, get_dimensionless_bubble_params
+from .bubble import BubbleParams, get_dimensionless_bubble_params
 from .convection import (
     BrineConvectionParams,
-    RJW14Params,
     get_dimensionless_brine_convection_params,
 )
 from .convert import Scales
@@ -37,14 +34,14 @@ class Config:
     this config object can be saved and loaded to a yaml file."""
 
     name: str
-    total_time: float = 4.0
-    savefreq: float = 5e-4  # save data after this amount of non-dimensional time
+    total_time: float
+    savefreq: float
 
-    physical_params: PhysicalParams = EQMPhysicalParams()
-    bubble_params: BubbleParams = MonoBubbleParams()
-    brine_convection_params: BrineConvectionParams = RJW14Params()
-    forcing_config: ForcingConfig = ConstantForcing()
-    initial_conditions_config: InitialConditionsConfig = UniformInitialConditions()
+    physical_params: PhysicalParams
+    bubble_params: BubbleParams
+    brine_convection_params: BrineConvectionParams
+    forcing_config: ForcingConfig
+    initial_conditions_config: InitialConditionsConfig
     numerical_params: NumericalParams = NumericalParams()
     scales: Scales | None = None
 

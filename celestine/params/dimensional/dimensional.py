@@ -47,29 +47,20 @@ class DimensionalParams:
     """
 
     name: str
-    total_time_in_days: float = 365  # days
-    savefreq_in_days: float = 1  # save data after this amount of time in days
-    lengthscale: float = 1  # domain height in m
-    frame_velocity_dimensional: float = 0  # velocity of frame in m/day
-    gravity: float = 9.81  # m/s2
+    total_time_in_days: float
+    savefreq_in_days: float
+    lengthscale: float
+
+    gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams
+    bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
+    brine_convection_params: DimensionalRJW14Params | NoBrineConvection
+    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing
+    initial_conditions_config: DimensionalSummerInitialConditions | UniformInitialConditions | BRW09InitialConditions
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()
-    gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams = (
-        DimensionalEQMGasParams()
-    )
-    bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams = (
-        DimensionalMonoBubbleParams()
-    )
-    brine_convection_params: DimensionalRJW14Params | NoBrineConvection = (
-        DimensionalRJW14Params()
-    )
-    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing = (
-        DimensionalConstantForcing()
-    )
-    initial_conditions_config: DimensionalSummerInitialConditions | UniformInitialConditions | BRW09InitialConditions = (
-        UniformInitialConditions()
-    )
     numerical_params: NumericalParams = NumericalParams()
+    frame_velocity_dimensional: float = 0  # velocity of frame in m/day
+    gravity: float = 9.81  # m/s2
 
     @property
     def damkohler_number(self):

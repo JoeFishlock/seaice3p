@@ -1,9 +1,11 @@
 import pytest
 from glob import glob
 from pathlib import Path
-from celestine import solve
-from celestine import DimensionalParams
-from celestine.params import (
+from celestine import (
+    solve,
+    DimensionalParams,
+    Config,
+    get_config,
     DimensionalBRW09Forcing,
     BRW09InitialConditions,
     DimensionalEQMGasParams,
@@ -11,14 +13,14 @@ from celestine.params import (
     DimensionalRJW14Params,
     NoBrineConvection,
     DimensionalPowerLawBubbleParams,
+    DimensionalMonoBubbleParams,
+    NumericalParams,
 )
-from celestine.params.initial_conditions import UniformInitialConditions
-from celestine.params.dimensional import NumericalParams
-from celestine.params import Config, get_config
 
 COMMON_PARAMS = {
     "total_time_in_days": 1,
     "savefreq_in_days": 0.1,
+    "lengthscale": 1,
 }
 BRINE = DimensionalRJW14Params(Rayleigh_critical=40, convection_strength=0.03)
 NUM = NumericalParams(I=24)
@@ -30,6 +32,7 @@ NUM = NumericalParams(I=24)
         DimensionalParams(
             name="no_brine_convection",
             brine_convection_params=NoBrineConvection(),
+            bubble_params=DimensionalMonoBubbleParams(),
             forcing_config=DimensionalBRW09Forcing(),
             initial_conditions_config=BRW09InitialConditions(),
             gas_params=DimensionalEQMGasParams(),
@@ -52,6 +55,7 @@ NUM = NumericalParams(I=24)
             forcing_config=DimensionalBRW09Forcing(),
             initial_conditions_config=BRW09InitialConditions(),
             gas_params=DimensionalEQMGasParams(),
+            bubble_params=DimensionalMonoBubbleParams(),
             numerical_params=NUM,
             **COMMON_PARAMS
         ),
@@ -61,6 +65,7 @@ NUM = NumericalParams(I=24)
             forcing_config=DimensionalBRW09Forcing(),
             initial_conditions_config=BRW09InitialConditions(),
             gas_params=DimensionalDISEQGasParams(),
+            bubble_params=DimensionalMonoBubbleParams(),
             numerical_params=NUM,
             **COMMON_PARAMS
         ),

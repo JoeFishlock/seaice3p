@@ -2,19 +2,23 @@
 
 from pathlib import Path
 import matplotlib.pyplot as plt
-from . import __version__
-from .params import (
+
+from . import (
+    __version__,
+    Grids,
+    solve,
+    load_data,
+    get_array_data,
+    get_state,
     DimensionalParams,
     DimensionalBRW09Forcing,
     DimensionalMonoBubbleParams,
+    DimensionalEQMGasParams,
     BRW09InitialConditions,
     NoBrineConvection,
     NumericalParams,
     get_config,
 )
-from .run_simulation import solve
-from .grids import Grids
-from .load import get_array_data, load_data, get_state
 from .enthalpy_method import get_enthalpy_method
 
 DATA_DIRECTORY = Path("example_data")
@@ -23,8 +27,9 @@ SIMULATION_DIMENSIONAL_PARAMS = DimensionalParams(
     name="example",
     total_time_in_days=164,
     savefreq_in_days=3,
-    bubble_params=DimensionalMonoBubbleParams(bubble_radius=0.2e-3),
     lengthscale=2.4,
+    gas_params=DimensionalEQMGasParams(),
+    bubble_params=DimensionalMonoBubbleParams(bubble_radius=0.2e-3),
     numerical_params=NumericalParams(I=24),
     initial_conditions_config=BRW09InitialConditions(),
     forcing_config=DimensionalBRW09Forcing(),
