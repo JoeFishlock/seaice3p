@@ -97,7 +97,7 @@ class DimensionalParams:
 
         """
         stokes_velocity = (
-            self.water_params.liquid_density
+            (self.water_params.liquid_density - self.gas_params.gas_density)
             * self.gravity
             * self.bubble_params.pore_radius**2
             / (3 * self.water_params.liquid_viscosity)
