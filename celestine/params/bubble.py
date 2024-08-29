@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from serde import serde, coerce
 from .dimensional import (
     DimensionalParams,
@@ -7,6 +8,7 @@ from .dimensional import (
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class BaseBubbleParams:
     """Not to be used directly but provides parameters for bubble model in sea ice
     common to other bubble parameter objects.
@@ -19,6 +21,7 @@ class BaseBubbleParams:
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class MonoBubbleParams(BaseBubbleParams):
     """Parameters for population of identical spherical bubbles."""
 
@@ -26,6 +29,7 @@ class MonoBubbleParams(BaseBubbleParams):
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class PowerLawBubbleParams(BaseBubbleParams):
     """Parameters for population of bubbles following a power law size distribution
     between a minimum and maximum radius.

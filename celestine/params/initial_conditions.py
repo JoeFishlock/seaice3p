@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from serde import serde, coerce
 from .dimensional import (
     DimensionalParams,
@@ -8,6 +9,7 @@ from .dimensional import (
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class SummerInitialConditions:
     """values for bottom (ocean) boundary"""
 

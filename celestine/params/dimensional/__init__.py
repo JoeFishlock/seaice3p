@@ -1,17 +1,19 @@
 from .dimensional import (
     DimensionalParams,
-    DimensionalBRW09Forcing,
-    DimensionalMonoBubbleParams,
-    DimensionalEQMGasParams,
-    DimensionalDISEQGasParams,
-    DimensionalRJW14Params,
-    DimensionalPowerLawBubbleParams,
-    DimensionalConstantForcing,
-    DimensionalYearlyForcing,
-    DimensionalRadForcing,
-    DimensionalSummerInitialConditions,
-    BRW09InitialConditions,
-    UniformInitialConditions,
-    NoBrineConvection,
 )
+from .forcing import (
+    DimensionalBRW09Forcing,
+    DimensionalConstantForcing,
+    DimensionalRadForcing,
+    DimensionalYearlyForcing,
+)
+from .initial_conditions import (
+    BRW09InitialConditions,
+    DimensionalSummerInitialConditions,
+    UniformInitialConditions,
+)
+from .convection import NoBrineConvection, DimensionalRJW14Params
 from .numerical import NumericalParams
+from .water import DimensionalWaterParams
+from .gas import DimensionalDISEQGasParams, DimensionalEQMGasParams
+from .bubble import DimensionalPowerLawBubbleParams, DimensionalMonoBubbleParams

@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import numpy as np
 from serde import serde, coerce
 
@@ -9,6 +10,7 @@ from .dimensional import (
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class BasePhysicalParams:
     """Not to be used directly but provides the common parameters for physical params
     objects
@@ -30,11 +32,13 @@ class BasePhysicalParams:
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class EQMPhysicalParams(BasePhysicalParams):
     """non dimensional numbers for the mushy layer"""
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class DISEQPhysicalParams(BasePhysicalParams):
     """non dimensional numbers for the mushy layer"""
 

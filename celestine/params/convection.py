@@ -1,8 +1,10 @@
+from dataclasses import dataclass
 from serde import serde, coerce
 from .dimensional import DimensionalParams, DimensionalRJW14Params, NoBrineConvection
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class RJW14Params:
     """Parameters for the RJW14 parameterisation of brine convection"""
 

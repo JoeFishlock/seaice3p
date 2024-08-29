@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from serde import serde, coerce
 
 
@@ -5,6 +6,7 @@ SECONDS_TO_DAYS = 1 / (60 * 60 * 24)
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class Scales:
     lengthscale: float  # domain height in m
     thermal_diffusivity: float  # m2/s

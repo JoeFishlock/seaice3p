@@ -1,7 +1,9 @@
+from dataclasses import dataclass
 from serde import serde, coerce
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class NumericalParams:
     """parameters needed for discretisation and choice of numerical method"""
 

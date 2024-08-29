@@ -1,4 +1,5 @@
 from pathlib import Path
+from dataclasses import dataclass
 from serde import serde, coerce
 import numpy as np
 from .dimensional import (
@@ -17,6 +18,7 @@ def _filter_missing_values(air_temp, days):
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class BaseOceanForcing:
     """Not to be used directly but provides parameters for fixed ocean properties:
     gas saturation, temperature and bulk salinity to other forcing configuration
@@ -29,6 +31,7 @@ class BaseOceanForcing:
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class ConstantForcing(BaseOceanForcing):
     """Constant temperature forcing"""
 
@@ -36,6 +39,7 @@ class ConstantForcing(BaseOceanForcing):
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class YearlyForcing(BaseOceanForcing):
     """Yearly sinusoidal temperature forcing"""
 
@@ -95,6 +99,7 @@ class BRW09Forcing:
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class RadForcing(BaseOceanForcing):
     """Forcing parameters for radiative transfer simulation with oil drops"""
 

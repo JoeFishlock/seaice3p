@@ -4,14 +4,14 @@ The config class contains all the parameters needed to run a simulation as well
 as methods to save and load this configuration to a yaml file."""
 
 from pathlib import Path
-from dataclasses import field
+from dataclasses import dataclass
 from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 
-from .forcing import BRW09Forcing, ForcingConfig, get_dimensionless_forcing_config
+from .forcing import ConstantForcing, ForcingConfig, get_dimensionless_forcing_config
 from .initial_conditions import (
     InitialConditionsConfig,
-    BRW09InitialConditions,
+    UniformInitialConditions,
     get_dimensionless_initial_conditions_config,
 )
 from .physical import (
@@ -30,6 +30,7 @@ from .dimensional import DimensionalParams, NumericalParams
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
 class Config:
     """contains all information needed to run a simulation and save output
 
@@ -39,14 +40,12 @@ class Config:
     total_time: float = 4.0
     savefreq: float = 5e-4  # save data after this amount of non-dimensional time
 
-    physical_params: PhysicalParams = field(default_factory=EQMPhysicalParams)
-    bubble_params: BubbleParams = field(default_factory=MonoBubbleParams)
-    brine_convection_params: BrineConvectionParams = field(default_factory=RJW14Params)
-    forcing_config: ForcingConfig = field(default_factory=BRW09Forcing)
-    initial_conditions_config: InitialConditionsConfig = field(
-        default_factory=BRW09InitialConditions
-    )
-    numerical_params: NumericalParams = field(default_factory=NumericalParams)
+    physical_params: PhysicalParams = EQMPhysicalParams()
+    bubble_params: BubbleParams = MonoBubbleParams()
+    brine_convection_params: BrineConvectionParams = RJW14Params()
+    forcing_config: ForcingConfig = ConstantForcing()
+    initial_conditions_config: InitialConditionsConfig = UniformInitialConditions()
+    numerical_params: NumericalParams = NumericalParams()
     scales: Scales | None = None
 
     def save(self, directory: Path):
