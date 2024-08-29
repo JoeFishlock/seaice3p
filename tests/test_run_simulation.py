@@ -3,7 +3,7 @@ from glob import glob
 from pathlib import Path
 from celestine import solve
 from celestine import DimensionalParams
-from celestine.params.dimensional import (
+from celestine.params import (
     DimensionalBRW09Forcing,
     BRW09InitialConditions,
     DimensionalEQMGasParams,

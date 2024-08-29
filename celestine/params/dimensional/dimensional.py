@@ -14,31 +14,29 @@ from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 from dataclasses import field
 
-from .params import (
+from ..params import (
     Config,
     NumericalParams,
 )
-from .convert import (
-    calculate_timescale_in_days,
-    calculate_velocity_scale_in_m_day,
+from ..convert import (
     Scales,
 )
-from .physical import EQMPhysicalParams, DISEQPhysicalParams
-from .initial_conditions import (
+from ..physical import EQMPhysicalParams, DISEQPhysicalParams
+from ..initial_conditions import (
     SummerInitialConditions,
     InitialConditionsConfig,
     BRW09InitialConditions,
     UniformInitialConditions,
 )
-from .forcing import (
+from ..forcing import (
     ForcingConfig,
     ConstantForcing,
     YearlyForcing,
     BRW09Forcing,
     RadForcing,
 )
-from .bubble import MonoBubbleParams, PowerLawBubbleParams
-from .convection import RJW14Params, NoBrineConvection
+from ..bubble import MonoBubbleParams, PowerLawBubbleParams
+from ..convection import RJW14Params, NoBrineConvection
 
 
 @serde(type_check=coerce)
@@ -308,26 +306,17 @@ class DimensionalParams:
     @property
     def total_time(self):
         """calculate the total time in non dimensional units for the simulation"""
-        timescale = calculate_timescale_in_days(
-            self.lengthscale, self.water_params.thermal_diffusivity
-        )
-        return self.total_time_in_days / timescale
+        return self.total_time_in_days / self.scales.time_scale
 
     @property
     def savefreq(self):
         """calculate the save frequency in non dimensional time"""
-        timescale = calculate_timescale_in_days(
-            self.lengthscale, self.water_params.thermal_diffusivity
-        )
-        return self.savefreq_in_days / timescale
+        return self.savefreq_in_days / self.scales.time_scale
 
     @property
     def frame_velocity(self):
         """calculate the frame velocity in non dimensional units"""
-        velocity_scale = calculate_velocity_scale_in_m_day(
-            self.lengthscale, self.water_params.thermal_diffusivity
-        )
-        return self.frame_velocity_dimensional / velocity_scale
+        return self.frame_velocity_dimensional / self.scales.velocity_scale
 
     @property
     def B(self):
@@ -416,12 +405,13 @@ class DimensionalParams:
             bubble_params=bubble_params,
             forcing_config=forcing_config,
             numerical_params=self.numerical_params,
-            scales=self.get_scales(),
+            scales=self.scales,
             total_time=self.total_time,
             savefreq=self.savefreq,
         )
 
-    def get_scales(self):
+    @property
+    def scales(self):
         """return a Scales object used for converting between dimensional and non
         dimensional variables."""
         return Scales(
@@ -540,7 +530,7 @@ def get_dimensionless_forcing_config(
 def get_dimensionless_initial_conditions_config(
     dimensional_params: DimensionalParams,
 ) -> InitialConditionsConfig:
-    scales = dimensional_params.get_scales()
+    scales = dimensional_params.scales
     match dimensional_params.initial_conditions_config:
         case UniformInitialConditions():
             return UniformInitialConditions()

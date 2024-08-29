@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 from . import __version__
 from .params import (
     DimensionalParams,
+    DimensionalBRW09Forcing,
+    DimensionalMonoBubbleParams,
     BRW09InitialConditions,
     NoBrineConvection,
     NumericalParams,
 )
-from .params.dimensional import DimensionalBRW09Forcing, DimensionalMonoBubbleParams
 from .run_simulation import solve
 from .grids import Grids
 from .load import get_array_data, load_data, get_state
@@ -65,7 +66,7 @@ def main(
     DIMENSIONAL_CONFIG_DATA_PATH = data_directory / f"{simulation_name}_dimensional.yml"
 
     cfg, times, data = load_data(simulation_name, data_directory, is_dimensional=True)
-    scales = DimensionalParams.load(DIMENSIONAL_CONFIG_DATA_PATH).get_scales()
+    scales = DimensionalParams.load(DIMENSIONAL_CONFIG_DATA_PATH).scales
 
     GAS_FRACTION_DIR = frames_directory / "gas_fraction/"
     GAS_FRACTION_DIR.mkdir(exist_ok=True, parents=True)

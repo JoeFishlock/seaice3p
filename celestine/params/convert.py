@@ -1,55 +1,7 @@
-from typing import TYPE_CHECKING
 from serde import serde, coerce
-
-from celestine.params.bubble import MonoBubbleParams, PowerLawBubbleParams
-from celestine.params.convection import NoBrineConvection, RJW14Params
-
-
-if TYPE_CHECKING:
-    from .dimensional import DimensionalParams
-
-from .forcing import (
-    ForcingConfig,
-    ConstantForcing,
-    BRW09Forcing,
-    YearlyForcing,
-    RadForcing,
-)
-from .initial_conditions import (
-    InitialConditionsConfig,
-    UniformInitialConditions,
-    BRW09InitialConditions,
-    SummerInitialConditions,
-)
-from .physical import DISEQPhysicalParams, EQMPhysicalParams
 
 
 SECONDS_TO_DAYS = 1 / (60 * 60 * 24)
-
-
-def calculate_timescale_in_days(lengthscale, thermal_diffusivity):
-    """calculate timescale given domain height and thermal diffusivity.
-
-    :param lengthscale: domain height in m
-    :type lengthscale: float
-    :param thermal_diffusivity: thermal diffusivity in m2/s
-    :type thermal_diffusivity: float
-    :return: timescale in days
-    """
-    return SECONDS_TO_DAYS * lengthscale**2 / thermal_diffusivity
-
-
-def calculate_velocity_scale_in_m_day(lengthscale, thermal_diffusivity):
-    """calculate the velocity scale given domain height and thermal diffusivity
-
-    :param lengthscale: domain height in m
-    :type lengthscale: float
-    :param thermal_diffusivity: thermal diffusivity in m2/s
-    :type thermal_diffusivity: float
-    :return: velocity scale in m/day
-    """
-    timescale_in_days = calculate_timescale_in_days(lengthscale, thermal_diffusivity)
-    return lengthscale / timescale_in_days
 
 
 @serde(type_check=coerce)
@@ -65,14 +17,14 @@ class Scales:
     saturation_concentration: float  # kg(gas)/kg(liquid)
 
     @property
-    def timescale_in_days(self):
-        return calculate_timescale_in_days(self.lengthscale, self.thermal_diffusivity)
+    def time_scale(self):
+        """in days"""
+        return SECONDS_TO_DAYS * self.lengthscale**2 / self.thermal_diffusivity
 
     @property
-    def velocity_scale_in_m_per_day(self):
-        return calculate_velocity_scale_in_m_day(
-            self.lengthscale, self.thermal_diffusivity
-        )
+    def velocity_scale(self):
+        """in m /day"""
+        return self.lengthscale / self.time_scale
 
     def convert_from_dimensional_temperature(self, dimensional_temperature):
         """Non dimensionalise temperature in deg C"""
@@ -96,11 +48,11 @@ class Scales:
 
     def convert_from_dimensional_time(self, dimensional_time):
         """Non dimensionalise time in days"""
-        return dimensional_time / self.timescale_in_days
+        return dimensional_time / self.time_scale
 
     def convert_to_dimensional_time(self, time):
         """Convert non dimensional time into time in days since start of simulation"""
-        return self.timescale_in_days * time
+        return self.time_scale * time
 
     def convert_from_dimensional_bulk_salinity(self, dimensional_bulk_salinity):
         """Non dimensionalise bulk salinity in g/kg"""

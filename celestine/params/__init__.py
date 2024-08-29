@@ -18,4 +18,12 @@ from .convection import NoBrineConvection, BrineConvectionParams, RJW14Params
 from .params import (
     Config,
 )
-from .dimensional import DimensionalParams
+from .dimensional import (
+    DimensionalParams,
+    DimensionalBRW09Forcing,
+    DimensionalMonoBubbleParams,
+    DimensionalEQMGasParams,
+    DimensionalDISEQGasParams,
+    DimensionalRJW14Params,
+    DimensionalPowerLawBubbleParams,
+)
