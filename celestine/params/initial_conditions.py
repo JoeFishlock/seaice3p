@@ -1,16 +1,10 @@
 from serde import serde, coerce
-
-
-@serde(type_check=coerce)
-class UniformInitialConditions:
-    """values for bottom (ocean) boundary"""
-
-
-@serde(type_check=coerce)
-class BRW09InitialConditions:
-    """values for bottom (ocean) boundary"""
-
-    Barrow_initial_bulk_gas_in_ice: float = 1 / 5
+from .dimensional import (
+    DimensionalParams,
+    DimensionalSummerInitialConditions,
+    UniformInitialConditions,
+    BRW09InitialConditions,
+)
 
 
 @serde(type_check=coerce)
@@ -26,3 +20,29 @@ class SummerInitialConditions:
 InitialConditionsConfig = (
     UniformInitialConditions | BRW09InitialConditions | SummerInitialConditions
 )
+
+
+def get_dimensionless_initial_conditions_config(
+    dimensional_params: DimensionalParams,
+) -> InitialConditionsConfig:
+    scales = dimensional_params.scales
+    match dimensional_params.initial_conditions_config:
+        case UniformInitialConditions():
+            return UniformInitialConditions()
+        case BRW09InitialConditions():
+            return BRW09InitialConditions(
+                Barrow_initial_bulk_gas_in_ice=dimensional_params.initial_conditions_config.Barrow_initial_bulk_gas_in_ice
+            )
+        case DimensionalSummerInitialConditions():
+            return SummerInitialConditions(
+                initial_summer_ice_depth=dimensional_params.initial_conditions_config.initial_summer_ice_depth
+                / dimensional_params.lengthscale,
+                initial_summer_ocean_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_conditions_config.initial_summer_ocean_temperature
+                ),
+                initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_conditions_config.initial_summer_ice_temperature
+                ),
+            )
+        case _:
+            raise NotImplementedError

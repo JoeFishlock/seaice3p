@@ -12,12 +12,9 @@ from .initial_conditions import (
     UniformInitialConditions,
 )
 from .physical import PhysicalParams, DISEQPhysicalParams, EQMPhysicalParams
-from .numerical import NumericalParams
 from .bubble import BubbleParams, MonoBubbleParams, PowerLawBubbleParams
 from .convection import NoBrineConvection, BrineConvectionParams, RJW14Params
-from .params import (
-    Config,
-)
+from .params import Config, get_config
 from .dimensional import (
     DimensionalParams,
     DimensionalBRW09Forcing,
@@ -26,4 +23,5 @@ from .dimensional import (
     DimensionalDISEQGasParams,
     DimensionalRJW14Params,
     DimensionalPowerLawBubbleParams,
+    NumericalParams,
 )

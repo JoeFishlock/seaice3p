@@ -2,7 +2,7 @@ from pathlib import Path
 import numpy as np
 
 
-from . import Config, DimensionalParams
+from . import Config, DimensionalParams, get_config
 from .params.physical import DISEQPhysicalParams, EQMPhysicalParams
 from .state import get_unpacker
 from .enthalpy_method import get_enthalpy_method
@@ -21,9 +21,11 @@ def load_data(
     SIM_DATA_PATH = data_directory / f"{sim_name}.npz"
 
     if is_dimensional:
-        sim_cfg = DimensionalParams.load(
-            data_directory / f"{sim_config_name}_dimensional.{config_extension}"
-        ).get_config()
+        sim_cfg = get_config(
+            DimensionalParams.load(
+                data_directory / f"{sim_config_name}_dimensional.{config_extension}"
+            )
+        )
     else:
         sim_cfg = Config.load(data_directory / f"{sim_config_name}.{config_extension}")
 

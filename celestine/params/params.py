@@ -8,13 +8,25 @@ from dataclasses import field
 from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 
-from .forcing import BRW09Forcing, ForcingConfig
-from .initial_conditions import InitialConditionsConfig, BRW09InitialConditions
-from .numerical import NumericalParams
-from .physical import PhysicalParams, EQMPhysicalParams
-from .bubble import BubbleParams, MonoBubbleParams
-from .convection import BrineConvectionParams, RJW14Params
+from .forcing import BRW09Forcing, ForcingConfig, get_dimensionless_forcing_config
+from .initial_conditions import (
+    InitialConditionsConfig,
+    BRW09InitialConditions,
+    get_dimensionless_initial_conditions_config,
+)
+from .physical import (
+    PhysicalParams,
+    EQMPhysicalParams,
+    get_dimensionless_physical_params,
+)
+from .bubble import BubbleParams, MonoBubbleParams, get_dimensionless_bubble_params
+from .convection import (
+    BrineConvectionParams,
+    RJW14Params,
+    get_dimensionless_brine_convection_params,
+)
 from .convert import Scales
+from .dimensional import DimensionalParams, NumericalParams
 
 
 @serde(type_check=coerce)
@@ -46,3 +58,32 @@ class Config:
         with open(path, "r") as infile:
             yaml = infile.read()
         return from_yaml(cls, yaml)
+
+
+def get_config(dimensional_params: DimensionalParams) -> Config:
+    """Return a Config object for the simulation.
+
+    physical parameters and Darcy law parameters are calculated from the dimensional
+    input. You can modify the numerical parameters and boundary conditions and
+    forcing provided for the simulation."""
+    physical_params = get_dimensionless_physical_params(dimensional_params)
+    initial_conditions_config = get_dimensionless_initial_conditions_config(
+        dimensional_params
+    )
+    brine_convection_params = get_dimensionless_brine_convection_params(
+        dimensional_params
+    )
+    bubble_params = get_dimensionless_bubble_params(dimensional_params)
+    forcing_config = get_dimensionless_forcing_config(dimensional_params)
+    return Config(
+        name=dimensional_params.name,
+        physical_params=physical_params,
+        initial_conditions_config=initial_conditions_config,
+        brine_convection_params=brine_convection_params,
+        bubble_params=bubble_params,
+        forcing_config=forcing_config,
+        numerical_params=dimensional_params.numerical_params,
+        scales=dimensional_params.scales,
+        total_time=dimensional_params.total_time,
+        savefreq=dimensional_params.savefreq,
+    )

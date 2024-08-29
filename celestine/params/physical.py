@@ -1,6 +1,12 @@
 import numpy as np
 from serde import serde, coerce
 
+from .dimensional import (
+    DimensionalParams,
+    DimensionalEQMGasParams,
+    DimensionalDISEQGasParams,
+)
+
 
 @serde(type_check=coerce)
 class BasePhysicalParams:
@@ -37,3 +43,37 @@ class DISEQPhysicalParams(BasePhysicalParams):
 
 
 PhysicalParams = EQMPhysicalParams | DISEQPhysicalParams
+
+
+def get_dimensionless_physical_params(
+    dimensional_params: DimensionalParams,
+) -> PhysicalParams:
+    """return a PhysicalParams object"""
+    match dimensional_params.gas_params:
+        case DimensionalEQMGasParams():
+            return EQMPhysicalParams(
+                expansion_coefficient=dimensional_params.expansion_coefficient,
+                concentration_ratio=dimensional_params.water_params.concentration_ratio,
+                stefan_number=dimensional_params.water_params.stefan_number,
+                lewis_salt=dimensional_params.water_params.lewis_salt,
+                lewis_gas=dimensional_params.lewis_gas,
+                frame_velocity=dimensional_params.frame_velocity,
+                phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
+                conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
+                tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
+            )
+        case DimensionalDISEQGasParams():
+            return DISEQPhysicalParams(
+                expansion_coefficient=dimensional_params.expansion_coefficient,
+                concentration_ratio=dimensional_params.water_params.concentration_ratio,
+                stefan_number=dimensional_params.water_params.stefan_number,
+                lewis_salt=dimensional_params.water_params.lewis_salt,
+                lewis_gas=dimensional_params.lewis_gas,
+                frame_velocity=dimensional_params.frame_velocity,
+                phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
+                conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
+                tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
+                damkohler_number=dimensional_params.damkohler_number,
+            )
+        case _:
+            raise NotImplementedError

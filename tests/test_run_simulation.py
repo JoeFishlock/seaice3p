@@ -13,8 +13,8 @@ from celestine.params import (
     DimensionalPowerLawBubbleParams,
 )
 from celestine.params.initial_conditions import UniformInitialConditions
-from celestine.params.numerical import NumericalParams
-from celestine.params import Config
+from celestine.params.dimensional import NumericalParams
+from celestine.params import Config, get_config
 
 COMMON_PARAMS = {
     "total_time_in_days": 1,
@@ -67,15 +67,19 @@ NUM = NumericalParams(I=24)
     ],
 )
 def test_short_solve(tmp_path, simulation_parameters: DimensionalParams):
-    solve(simulation_parameters.get_config(), tmp_path)
+    solve(get_config(simulation_parameters), tmp_path)
 
 
 @pytest.mark.slow
 def test_best_barrow_config(tmp_path):
     solve(
-        DimensionalParams.load(
-            Path("tests/test_configurations/best_barrow/best_barrow_dimensional.yml")
-        ).get_config(),
+        get_config(
+            DimensionalParams.load(
+                Path(
+                    "tests/test_configurations/best_barrow/best_barrow_dimensional.yml"
+                )
+            )
+        ),
         tmp_path,
     )
 

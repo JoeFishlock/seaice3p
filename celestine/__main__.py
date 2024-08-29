@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 from celestine import __version__
 from .params import DimensionalParams
-from celestine.params import Config
+from celestine.params import Config, get_config
 from celestine.run_simulation import run_batch
 
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     cfgs = []
     for config_path in list_of_configs:
         if is_dimensional_configuration:
-            cfgs.append(DimensionalParams.load(config_path).get_config())
+            cfgs.append(get_config(DimensionalParams.load(config_path)))
         else:
             cfgs.append(Config.load(config_path))
 

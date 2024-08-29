@@ -1,4 +1,5 @@
 from serde import serde, coerce
+from .dimensional import DimensionalParams, DimensionalRJW14Params, NoBrineConvection
 
 
 @serde(type_check=coerce)
@@ -12,9 +13,20 @@ class RJW14Params:
     couple_bubble_to_vertical_flow: bool = False
 
 
-@serde(type_check=coerce)
-class NoBrineConvection:
-    """No brine convection"""
-
-
 BrineConvectionParams = RJW14Params | NoBrineConvection
+
+
+def get_dimensionless_brine_convection_params(
+    dimensional_params: DimensionalParams,
+) -> BrineConvectionParams:
+    match dimensional_params.brine_convection_params:
+        case DimensionalRJW14Params():
+            return RJW14Params(
+                Rayleigh_salt=dimensional_params.Rayleigh_salt,
+                Rayleigh_critical=dimensional_params.brine_convection_params.Rayleigh_critical,
+                convection_strength=dimensional_params.brine_convection_params.convection_strength,
+                couple_bubble_to_horizontal_flow=dimensional_params.brine_convection_params.couple_bubble_to_horizontal_flow,
+                couple_bubble_to_vertical_flow=dimensional_params.brine_convection_params.couple_bubble_to_vertical_flow,
+            )
+        case NoBrineConvection():
+            return NoBrineConvection()

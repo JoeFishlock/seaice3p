@@ -1,4 +1,9 @@
 from serde import serde, coerce
+from .dimensional import (
+    DimensionalParams,
+    DimensionalPowerLawBubbleParams,
+    DimensionalMonoBubbleParams,
+)
 
 
 @serde(type_check=coerce)
@@ -32,3 +37,29 @@ class PowerLawBubbleParams(BaseBubbleParams):
 
 
 BubbleParams = MonoBubbleParams | PowerLawBubbleParams
+
+
+def get_dimensionless_bubble_params(
+    dimensional_params: DimensionalParams,
+) -> BubbleParams:
+    common_params = {
+        "B": dimensional_params.B,
+        "pore_throat_scaling": dimensional_params.bubble_params.pore_throat_scaling,
+        "porosity_threshold": dimensional_params.bubble_params.porosity_threshold,
+        "porosity_threshold_value": dimensional_params.bubble_params.porosity_threshold_value,
+    }
+    match dimensional_params.bubble_params:
+        case DimensionalMonoBubbleParams():
+            return MonoBubbleParams(
+                **common_params,
+                bubble_radius_scaled=dimensional_params.bubble_params.bubble_radius_scaled,
+            )
+        case DimensionalPowerLawBubbleParams():
+            return PowerLawBubbleParams(
+                **common_params,
+                bubble_distribution_power=dimensional_params.bubble_params.bubble_distribution_power,
+                minimum_bubble_radius_scaled=dimensional_params.bubble_params.minimum_bubble_radius_scaled,
+                maximum_bubble_radius_scaled=dimensional_params.bubble_params.maximum_bubble_radius_scaled,
+            )
+        case _:
+            raise NotImplementedError

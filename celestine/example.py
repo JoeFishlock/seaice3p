@@ -10,6 +10,7 @@ from .params import (
     BRW09InitialConditions,
     NoBrineConvection,
     NumericalParams,
+    get_config,
 )
 from .run_simulation import solve
 from .grids import Grids
@@ -36,7 +37,7 @@ def create_and_save_config(
 ):
     data_directory.mkdir(exist_ok=True, parents=True)
     simulation_dimensional_params.save(data_directory)
-    cfg = simulation_dimensional_params.get_config()
+    cfg = get_config(simulation_dimensional_params)
     cfg.save(data_directory)
     return cfg
 

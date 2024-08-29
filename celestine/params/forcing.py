@@ -1,6 +1,13 @@
 from pathlib import Path
 from serde import serde, coerce
 import numpy as np
+from .dimensional import (
+    DimensionalParams,
+    DimensionalConstantForcing,
+    DimensionalBRW09Forcing,
+    DimensionalYearlyForcing,
+    DimensionalRadForcing,
+)
 
 
 def _filter_missing_values(air_temp, days):
@@ -104,3 +111,56 @@ class RadForcing(BaseOceanForcing):
 
 
 ForcingConfig = ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing
+
+
+def get_dimensionless_forcing_config(
+    dimensional_params: DimensionalParams,
+) -> ForcingConfig:
+    ocean_temp = (
+        dimensional_params.water_params.ocean_temperature
+        - dimensional_params.water_params.ocean_freezing_temperature
+    ) / dimensional_params.water_params.temperature_difference
+    ocean_bulk_salinity = 0
+    ocean_gas_sat = dimensional_params.gas_params.ocean_saturation_state
+    match dimensional_params.forcing_config:
+        case DimensionalConstantForcing():
+            top_temp = (
+                dimensional_params.forcing_config.constant_top_temperature
+                - dimensional_params.water_params.ocean_freezing_temperature
+            ) / dimensional_params.water_params.temperature_difference
+            return ConstantForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                constant_top_temperature=top_temp,
+            )
+        case DimensionalYearlyForcing():
+            return YearlyForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                offset=dimensional_params.forcing_config.offset,
+                amplitude=dimensional_params.forcing_config.amplitude,
+                period=dimensional_params.forcing_config.period,
+            )
+        case DimensionalBRW09Forcing():
+            return BRW09Forcing(
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                Barrow_top_temperature_data_choice=dimensional_params.forcing_config.Barrow_top_temperature_data_choice,
+            )
+        case DimensionalRadForcing():
+            return RadForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                surface_energy_balance_forcing=dimensional_params.forcing_config.surface_energy_balance_forcing,
+                SW_internal_heating=dimensional_params.forcing_config.SW_internal_heating,
+                SW_forcing_choice=dimensional_params.forcing_config.SW_forcing_choice,
+                constant_SW_irradiance=dimensional_params.forcing_config.constant_SW_irradiance,
+                SW_radiation_model_choice=dimensional_params.forcing_config.SW_radiation_model_choice,
+                constant_oil_mass_ratio=dimensional_params.forcing_config.constant_oil_mass_ratio,
+                SW_scattering_ice_type=dimensional_params.forcing_config.SW_scattering_ice_type,
+            )
+        case _:
+            raise NotImplementedError
