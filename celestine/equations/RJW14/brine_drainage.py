@@ -33,8 +33,8 @@ def calculate_permeability(liquid_fraction, cfg: Config):
     :type cfg: celestine.params.Config
     :return: permeability on the same grid as liquid fraction
     """
-    if cfg.darcy_law_params.porosity_threshold:
-        cutoff = cfg.darcy_law_params.porosity_threshold_value
+    if cfg.bubble_params.porosity_threshold:
+        cutoff = cfg.bubble_params.porosity_threshold_value
         step_function = np.heaviside(liquid_fraction - cutoff, 0)
         return liquid_fraction**2 * (liquid_fraction - cutoff) * step_function
     return liquid_fraction**3
@@ -91,7 +91,7 @@ def calculate_Rayleigh(
     :type cfg: celestine.params.Config
     :return: Array of shape (I,) of Rayleigh number at cell centers
     """
-    Rayleigh_salt = cfg.darcy_law_params.Rayleigh_salt
+    Rayleigh_salt = cfg.brine_convection_params.Rayleigh_salt
     ice_depth = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
     averaged_permeabilities = np.array(
         [
@@ -131,7 +131,7 @@ def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
     :type cfg: celestine.params.Config
     :return: Edge grid value at convecting boundary.
     """
-    Rayleigh_critical = cfg.darcy_law_params.Rayleigh_critical
+    Rayleigh_critical = cfg.brine_convection_params.Rayleigh_critical
     if np.all(Rayleigh_number - Rayleigh_critical < 0):
         return np.NaN
     indices = np.where(Rayleigh_number >= Rayleigh_critical)
@@ -153,7 +153,7 @@ def get_effective_Rayleigh_number(Rayleigh_number, cfg: Config):
     :type cfg: celestine.params.Config
     :return: Effective Rayleigh number.
     """
-    Rayleigh_critical = cfg.darcy_law_params.Rayleigh_critical
+    Rayleigh_critical = cfg.brine_convection_params.Rayleigh_critical
     return np.max(
         np.where(
             Rayleigh_number >= Rayleigh_critical, Rayleigh_number - Rayleigh_critical, 0
@@ -181,7 +181,7 @@ def calculate_brine_channel_strength(
     :type cfg: celestine.params.Config
     :return: Brine channel strength parameter
     """
-    convection_strength = cfg.darcy_law_params.convection_strength
+    convection_strength = cfg.brine_convection_params.convection_strength
     if ice_depth == 0:
         return 0
 

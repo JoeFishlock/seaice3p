@@ -7,6 +7,7 @@ from .flux import get_dz_fluxes
 from .radiative_heating import get_radiative_heating
 from ..state import StateBCs
 from .velocities import calculate_velocities
+from ..params.forcing import RadForcing
 
 
 def _prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs) -> NDArray:
@@ -44,7 +45,7 @@ def get_equations(cfg, grids) -> Callable[[StateBCs], NDArray]:
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = _prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
 
-        if cfg.forcing_config.SW_internal_heating:
+        if isinstance(cfg, RadForcing):
             return (
                 -dz_fluxes(state_BCs, Wl, Vg, V)
                 - brine_convection_sink(state_BCs)

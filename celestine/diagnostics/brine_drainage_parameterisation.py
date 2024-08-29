@@ -1,6 +1,7 @@
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
+
 from ..equations.RJW14.brine_drainage import (
     calculate_integrated_mean_permeability,
     calculate_Rayleigh,
@@ -10,7 +11,15 @@ from ..equations.RJW14.brine_drainage import (
     calculate_brine_convection_liquid_velocity,
     calculate_brine_channel_sink,
 )
-from ..params import Config, NumericalParams, DarcyLawParams
+from ..params import (
+    Config,
+    NumericalParams,
+    MonoBubbleParams,
+    RJW14Params,
+    EQMPhysicalParams,
+    ConstantForcing,
+    UniformInitialConditions,
+)
 from ..grids import calculate_ice_ocean_boundary_depth
 
 
@@ -39,11 +48,15 @@ def main(output_dir: Path):
 
     """Print values of average permeability in ice"""
     cfg = Config(
-        "test",
+        name="test",
+        total_time=4,
+        savefreq=0.1,
         numerical_params=NumericalParams(I=200),
-        darcy_law_params=DarcyLawParams(
-            porosity_threshold=False, porosity_threshold_value=0.024
-        ),
+        brine_convection_params=RJW14Params(),
+        bubble_params=MonoBubbleParams(),
+        physical_params=EQMPhysicalParams(),
+        forcing_config=ConstantForcing(),
+        initial_conditions_config=UniformInitialConditions(),
     )
     I = cfg.numerical_params.I
     liquid_fraction = [1] * int(I / 2) + [0.2] * int(I / 2)

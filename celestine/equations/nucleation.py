@@ -3,17 +3,17 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ..state import StateBCs, EQMStateBCs, DISEQStateBCs
-from ..params import Config
+from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams
 
 
 def get_nucleation(cfg: Config) -> Callable[[StateBCs], NDArray]:
     fun_map = {
-        "EQM": _EQM_nucleation,
-        "DISEQ": _DISEQ_nucleation,
+        EQMPhysicalParams: _EQM_nucleation,
+        DISEQPhysicalParams: _DISEQ_nucleation,
     }
 
     def nucleation(state_BCs: StateBCs) -> NDArray:
-        return fun_map[cfg.model](state_BCs, cfg)
+        return fun_map[type(cfg.physical_params)](state_BCs, cfg)
 
     return nucleation
 

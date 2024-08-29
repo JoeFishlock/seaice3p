@@ -3,20 +3,22 @@ import numpy as np
 from numpy.typing import NDArray
 from .equilibrium_state import EQMState, EQMStateFull, EQMStateBCs
 from .disequilibrium_state import DISEQState, DISEQStateFull, DISEQStateBCs
+from ..params import EQMPhysicalParams, DISEQPhysicalParams, Config
+
 
 State = EQMState | DISEQState
 StateFull = EQMStateFull | DISEQStateFull
 StateBCs = EQMStateBCs | DISEQStateBCs
 
 
-def get_unpacker(cfg) -> Callable[[float, NDArray], State]:
+def get_unpacker(cfg: Config) -> Callable[[float, NDArray], State]:
     fun_map = {
-        "EQM": _unpack_EQM,
-        "DISEQ": _unpack_DISEQ,
+        EQMPhysicalParams: _unpack_EQM,
+        DISEQPhysicalParams: _unpack_DISEQ,
     }
 
     def unpack(time, solution_vector) -> State:
-        return fun_map[cfg.model](time, solution_vector)
+        return fun_map[type(cfg.physical_params)](time, solution_vector)
 
     return unpack
 

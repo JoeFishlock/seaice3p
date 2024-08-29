@@ -21,7 +21,7 @@ from .equations import get_equations
 from .state import get_unpacker
 from .forcing import get_boundary_conditions
 from .enthalpy_method import get_enthalpy_method
-from .params import Config
+from .params import Config, EQMPhysicalParams, DISEQPhysicalParams
 from .grids import Grids
 from .initial_conditions import get_initial_conditions
 
@@ -54,16 +54,12 @@ THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
 
 
 def solve(cfg: Config, directory: Path, verbosity_level=0) -> Literal[0]:
-    if cfg.model == "EQM":
+    if isinstance(cfg.physical_params, EQMPhysicalParams):
         number_of_solution_components = 3
-    elif cfg.model == "DISEQ":
+    elif isinstance(cfg.physical_params, DISEQPhysicalParams):
         number_of_solution_components = 4
     else:
         raise NotImplementedError
-
-    # for the barrow forcing you need to load external data to the forcing config
-    if cfg.forcing_config.temperature_forcing_choice == "barrow_2009":
-        cfg.forcing_config.load_forcing_data()
 
     initial = get_initial_conditions(cfg)
     T = cfg.total_time

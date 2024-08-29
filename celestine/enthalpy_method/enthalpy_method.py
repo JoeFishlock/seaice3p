@@ -2,7 +2,7 @@
 bulk salinity and bulk gas."""
 
 from typing import Callable
-from ..params import Config
+from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams
 from .phase_boundaries import get_phase_masks
 from ..state import EQMState, DISEQState, State, StateFull, EQMStateFull, DISEQStateFull
 from .gas import (
@@ -15,12 +15,12 @@ from .common import calculate_common_enthalpy_method_vars
 
 def get_enthalpy_method(cfg: Config) -> Callable[[State], StateFull]:
     fun_map = {
-        "EQM": _calculate_EQM_enthalpy_method,
-        "DISEQ": _calculate_DISEQ_enthalpy_method,
+        EQMPhysicalParams: _calculate_EQM_enthalpy_method,
+        DISEQPhysicalParams: _calculate_DISEQ_enthalpy_method,
     }
 
     def enthalpy_method(state: State) -> StateFull:
-        return fun_map[cfg.model](state, cfg)
+        return fun_map[type(cfg.physical_params)](state, cfg)
 
     return enthalpy_method
 

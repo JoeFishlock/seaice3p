@@ -5,10 +5,10 @@ liquid fraction
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-from ..velocities import calculate_velocities
-from ..velocities.mono_distribution import calculate_wall_drag_function
-from celestine.grids import geometric, Grids
-from celestine.dimensional_params import DimensionalParams
+from ..equations.velocities import calculate_velocities
+from ..equations.velocities.mono_distribution import calculate_wall_drag_function
+from ..grids import geometric, Grids
+from ..params import DimensionalParams
 
 
 def main(output_dir: Path):
