@@ -18,6 +18,7 @@ class BaseBubbleParams:
     pore_throat_scaling: float = 0.46
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
+    escape_ice_surface: bool = True
 
 
 @serde(type_check=coerce)
@@ -51,6 +52,7 @@ def get_dimensionless_bubble_params(
         "pore_throat_scaling": dimensional_params.bubble_params.pore_throat_scaling,
         "porosity_threshold": dimensional_params.bubble_params.porosity_threshold,
         "porosity_threshold_value": dimensional_params.bubble_params.porosity_threshold_value,
+        "escape_ice_surface": dimensional_params.bubble_params.escape_ice_surface,
     }
     match dimensional_params.bubble_params:
         case DimensionalMonoBubbleParams():

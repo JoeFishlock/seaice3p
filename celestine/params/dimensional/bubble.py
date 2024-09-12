@@ -9,6 +9,7 @@ class DimensionalBaseBubbleParams:
     pore_throat_scaling: float = 1 / 2
     porosity_threshold: bool = False
     porosity_threshold_value: float = 0.024
+    escape_ice_surface: bool = True
 
 
 @serde(type_check=coerce)

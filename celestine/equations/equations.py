@@ -7,10 +7,12 @@ from .flux import get_dz_fluxes
 from .radiative_heating import get_radiative_heating
 from ..state import StateBCs
 from .velocities import calculate_velocities
-from ..params.forcing import RadForcing
+from ..params import Config, RadForcing
 
 
-def _prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs) -> NDArray:
+def _prevent_gas_rise_into_saturated_cell(
+    Vg, state_BCs: StateBCs, cfg: Config
+) -> NDArray:
     """Modify the gas interstitial velocity to prevent bubble rise into a cell which
     is already theoretically saturated with gas.
 
@@ -28,14 +30,22 @@ def _prevent_gas_rise_into_saturated_cell(Vg, state_BCs: StateBCs) -> NDArray:
         fully gas saturated cell
 
     """
+    # Prevent gas rising into already gas saturated cell
     gas_fraction_above = state_BCs.gas_fraction[1:]
     solid_fraction_above = 1 - state_BCs.liquid_fraction[1:]
     filtered_Vg = np.where(gas_fraction_above + solid_fraction_above >= 1, 0, Vg)
-    filtered_Vg[-1] = Vg[-1]
+
+    if cfg.bubble_params.escape_ice_surface:
+        # Allow gas to leave top boundary
+        filtered_Vg[-1] = Vg[-1]
+    else:
+        # impermeable top boundary
+        filtered_Vg[-1] = 0
+
     return filtered_Vg
 
 
-def get_equations(cfg, grids) -> Callable[[StateBCs], NDArray]:
+def get_equations(cfg: Config, grids) -> Callable[[StateBCs], NDArray]:
     dz_fluxes = get_dz_fluxes(cfg, grids)
     brine_convection_sink = get_brine_convection_sink(cfg, grids)
     nucleation = get_nucleation(cfg)
@@ -43,7 +53,7 @@ def get_equations(cfg, grids) -> Callable[[StateBCs], NDArray]:
 
     def equations(state_BCs: StateBCs) -> NDArray:
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
-        Vg = _prevent_gas_rise_into_saturated_cell(Vg, state_BCs)
+        Vg = _prevent_gas_rise_into_saturated_cell(Vg, state_BCs, cfg)
 
         if isinstance(cfg, RadForcing):
             return (
