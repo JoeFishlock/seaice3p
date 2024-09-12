@@ -7,7 +7,7 @@ from .forcing import (
 )
 from .initial_conditions import (
     InitialConditionsConfig,
-    SummerInitialConditions,
+    OilInitialConditions,
 )
 from .physical import PhysicalParams, DISEQPhysicalParams, EQMPhysicalParams
 from .bubble import BubbleParams, MonoBubbleParams, PowerLawBubbleParams

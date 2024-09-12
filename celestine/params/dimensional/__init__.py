@@ -9,7 +9,7 @@ from .forcing import (
 )
 from .initial_conditions import (
     BRW09InitialConditions,
-    DimensionalSummerInitialConditions,
+    DimensionalOilInitialConditions,
     UniformInitialConditions,
 )
 from .convection import NoBrineConvection, DimensionalRJW14Params
