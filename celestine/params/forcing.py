@@ -103,8 +103,6 @@ class BRW09Forcing:
 class RadForcing(BaseOceanForcing):
     """Forcing parameters for radiative transfer simulation with oil drops"""
 
-    surface_energy_balance_forcing: bool = True
-
     SW_internal_heating: bool = False
     SW_forcing_choice: str = "constant"
     constant_SW_irradiance: float = 280  # W/m2
@@ -159,7 +157,6 @@ def get_dimensionless_forcing_config(
                 ocean_temp=ocean_temp,
                 ocean_bulk_salinity=ocean_bulk_salinity,
                 ocean_gas_sat=ocean_gas_sat,
-                surface_energy_balance_forcing=dimensional_params.forcing_config.surface_energy_balance_forcing,
                 SW_internal_heating=dimensional_params.forcing_config.SW_internal_heating,
                 SW_forcing_choice=dimensional_params.forcing_config.SW_forcing_choice,
                 constant_SW_irradiance=dimensional_params.forcing_config.constant_SW_irradiance,

@@ -23,9 +23,6 @@ class DimensionalRadForcing:
     constant_oil_mass_ratio: float = 0  # ng/g
     SW_scattering_ice_type: str = "FYI"
 
-    # surface energy balance forcing parameters
-    surface_energy_balance_forcing: bool = True
-
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
