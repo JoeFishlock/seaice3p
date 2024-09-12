@@ -9,12 +9,13 @@ doi: 10.1029/2004JC002361.
 """
 import numpy as np
 from scipy.optimize import fsolve
-from ..params import Config
+from ...state import StateFull
+from ...params import Config
 from .turbulent_heat_flux import (
     calculate_latent_heat_flux,
     calculate_sensible_heat_flux,
 )
-from .radiative_forcing import get_LW_forcing, get_SW_forcing
+from ..radiative_forcing import get_LW_forcing, get_SW_forcing
 
 STEFAN_BOLTZMANN = 5.670374419e-8  # W/m2 K4
 SW_ALBEDO = 0.7
@@ -110,18 +111,18 @@ def solve_for_surface_temp(
     return solution
 
 
-def find_ghost_cell_temperature(state) -> float:
+def find_ghost_cell_temperature(state: StateFull, cfg: Config) -> float:
     surface_temperature = solve_for_surface_temp(
-        state.cfg,
+        cfg,
         state.time,
         state.solid_fraction[-1],
         state.temperature[-1],
         state.temperature[-2],
     )
     return (
-        state.cfg.numerical_params.step
+        cfg.numerical_params.step
         * surface_temp_gradient(
-            state.cfg, surface_temperature, state.temperature[-1], state.temperature[-2]
+            cfg, surface_temperature, state.temperature[-1], state.temperature[-2]
         )
         + state.temperature[-1]
     )

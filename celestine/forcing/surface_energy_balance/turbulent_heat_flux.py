@@ -14,7 +14,7 @@ Journal of Geophysical Research: Oceans, vol. 98, no. C6, pp. 10085–10109, 199
 doi: 10.1029/93JC00656.
 """
 import numpy as np
-from ..params import Config
+from ...params import Config
 
 REF_HEIGHT = 10  # m
 REF_AIR_DENSITY = 1.275  # kg/m3
