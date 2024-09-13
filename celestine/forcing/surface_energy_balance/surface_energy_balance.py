@@ -18,22 +18,12 @@ from .turbulent_heat_flux import (
 from ..radiative_forcing import get_LW_forcing, get_SW_forcing
 
 STEFAN_BOLTZMANN = 5.670374419e-8  # W/m2 K4
-SW_ALBEDO = 0.7
-SW_PENETRATION_FRACTION = 0.4
 
 
 def calculate_emissivity(top_cell_is_ice: bool) -> float:
     if top_cell_is_ice:
         return 0.99
     return 0.97
-
-
-def calculate_SW_penetration_fraction(cfg: Config, time: float) -> float:
-    return SW_PENETRATION_FRACTION
-
-
-def calculate_SW_albedo(cfg: Config, time: float) -> float:
-    return SW_ALBEDO
 
 
 def convert_surface_temperature_to_kelvin(
@@ -51,8 +41,8 @@ def calculate_total_heat_flux(
     """Takes non-dimensional surface temperature and returns non-dimensional heat flux"""
     surface_temp_K = convert_surface_temperature_to_kelvin(cfg, surface_temp)
     emissivity = calculate_emissivity(top_cell_is_ice)
-    SW_penetration_fraction = calculate_SW_penetration_fraction(cfg, time)
-    SW_albedo = calculate_SW_albedo(cfg, time)
+    SW_penetration_fraction = cfg.forcing_config.SW_forcing.SW_penetration_fraction
+    SW_albedo = cfg.forcing_config.SW_forcing.SW_albedo
     dimensional_heat_flux = (
         get_LW_forcing(time, cfg)
         + (1 - SW_penetration_fraction) * (1 - SW_albedo) * get_SW_forcing(time, cfg)

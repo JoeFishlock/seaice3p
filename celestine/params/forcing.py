@@ -105,7 +105,10 @@ class BRW09Forcing:
 @serde(type_check=coerce)
 @dataclass(frozen=True)
 class RadForcing(BaseOceanForcing):
-    """Forcing parameters for radiative transfer simulation with oil drops"""
+    """Forcing parameters for radiative transfer simulation with oil drops
+
+    we have not implemented the non-dimensionalisation for these parameters yet
+    and so we just pass the dimensional values directly to the simulation"""
 
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()

@@ -16,6 +16,8 @@ class DimensionalYearlyForcing:
 @dataclass(frozen=True)
 class DimensionalConstantSWForcing:
     SW_irradiance: float = 280  # W/m2
+    SW_albedo: float = 0.7
+    SW_penetration_fraction: float = 0.4
 
 
 @serde(type_check=coerce)
