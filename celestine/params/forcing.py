@@ -12,6 +12,8 @@ from .dimensional import (
     DimensionalConstantSWForcing,
     DimensionalOilHeating,
     DimensionalBackgroundOilHeating,
+    DimensionalLWForcing,
+    DimensionalConstantLWForcing,
 )
 
 
@@ -111,6 +113,7 @@ class RadForcing(BaseOceanForcing):
     and so we just pass the dimensional values directly to the simulation"""
 
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
+    LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 
@@ -159,6 +162,7 @@ def get_dimensionless_forcing_config(
                 ocean_bulk_salinity=ocean_bulk_salinity,
                 ocean_gas_sat=ocean_gas_sat,
                 SW_forcing=dimensional_params.forcing_config.SW_forcing,
+                LW_forcing=dimensional_params.forcing_config.LW_forcing,
                 oil_heating=dimensional_params.forcing_config.oil_heating,
             )
         case _:

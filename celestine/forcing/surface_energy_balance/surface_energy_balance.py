@@ -20,10 +20,10 @@ from ..radiative_forcing import get_LW_forcing, get_SW_forcing
 STEFAN_BOLTZMANN = 5.670374419e-8  # W/m2 K4
 
 
-def calculate_emissivity(top_cell_is_ice: bool) -> float:
+def calculate_emissivity(cfg: Config, top_cell_is_ice: bool) -> float:
     if top_cell_is_ice:
-        return 0.99
-    return 0.97
+        return cfg.forcing_config.LW_forcing.ice_emissitivty
+    return cfg.forcing_config.LW_forcing.water_emissivity
 
 
 def convert_surface_temperature_to_kelvin(
@@ -40,7 +40,7 @@ def calculate_total_heat_flux(
 ) -> float:
     """Takes non-dimensional surface temperature and returns non-dimensional heat flux"""
     surface_temp_K = convert_surface_temperature_to_kelvin(cfg, surface_temp)
-    emissivity = calculate_emissivity(top_cell_is_ice)
+    emissivity = calculate_emissivity(cfg, top_cell_is_ice)
     SW_penetration_fraction = cfg.forcing_config.SW_forcing.SW_penetration_fraction
     SW_albedo = cfg.forcing_config.SW_forcing.SW_albedo
     dimensional_heat_flux = (

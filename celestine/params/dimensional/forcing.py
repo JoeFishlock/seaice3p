@@ -47,9 +47,21 @@ DimensionalSWForcing = DimensionalConstantSWForcing
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
+class DimensionalConstantLWForcing:
+    LW_irradiance: float = 260  # W/m2
+    ice_emissitivty: float = 0.99
+    water_emissivity: float = 0.97
+
+
+DimensionalLWForcing = DimensionalConstantLWForcing
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
 class DimensionalRadForcing:
     # Short wave forcing parameters
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
+    LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 

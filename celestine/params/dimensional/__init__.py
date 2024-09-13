@@ -12,6 +12,8 @@ from .forcing import (
     DimensionalBackgroundOilHeating,
     DimensionalMobileOilHeating,
     DimensionalNoHeating,
+    DimensionalConstantLWForcing,
+    DimensionalLWForcing,
 )
 from .initial_conditions import (
     BRW09InitialConditions,
