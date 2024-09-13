@@ -14,6 +14,8 @@ from .forcing import (
     DimensionalNoHeating,
     DimensionalConstantLWForcing,
     DimensionalLWForcing,
+    DimensionalConstantTurbulentFlux,
+    DimensionalTurbulentFlux,
 )
 from .initial_conditions import (
     BRW09InitialConditions,

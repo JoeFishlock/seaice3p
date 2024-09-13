@@ -16,36 +16,30 @@ doi: 10.1029/93JC00656.
 import numpy as np
 from ...params import Config
 
-REF_HEIGHT = 10  # m
-REF_AIR_DENSITY = 1.275  # kg/m3
-REF_AIR_HEAT_CAPACITY = 1005  # J/kg K
 GRAVITY = 9.81  # m/s2
-LATENT_HEAT_OF_VAPORISATION = 2.501e6  # J/kg
-
-REF_WINDSPEED = 5  # m/s
-REF_AIR_TEMP = 273  # K
-REF_SPECIFIC_HUMIDITY = 3.6e-3  # kg water / kg air
-REF_ATM_PRESSURE = 101.325  # KPa
 
 
 def calculate_ref_windspeed(cfg: Config, time: float) -> float:
     """return windspeed at reference level above the ice"""
-    return REF_WINDSPEED
+    return cfg.forcing_config.turbulent_flux.windspeed
 
 
 def calculate_ref_air_temp(cfg: Config, time: float) -> float:
-    """return air temperature at reference level above the ice"""
-    return REF_AIR_TEMP
+    """return air temperature at reference level above the ice in Kelvin
+
+    in the configuration the air temperature is given in deg C
+    """
+    return cfg.forcing_config.turbulent_flux.air_temp + 273.15
 
 
 def calculate_ref_specific_humidity(cfg: Config, time: float) -> float:
     """return specific humidity at reference level above the ice"""
-    return REF_SPECIFIC_HUMIDITY
+    return cfg.forcing_config.turbulent_flux.specific_humidity
 
 
 def calculate_ref_atmospheric_pressure(cfg: Config, time: float) -> float:
     """return atmospheric pressure at reference level above the ice"""
-    return REF_ATM_PRESSURE
+    return cfg.forcing_config.turbulent_flux.atm_pressure
 
 
 def calculate_bulk_transfer_coefficient(
@@ -60,10 +54,11 @@ def calculate_bulk_transfer_coefficient(
     C = 1961 * BPRIME * CT0
     ref_air_temp = calculate_ref_air_temp(cfg, time)
     ref_windspeed = calculate_ref_windspeed(cfg, time)
+    ref_height = cfg.forcing_config.turbulent_flux.ref_height
     Richardson = (
         GRAVITY
         * (ref_air_temp - surface_temp)
-        * REF_HEIGHT
+        * ref_height
         / (ref_air_temp * ref_windspeed**2)
     )
     if Richardson < 0:
@@ -90,14 +85,16 @@ def calculate_sensible_heat_flux(
     cfg: Config, time: float, top_cell_is_ice: bool, surface_temp: float
 ) -> float:
     """Calculate sensible heat flux from [2]"""
+    air_density = cfg.forcing_config.turbulent_flux.air_density
+    air_heat_capacity = cfg.forcing_config.turbulent_flux.air_heat_capacity
     ref_air_temp = calculate_ref_air_temp(cfg, time)
     windspeed = calculate_ref_windspeed(cfg, time)
     bulk_transfer_coeff = calculate_bulk_transfer_coefficient(
         cfg, top_cell_is_ice, time, surface_temp
     )
     return (
-        REF_AIR_DENSITY
-        * REF_AIR_HEAT_CAPACITY
+        air_density
+        * air_heat_capacity
         * bulk_transfer_coeff
         * windspeed
         * (ref_air_temp - surface_temp)
@@ -108,6 +105,10 @@ def calculate_latent_heat_flux(
     cfg: Config, time: float, top_cell_is_ice: bool, surface_temp: float
 ) -> float:
     """Calculate latent heat flux from [2]"""
+    air_density = cfg.forcing_config.turbulent_flux.air_density
+    air_latent_heat_of_vaporisation = (
+        cfg.forcing_config.turbulent_flux.air_latent_heat_of_vaporisation
+    )
     windspeed = calculate_ref_windspeed(cfg, time)
     ref_specific_humidity = calculate_ref_specific_humidity(cfg, time)
     bulk_transfer_coeff = calculate_bulk_transfer_coefficient(
@@ -117,8 +118,8 @@ def calculate_latent_heat_flux(
         cfg, time, surface_temp
     )
     return (
-        REF_AIR_DENSITY
-        * LATENT_HEAT_OF_VAPORISATION
+        air_density
+        * air_latent_heat_of_vaporisation
         * bulk_transfer_coeff
         * windspeed
         * (ref_specific_humidity - surface_specific_humidity)

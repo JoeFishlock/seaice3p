@@ -58,10 +58,28 @@ DimensionalLWForcing = DimensionalConstantLWForcing
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
+class DimensionalConstantTurbulentFlux:
+    ref_height: float = 10  # m
+    windspeed: float = 5  # m/s
+    air_temp: float = 0  # deg C
+    specific_humidity: float = 3.6e-3  # kg water / kg air
+    atm_pressure: float = 101.325  # KPa
+
+    air_density: float = 1.275  # kg/m3
+    air_heat_capacity: float = 1005  # J/kg K
+    air_latent_heat_of_vaporisation: float = 2.501e6  # J/kg
+
+
+DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
 class DimensionalRadForcing:
     # Short wave forcing parameters
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
+    turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 

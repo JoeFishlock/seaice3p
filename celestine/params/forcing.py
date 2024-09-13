@@ -14,6 +14,8 @@ from .dimensional import (
     DimensionalBackgroundOilHeating,
     DimensionalLWForcing,
     DimensionalConstantLWForcing,
+    DimensionalTurbulentFlux,
+    DimensionalConstantTurbulentFlux,
 )
 
 
@@ -114,6 +116,7 @@ class RadForcing(BaseOceanForcing):
 
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
+    turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 
@@ -163,6 +166,7 @@ def get_dimensionless_forcing_config(
                 ocean_gas_sat=ocean_gas_sat,
                 SW_forcing=dimensional_params.forcing_config.SW_forcing,
                 LW_forcing=dimensional_params.forcing_config.LW_forcing,
+                turbulent_flux=dimensional_params.forcing_config.turbulent_flux,
                 oil_heating=dimensional_params.forcing_config.oil_heating,
             )
         case _:
