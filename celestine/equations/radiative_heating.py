@@ -30,10 +30,7 @@ def get_radiative_heating(cfg: Config, grids: Grids) -> Callable[[StateBCs], NDA
     }
 
     def radiative_heating(state_BCs: StateBCs) -> NDArray:
-        if isinstance(cfg.forcing_config, RadForcing):
-            return fun_map[type(cfg.physical_params)](state_BCs, cfg, grids)
-
-        return np.zeros_like(state_BCs.enthalpy[1:-1])
+        return fun_map[type(cfg.physical_params)](state_BCs, cfg, grids)
 
     return radiative_heating
 
@@ -79,6 +76,11 @@ def _calculate_non_dimensional_shortwave_heating(
     center_grid = grids.centers
     edge_grid = grids.edges
     heating = np.zeros_like(center_grid)
+
+    # If we don't have radiative forcing then just return array of zeros for heating
+    if not isinstance(cfg.forcing_config, RadForcing):
+        return heating
+
     ice_ocean_boundary_depth = calculate_ice_ocean_boundary_depth(
         state_bcs.liquid_fraction, edge_grid
     )
