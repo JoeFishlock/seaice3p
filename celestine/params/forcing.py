@@ -8,6 +8,10 @@ from .dimensional import (
     DimensionalBRW09Forcing,
     DimensionalYearlyForcing,
     DimensionalRadForcing,
+    DimensionalSWForcing,
+    DimensionalConstantSWForcing,
+    DimensionalOilHeating,
+    DimensionalBackgroundOilHeating,
 )
 
 
@@ -103,14 +107,8 @@ class BRW09Forcing:
 class RadForcing(BaseOceanForcing):
     """Forcing parameters for radiative transfer simulation with oil drops"""
 
-    SW_internal_heating: bool = False
-    SW_forcing_choice: str = "constant"
-    constant_SW_irradiance: float = 280  # W/m2
-
-    SW_radiation_model_choice: str = "1L"  # specify oilrad model to use
-    # Parameters for single layer SW radiative transfer model
-    constant_oil_mass_ratio: float = 0  # ng/g
-    SW_scattering_ice_type: str = "FYI"
+    SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
+    oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 
 ForcingConfig = ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing
@@ -157,12 +155,8 @@ def get_dimensionless_forcing_config(
                 ocean_temp=ocean_temp,
                 ocean_bulk_salinity=ocean_bulk_salinity,
                 ocean_gas_sat=ocean_gas_sat,
-                SW_internal_heating=dimensional_params.forcing_config.SW_internal_heating,
-                SW_forcing_choice=dimensional_params.forcing_config.SW_forcing_choice,
-                constant_SW_irradiance=dimensional_params.forcing_config.constant_SW_irradiance,
-                SW_radiation_model_choice=dimensional_params.forcing_config.SW_radiation_model_choice,
-                constant_oil_mass_ratio=dimensional_params.forcing_config.constant_oil_mass_ratio,
-                SW_scattering_ice_type=dimensional_params.forcing_config.SW_scattering_ice_type,
+                SW_forcing=dimensional_params.forcing_config.SW_forcing,
+                oil_heating=dimensional_params.forcing_config.oil_heating,
             )
         case _:
             raise NotImplementedError

@@ -7,7 +7,7 @@ from .flux import get_dz_fluxes
 from .radiative_heating import get_radiative_heating
 from ..state import StateBCs
 from .velocities import calculate_velocities
-from ..params import Config, RadForcing
+from ..params import Config
 
 
 def _prevent_gas_rise_into_saturated_cell(
@@ -55,18 +55,11 @@ def get_equations(cfg: Config, grids) -> Callable[[StateBCs], NDArray]:
         Vg, Wl, V = calculate_velocities(state_BCs, cfg)
         Vg = _prevent_gas_rise_into_saturated_cell(Vg, state_BCs, cfg)
 
-        if isinstance(cfg, RadForcing):
-            return (
-                -dz_fluxes(state_BCs, Wl, Vg, V)
-                - brine_convection_sink(state_BCs)
-                + nucleation(state_BCs)
-                + radiative_heating(state_BCs)
-            )
-
         return (
             -dz_fluxes(state_BCs, Wl, Vg, V)
             - brine_convection_sink(state_BCs)
             + nucleation(state_BCs)
+            + radiative_heating(state_BCs)
         )
 
     return equations

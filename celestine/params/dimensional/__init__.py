@@ -6,6 +6,12 @@ from .forcing import (
     DimensionalConstantForcing,
     DimensionalRadForcing,
     DimensionalYearlyForcing,
+    DimensionalConstantSWForcing,
+    DimensionalSWForcing,
+    DimensionalOilHeating,
+    DimensionalBackgroundOilHeating,
+    DimensionalMobileOilHeating,
+    DimensionalNoHeating,
 )
 from .initial_conditions import (
     BRW09InitialConditions,

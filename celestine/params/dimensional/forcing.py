@@ -14,14 +14,41 @@ class DimensionalYearlyForcing:
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
+class DimensionalConstantSWForcing:
+    SW_irradiance: float = 280  # W/m2
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class DimensionalBackgroundOilHeating:
+    oil_mass_ratio: float = 0  # ng/g
+    ice_type: str = "FYI"
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class DimensionalMobileOilHeating:
+    ice_type: str = "FYI"
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class DimensionalNoHeating:
+    pass
+
+
+DimensionalOilHeating = (
+    DimensionalBackgroundOilHeating | DimensionalMobileOilHeating | DimensionalNoHeating
+)
+DimensionalSWForcing = DimensionalConstantSWForcing
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
 class DimensionalRadForcing:
     # Short wave forcing parameters
-    SW_internal_heating: bool = False
-    SW_forcing_choice: str = "constant"
-    constant_SW_irradiance: float = 280  # W/m2
-    SW_radiation_model_choice: str = "1L"  # specify oilrad model to use
-    constant_oil_mass_ratio: float = 0  # ng/g
-    SW_scattering_ice_type: str = "FYI"
+    SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
+    oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 
 @serde(type_check=coerce)
