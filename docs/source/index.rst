@@ -9,25 +9,8 @@ Celestine
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
-   boundary_conditions
-   dimensional_params
-   enthalpy_method
-   flux
-   forcing
-   grids
-   initial_conditions
-   logging_config
-   params
-   phase_boundaries
-   run_simulation
-   state
-   velocities
-   brine_drainage
-   brine_channel_sink_terms
-   template
-   reduced_solver
-   scipy
+
+   modules
 
 Indices and tables
 ==================
