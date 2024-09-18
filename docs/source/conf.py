@@ -18,12 +18,12 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "celestine"
+project = "seaice3p"
 copyright = "2023, Joseph Fishlock"
 author = "Joseph Fishlock"
 
 # The full version, including alpha/beta/rc tags
-release = "0.14.0"
+release = "0.15.0"
 
 
 # -- General configuration ---------------------------------------------------

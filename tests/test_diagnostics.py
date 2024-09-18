@@ -1,4 +1,4 @@
-"""Test running the diagnostic scripts in celestine
+"""Test running the diagnostic scripts in seaice3p
 
 These scripts plot functions used in the code like the gas velocities and brine
 convection parameteristaion
@@ -9,14 +9,7 @@ the code however they do produce file output
 import pytest
 
 
-@pytest.mark.slow
-def test_running_gas_velocity(tmp_path):
-    from celestine.diagnostics.gas_velocity import main
-
-    main(tmp_path)
-
-
-def test_running_brine_convection_parameterisation(tmp_path):
-    from celestine.diagnostics.brine_drainage_parameterisation import main
+def test_running_brine_convection_diagnostics(tmp_path):
+    from seaice3p.diagnostics.brine_drainage_parameterisation import main
 
     main(tmp_path)

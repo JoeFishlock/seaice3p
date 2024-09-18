@@ -1,57 +1,43 @@
-boundary_conditions_config:
-  far_bulk_salinity: 0.0
-  far_gas_sat: 1.0
-  far_temp: 0.10014860631376014
-  initial_conditions_choice: barrow_2009
-darcy_law_params:
-  B: 23115236.638081532
-  Rayleigh_critical: 40
-  Rayleigh_salt: 122741.90654821295
-  brine_convection_parameterisation: false
-  bubble_distribution_power: 1.5
-  bubble_radius_scaled: 0.2
-  bubble_size_distribution_type: mono
-  convection_strength: 0.03
-  couple_bubble_to_horizontal_flow: true
-  couple_bubble_to_vertical_flow: true
-  drag_exponent: 6.0
-  maximum_bubble_radius_scaled: 1.0
-  minimum_bubble_radius_scaled: 0.001
-  pore_throat_scaling: 0.5
-  porosity_threshold: false
-  porosity_threshold_value: 0.024
-  wall_drag_law_choice: power
+brine_convection_params:
+  NoBrineConvection: {}
+bubble_params:
+  MonoBubbleParams:
+    B: 23092750.999328535
+    bubble_radius_scaled: 0.2
+    pore_throat_scaling: 0.5
+    porosity_threshold: false
+    porosity_threshold_value: 0.024
 forcing_config:
-  Barrow_initial_bulk_gas_in_ice: 0.2
-  Barrow_top_temperature_data_choice: air
-  amplitude: 0.75
-  constant_top_temperature: -1.4999196722628323
-  offset: -1.0
-  period: 4.0
-  temperature_forcing_choice: barrow_2009
+  BRW09Forcing:
+    Barrow_top_temperature_data_choice: air
+    ocean_bulk_salinity: 0.0
+    ocean_gas_sat: 1.0
+initial_conditions_config:
+  BRW09InitialConditions:
+    Barrow_initial_bulk_gas_in_ice: 0.2
 name: example
 numerical_params:
   I: 24
   regularisation: 1.0e-06
-  solver: SCI
-  timestep: 0.0002
 physical_params:
-  concentration_ratio: 0.1440677966101695
-  conductivity_ratio: 4.111111111111112
-  expansion_coefficient: 0.010280000000000001
-  frame_velocity: 0.0
-  lewis_gas: .inf
-  lewis_salt: .inf
-  phase_average_conductivity: false
-  stefan_number: 4.328367195135119
-  tolerable_super_saturation_fraction: 1
+  EQMPhysicalParams:
+    concentration_ratio: 0.1440677966101695
+    conductivity_ratio: 4.111111111111112
+    expansion_coefficient: 0.010280000000000001
+    frame_velocity: 0.0
+    lewis_gas: .inf
+    lewis_salt: .inf
+    phase_average_conductivity: false
+    stefan_number: 4.328367195135119
+    tolerable_super_saturation_fraction: 1.0
 savefreq: 0.00564964921025809
 scales:
-  gas_density: 1
+  gas_density: 1.0
   lengthscale: 2.4
+  liquid_thermal_conductivity: 0.54
   ocean_freezing_temperature: -2.6570370370370373
-  ocean_salinity: 34
-  salinity_difference: 236
+  ocean_salinity: 34.0
+  salinity_difference: 236.0
   saturation_concentration: 1.0e-05
   temperature_difference: 18.442962962962966
   thermal_diffusivity: 1.2554776022795754e-07

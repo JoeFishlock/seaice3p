@@ -1,5 +1,36 @@
 # Changelog
 
+## v0.15.0 (2024-09-18) ##
+
+### Summary ###
+Renamed the project from the working name celestine to seaice3p.
+Updated to use python 3.12.
+Added verbosity option to command line interface -v.
+Removed logging to files.
+Major refactoring.
+
+Removed redundant enthalpy method and solver classes.
+Simulation state is stored in the State object which keeps the prime variables.
+Running the enthalpy method on this onbect produces a StateFull object with the enthalpy method variables.
+Applying the boundary conditions to this object produces the StateBCs object used in the solver.
+Broken up to configuration of the simulation to be handled by different objects.
+This should mean only necessary parameters for the type of simulation being run need to be given.
+Use pyserde to serialize these configuration objects.
+Added a load module to read in data from simulations.
+
+Implemented a disequilibrium model for gas dynamics with a finite nucleation rate.
+
+Added convenience function to adapt gas dynamics to simulate oil droplets.
+The buoyancy parameter is now calculated as the difference in fluid and oil/gas density.
+When simulating oil droplets the top velocity is changed to prevent oil escaping the top surface.
+
+Implemented a radiative forcing configuration which uses a surface energy balance to calculate
+the appropriate temperature boundary condition.
+Also use the radiative transfer model `oilrad` (v0.3.0) to calculate internal radiative heating due to 
+shortwave absorption of ice and oil droplets.
+Created an initial condition to investigate melting a layer of ice under radiative and turbulent
+surface fluxes.
+
 ## v0.14.0 (2024-04-23) ##
 
 ### Summary ###

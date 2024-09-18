@@ -1,16 +1,17 @@
 [tool.poetry]
-name = "celestine"
-version = "0.14.0"
-description = "Simulate gas bubble motion in sea ice."
+name = "seaice3p"
+version = "0.15.0"
+description = "Simulate gas bubbles and oil droplets in sea ice."
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.12"
 numpy = "^1.26.4"
 scipy = "^1.13.0"
-PyYAML = "^6.0.1"
+pyserde = {version = "^0.20.1", extras = ["yaml"]}
+oilrad = "0.3.0"
 
 
 [tool.poetry.group.scripts.dependencies]
@@ -24,6 +25,8 @@ pydeps = "^1.12.20"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^8.1.1"
+pytest-xdist = "^3.5.0"
+coverage = "^7.5.0"
 
 [build-system]
 requires = ["poetry-core"]

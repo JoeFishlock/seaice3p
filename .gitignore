@@ -9,6 +9,9 @@ test_data/*
 .DS_Store
 *scratch.py
 *.log
+TODO.txt
+
+.coverage
 
 # Sphinx
 docs/build
