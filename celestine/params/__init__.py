@@ -12,5 +12,6 @@ from .initial_conditions import (
 from .physical import PhysicalParams, DISEQPhysicalParams, EQMPhysicalParams
 from .bubble import BubbleParams, MonoBubbleParams, PowerLawBubbleParams
 from .convection import BrineConvectionParams, RJW14Params
+from .convert import Scales
 from .params import Config, get_config
 from .dimensional import *

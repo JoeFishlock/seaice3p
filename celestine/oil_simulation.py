@@ -1,5 +1,5 @@
 from pathlib import Path
-from celestine import (
+from . import (
     DimensionalParams,
     DimensionalEQMGasParams,
     DimensionalMonoBubbleParams,
@@ -9,8 +9,6 @@ from celestine import (
     DimensionalOilInitialConditions,
     NumericalParams,
     DimensionalWaterParams,
-)
-from celestine.params.dimensional import (
     DimensionalConstantSWForcing,
     DimensionalBackgroundOilHeating,
     DimensionalMobileOilHeating,
