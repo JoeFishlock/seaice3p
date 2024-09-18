@@ -71,7 +71,7 @@ def _calculate_non_dimensional_shortwave_heating(
     passed."""
     # To integrate spectrum between in nm
     MIN_WAVELENGTH = 350
-    MAX_WAVELENGTH = 700
+    MAX_WAVELENGTH = 1200
 
     center_grid = grids.centers
     edge_grid = grids.edges
@@ -96,6 +96,7 @@ def _calculate_non_dimensional_shortwave_heating(
                 "oil_mass_ratio": cfg.forcing_config.oil_heating.oil_mass_ratio,
                 "ice_thickness": dimensional_ice_thickness,
                 "ice_type": cfg.forcing_config.oil_heating.ice_type,
+                "median_droplet_radius_in_microns": 0.5,
             }
             model_choice = "1L"
 
@@ -107,6 +108,7 @@ def _calculate_non_dimensional_shortwave_heating(
                 "oil_mass_ratio": oil_mass_ratio,
                 "ice_thickness": dimensional_ice_thickness,
                 "ice_type": cfg.forcing_config.oil_heating.ice_type,
+                "median_droplet_radius_in_microns": 0.5,
             }
             model_choice = "IL"
         case _:
@@ -118,6 +120,7 @@ def _calculate_non_dimensional_shortwave_heating(
         model_choice,
         MIN_WAVELENGTH,
         MAX_WAVELENGTH,
+        num_samples=5,
         **MODEL_KWARGS
     )
 
