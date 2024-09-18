@@ -59,7 +59,7 @@ def main(
     print(f"Celestine version {__version__}")
 
     cfg = create_and_save_config(data_directory, simulation_dimensional_params)
-    solve(cfg, data_directory)
+    solve(cfg, data_directory, verbosity_level=1)
 
     # Analysis load simulation data
     # plot:
