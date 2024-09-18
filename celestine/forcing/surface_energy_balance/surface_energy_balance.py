@@ -9,30 +9,21 @@ doi: 10.1029/2004JC002361.
 """
 import numpy as np
 from scipy.optimize import fsolve
-from ..params import Config
+from ...state import StateFull
+from ...params import Config
 from .turbulent_heat_flux import (
     calculate_latent_heat_flux,
     calculate_sensible_heat_flux,
 )
-from .radiative_forcing import get_LW_forcing, get_SW_forcing
+from ..radiative_forcing import get_LW_forcing, get_SW_forcing
 
 STEFAN_BOLTZMANN = 5.670374419e-8  # W/m2 K4
-SW_ALBEDO = 0.7
-SW_PENETRATION_FRACTION = 0.4
 
 
-def calculate_emissivity(top_cell_is_ice: bool) -> float:
+def calculate_emissivity(cfg: Config, top_cell_is_ice: bool) -> float:
     if top_cell_is_ice:
-        return 0.99
-    return 0.97
-
-
-def calculate_SW_penetration_fraction(cfg: Config, time: float) -> float:
-    return SW_PENETRATION_FRACTION
-
-
-def calculate_SW_albedo(cfg: Config, time: float) -> float:
-    return SW_ALBEDO
+        return cfg.forcing_config.LW_forcing.ice_emissitivty
+    return cfg.forcing_config.LW_forcing.water_emissivity
 
 
 def convert_surface_temperature_to_kelvin(
@@ -49,9 +40,9 @@ def calculate_total_heat_flux(
 ) -> float:
     """Takes non-dimensional surface temperature and returns non-dimensional heat flux"""
     surface_temp_K = convert_surface_temperature_to_kelvin(cfg, surface_temp)
-    emissivity = calculate_emissivity(top_cell_is_ice)
-    SW_penetration_fraction = calculate_SW_penetration_fraction(cfg, time)
-    SW_albedo = calculate_SW_albedo(cfg, time)
+    emissivity = calculate_emissivity(cfg, top_cell_is_ice)
+    SW_penetration_fraction = cfg.forcing_config.SW_forcing.SW_penetration_fraction
+    SW_albedo = cfg.forcing_config.SW_forcing.SW_albedo
     dimensional_heat_flux = (
         get_LW_forcing(time, cfg)
         + (1 - SW_penetration_fraction) * (1 - SW_albedo) * get_SW_forcing(time, cfg)
@@ -110,18 +101,18 @@ def solve_for_surface_temp(
     return solution
 
 
-def find_ghost_cell_temperature(state) -> float:
+def find_ghost_cell_temperature(state: StateFull, cfg: Config) -> float:
     surface_temperature = solve_for_surface_temp(
-        state.cfg,
+        cfg,
         state.time,
         state.solid_fraction[-1],
         state.temperature[-1],
         state.temperature[-2],
     )
     return (
-        state.cfg.numerical_params.step
+        cfg.numerical_params.step
         * surface_temp_gradient(
-            state.cfg, surface_temperature, state.temperature[-1], state.temperature[-2]
+            cfg, surface_temperature, state.temperature[-1], state.temperature[-2]
         )
         + state.temperature[-1]
     )

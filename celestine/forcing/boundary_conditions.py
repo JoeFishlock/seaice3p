@@ -6,10 +6,8 @@ from typing import Callable
 import numpy as np
 
 from .temperature_forcing import get_temperature_forcing, get_bottom_temperature_forcing
-from .surface_energy_balance import find_ghost_cell_temperature
 from ..grids import add_ghost_cells
 from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams
-from ..params.forcing import RadForcing
 from ..state import (
     StateFull,
     StateBCs,
@@ -34,7 +32,7 @@ def get_boundary_conditions(cfg: Config) -> Callable[[StateFull], StateBCs]:
 
 def _EQM_boundary_conditions(full_state: EQMStateFull, cfg: Config) -> StateBCs:
     time = full_state.time
-    temperature = _temperature_BCs(full_state, time, cfg)
+    temperature = _temperature_BCs(full_state, cfg)
     enthalpy = _enthalpy_BCs(full_state.enthalpy, cfg, temperature[0])
     salt = _salt_BCs(full_state.salt, cfg)
 
@@ -59,7 +57,7 @@ def _EQM_boundary_conditions(full_state: EQMStateFull, cfg: Config) -> StateBCs:
 
 def _DISEQ_boundary_conditions(full_state: DISEQStateFull, cfg: Config) -> StateBCs:
     time = full_state.time
-    temperature = _temperature_BCs(full_state, time, cfg)
+    temperature = _temperature_BCs(full_state, cfg)
     enthalpy = _enthalpy_BCs(full_state.enthalpy, cfg, temperature[0])
     salt = _salt_BCs(full_state.salt, cfg)
 
@@ -111,18 +109,12 @@ def _liquid_salinity_BCs(liquid_salinity_centers, cfg: Config):
     )
 
 
-def _temperature_BCs(state, time, cfg: Config):
+def _temperature_BCs(state: StateFull, cfg: Config):
     """Add ghost cells with BCs to center quantity
 
     Note this needs the current time as well as top temperature is forced."""
-    far_temp = get_bottom_temperature_forcing(time, cfg)
-
-    if isinstance(cfg.forcing_config, RadForcing):
-        return add_ghost_cells(
-            state.temperature, bottom=far_temp, top=find_ghost_cell_temperature(state)
-        )
-
-    top_temp = get_temperature_forcing(time, cfg)
+    far_temp = get_bottom_temperature_forcing(state.time, cfg)
+    top_temp = get_temperature_forcing(state, cfg)
     return add_ghost_cells(state.temperature, bottom=far_temp, top=top_temp)
 
 

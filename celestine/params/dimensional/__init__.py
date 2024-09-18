@@ -6,10 +6,20 @@ from .forcing import (
     DimensionalConstantForcing,
     DimensionalRadForcing,
     DimensionalYearlyForcing,
+    DimensionalConstantSWForcing,
+    DimensionalSWForcing,
+    DimensionalOilHeating,
+    DimensionalBackgroundOilHeating,
+    DimensionalMobileOilHeating,
+    DimensionalNoHeating,
+    DimensionalConstantLWForcing,
+    DimensionalLWForcing,
+    DimensionalConstantTurbulentFlux,
+    DimensionalTurbulentFlux,
 )
 from .initial_conditions import (
     BRW09InitialConditions,
-    DimensionalSummerInitialConditions,
+    DimensionalOilInitialConditions,
     UniformInitialConditions,
 )
 from .convection import NoBrineConvection, DimensionalRJW14Params

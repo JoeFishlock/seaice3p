@@ -7,7 +7,7 @@ from .params import (
     Config,
     UniformInitialConditions,
     BRW09InitialConditions,
-    SummerInitialConditions,
+    OilInitialConditions,
     NoBrineConvection,
     EQMPhysicalParams,
     DISEQPhysicalParams,
@@ -20,7 +20,7 @@ def get_initial_conditions(cfg: Config):
     INITIAL_CONDITIONS = {
         UniformInitialConditions: _get_uniform_initial_conditions,
         BRW09InitialConditions: _get_barrow_initial_conditions,
-        SummerInitialConditions: _get_summer_initial_conditions,
+        OilInitialConditions: _get_oil_initial_conditions,
     }
     initial_state = INITIAL_CONDITIONS[type(cfg.initial_conditions_config)](cfg)
     match cfg.physical_params:
@@ -127,28 +127,31 @@ def _get_barrow_initial_conditions(cfg: Config):
     return _pack_initial_state(cfg, enthalpy, salt, gas)
 
 
-def _get_summer_initial_conditions(cfg: Config):
+def _get_oil_initial_conditions(cfg: Config):
     """initialise domain with an initial ice layer of given temperature and bulk
     salinity given by values in the configuration.
 
     This is an idealised initial condition to investigate the impact of shortwave
     radiative forcing on melting bare ice
     """
-    ICE_DEPTH = cfg.initial_conditions_config.initial_summer_ice_depth
+    ICE_DEPTH = cfg.initial_conditions_config.initial_ice_depth
 
     # Initialise with a constant bulk salinity in ice
-    SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
+    SALT_IN_ICE = cfg.initial_conditions_config.initial_ice_bulk_salinity
 
-    BOTTOM_TEMP = cfg.initial_conditions_config.initial_summer_ocean_temperature
+    BOTTOM_TEMP = cfg.initial_conditions_config.initial_ocean_temperature
     BOTTOM_SALT = cfg.forcing_config.ocean_bulk_salinity
-    TEMP_IN_ICE = cfg.initial_conditions_config.initial_summer_ice_temperature
+    TEMP_IN_ICE = cfg.initial_conditions_config.initial_ice_temperature
+
+    INITIAL_OIL_VOLUME_FRACTION = (
+        cfg.initial_conditions_config.initial_oil_volume_fraction
+    )
 
     centers = Grids(cfg.numerical_params.I).centers
     salt = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
-    # Initialise no gas until we have worked out treatment of oil
-    gas = np.zeros_like(salt)
+    gas = np.full_like(salt, INITIAL_OIL_VOLUME_FRACTION)
 
     temp = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers

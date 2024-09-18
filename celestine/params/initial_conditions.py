@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from serde import serde, coerce
 from .dimensional import (
     DimensionalParams,
-    DimensionalSummerInitialConditions,
+    DimensionalOilInitialConditions,
     UniformInitialConditions,
     BRW09InitialConditions,
 )
@@ -10,17 +10,19 @@ from .dimensional import (
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
-class SummerInitialConditions:
+class OilInitialConditions:
     """values for bottom (ocean) boundary"""
 
     # Non dimensional parameters for summer initial conditions
-    initial_summer_ice_depth: float = 0.5
-    initial_summer_ocean_temperature: float = -0.05
-    initial_summer_ice_temperature: float = -0.1
+    initial_ice_depth: float = 0.5
+    initial_ocean_temperature: float = -0.05
+    initial_ice_temperature: float = -0.1
+    initial_oil_volume_fraction: float = 1e-7
+    initial_ice_bulk_salinity: float = -0.1
 
 
 InitialConditionsConfig = (
-    UniformInitialConditions | BRW09InitialConditions | SummerInitialConditions
+    UniformInitialConditions | BRW09InitialConditions | OilInitialConditions
 )
 
 
@@ -35,15 +37,19 @@ def get_dimensionless_initial_conditions_config(
             return BRW09InitialConditions(
                 Barrow_initial_bulk_gas_in_ice=dimensional_params.initial_conditions_config.Barrow_initial_bulk_gas_in_ice
             )
-        case DimensionalSummerInitialConditions():
-            return SummerInitialConditions(
-                initial_summer_ice_depth=dimensional_params.initial_conditions_config.initial_summer_ice_depth
+        case DimensionalOilInitialConditions():
+            return OilInitialConditions(
+                initial_ice_depth=dimensional_params.initial_conditions_config.initial_ice_depth
                 / dimensional_params.lengthscale,
-                initial_summer_ocean_temperature=scales.convert_from_dimensional_temperature(
-                    dimensional_params.initial_conditions_config.initial_summer_ocean_temperature
+                initial_ocean_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_conditions_config.initial_ocean_temperature
                 ),
-                initial_summer_ice_temperature=scales.convert_from_dimensional_temperature(
-                    dimensional_params.initial_conditions_config.initial_summer_ice_temperature
+                initial_ice_temperature=scales.convert_from_dimensional_temperature(
+                    dimensional_params.initial_conditions_config.initial_ice_temperature
+                ),
+                initial_oil_volume_fraction=dimensional_params.initial_conditions_config.initial_oil_volume_fraction,
+                initial_ice_bulk_salinity=scales.convert_from_dimensional_bulk_salinity(
+                    dimensional_params.initial_conditions_config.initial_ice_bulk_salinity
                 ),
             )
         case _:
