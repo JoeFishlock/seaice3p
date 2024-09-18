@@ -1,10 +1,9 @@
 import argparse
 from pathlib import Path
-from celestine import __version__
-from celestine.printing import get_printer
-from .params import DimensionalParams
-from celestine.params import Config, get_config
-from celestine.run_simulation import run_batch
+from . import __version__
+from .printing import get_printer
+from .params import DimensionalParams, Config, get_config
+from .run_simulation import run_batch
 
 
 if __name__ == "__main__":
@@ -46,7 +45,7 @@ if __name__ == "__main__":
         output_directory_path = Path(args.output_directory)
     output_directory_path.mkdir(parents=True, exist_ok=True)
 
-    optprint(f"Running celestine version: {__version__}")
+    optprint(f"Running seaice3p version: {__version__}")
     optprint(f"Save simulation output to: {output_directory_path}")
     optprint(f"Looking for configurations in: {configuration_directory_path}")
     optprint(f"Dimensional configuration option is {is_dimensional_configuration}")

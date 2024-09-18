@@ -17,7 +17,7 @@ def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
     :param D_g: difference matrix for ghost grid
     :type D_g: Numpy Array
     :param cfg: Simulation configuration
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: conductive heat flux
 
     """

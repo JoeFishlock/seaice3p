@@ -8,12 +8,12 @@ To skip this test run pytest -m "not slow"
 """
 from pathlib import Path
 import pytest
-from celestine.example import (
+from seaice3p.example import (
     SIMULATION_DIMENSIONAL_PARAMS,
     create_and_save_config,
     main,
 )
-from celestine import Config, DimensionalParams
+from seaice3p import Config, DimensionalParams
 
 
 def test_example_configuration(tmp_path):

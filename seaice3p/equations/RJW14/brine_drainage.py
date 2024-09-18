@@ -30,7 +30,7 @@ def calculate_permeability(liquid_fraction, cfg: Config):
     :param liquid_fraction: liquid fraction
     :type liquid_fraction: Numpy Array
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: permeability on the same grid as liquid fraction
     """
     if cfg.bubble_params.porosity_threshold:
@@ -57,7 +57,7 @@ def calculate_integrated_mean_permeability(
     :param cell_centers: cell center positions
     :type cell_centers: Numpy Array of shape (I,)
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: permeability averaged from base of the ice up to given z value
     """
     if z < -ice_depth:
@@ -88,7 +88,7 @@ def calculate_Rayleigh(
     :param liquid_fraction: liquid fraction on center grid
     :type liquid_fraction: Numpy Array (size I)
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: Array of shape (I,) of Rayleigh number at cell centers
     """
     Rayleigh_salt = cfg.brine_convection_params.Rayleigh_salt
@@ -128,7 +128,7 @@ def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
     :param edge_grid: The vertical coordinate positions of the edge grid.
     :type edge_grid: Numpy Array (size I+1)
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: Edge grid value at convecting boundary.
     """
     Rayleigh_critical = cfg.brine_convection_params.Rayleigh_critical
@@ -150,7 +150,7 @@ def get_effective_Rayleigh_number(Rayleigh_number, cfg: Config):
     :param Rayleigh_number: local rayleigh number on center grid
     :type Rayleigh_number: Numpy Array of shape (I,)
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: Effective Rayleigh number.
     """
     Rayleigh_critical = cfg.brine_convection_params.Rayleigh_critical
@@ -178,7 +178,7 @@ def calculate_brine_channel_strength(
     :param convecting_region_height: position of the convecting region boundary (negative)
     :type convecting_region_height: float
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: Brine channel strength parameter
     """
     convection_strength = cfg.brine_convection_params.convection_strength
@@ -214,7 +214,7 @@ def calculate_brine_convection_liquid_velocity(
     :param edge_grid: Vertical coordinates of cell edges
     :type edge_grid: Numpy Array of shape (I+1,)
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: Liquid darcy velocity on the edge grid.
     """
     ice_depth = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)
@@ -274,7 +274,7 @@ def calculate_brine_channel_sink(
     :param edge_grid: Vertical coordinates of cell edges
     :type edge_grid: Numpy Array of shape (I+1,)
     :param cfg: Configuration object for the simulation.
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: Strength of the sink term due to brine channels on the center grid.
     """
     ice_depth = calculate_ice_ocean_boundary_depth(liquid_fraction, edge_grid)

@@ -1,4 +1,4 @@
-"""Test running the diagnostic scripts in celestine
+"""Test running the diagnostic scripts in seaice3p
 
 These scripts plot functions used in the code like the gas velocities and brine
 convection parameteristaion
@@ -10,6 +10,6 @@ import pytest
 
 
 def test_running_brine_convection_diagnostics(tmp_path):
-    from celestine.diagnostics.brine_drainage_parameterisation import main
+    from seaice3p.diagnostics.brine_drainage_parameterisation import main
 
     main(tmp_path)

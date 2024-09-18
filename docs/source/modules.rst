@@ -1,7 +1,7 @@
-celestine
-=========
+seaice3p
+========
 
 .. toctree::
    :maxdepth: 4
 
-   celestine
+   seaice3p

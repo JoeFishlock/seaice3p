@@ -71,7 +71,7 @@ class BRW09Forcing:
         and time in days (with missing values filtered out).
 
         Note the metadata explaining how to use the barrow temperature data is also
-        in celestine/forcing_data. The indices corresponding to days and air temp are
+        in seaice3p/forcing_data. The indices corresponding to days and air temp are
         hard coded in as class variables.
         """
         DATA_INDICES = {

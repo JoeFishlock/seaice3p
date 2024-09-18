@@ -25,7 +25,7 @@ def _prevent_gas_rise_into_saturated_cell(
     :param Vg: gas insterstitial velocity on cell edges
     :type Vg: Numpy array (size I+1)
     :param state_BCs: state of system with boundary conditions
-    :type state_BCs: celestine.state.StateBCs
+    :type state_BCs: seaice3p.state.StateBCs
     :return: filtered gas interstitial velocities on edges to prevent gas rise into a
         fully gas saturated cell
 

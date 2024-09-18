@@ -1,4 +1,4 @@
-# Celestine #
+# seaice3p #
 
 Code for simulating gas content of sea ice in 1D using enthalpy method.
 
@@ -13,10 +13,10 @@ Note depends on oilrad (v0.3.0).
 
 Save configurations for a simulation (either dimensional or non-dimensional but not a mixture) as yaml files.
 This can be done by editing examples or by using classes within the dimensional_params and params modules.
-Once you have a directory of configuration files the simulation for each can be run using `python -m celestine path_to_configuration_directory path_to_output_directory`.
+Once you have a directory of configuration files the simulation for each can be run using `python -m seaice3p path_to_configuration_directory path_to_output_directory`.
 The `--dimensional` flag should be added to this command if running dimensional parameter configurations.
 The simulation will be run for each configuration and the data saved as a numpy archive with the same name as the simulation in the specified output directory.
-Example script that generates, runs and plots a simulation can be run with `python -m celestine.example`.
+Example script that generates, runs and plots a simulation can be run with `python -m seaice3p.example`.
 
 ## Documentation ##
 
@@ -36,10 +36,10 @@ To speed this up run in parallel using `pytest-xdist` with the extra options `py
 ## Release checklist ##
 
 - run tests.
-- bump version number in celestine/__init__.py
+- bump version number in seaice3p/__init__.py
 - bump version number in sphinx documentation in docs/source/conf.py
 - bump version number in pyproject.toml
-- run `sphinx-apidoc -o docs/source celestine` to generate source files for documentation.
+- run `sphinx-apidoc -o docs/source seaice3p` to generate source files for documentation.
 - create docs by running make latexpdf in docs/ directory and put pdf from build directory into docs/
 - update Changelog.md
 - tag commit with version number

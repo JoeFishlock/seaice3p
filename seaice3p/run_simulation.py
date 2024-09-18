@@ -15,8 +15,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
 
-from celestine.printing import get_printer
-
+from .printing import get_printer
 from .equations import get_equations
 from .state import get_unpacker
 from .forcing import get_boundary_conditions
@@ -33,7 +32,7 @@ def run_batch(list_of_cfg: List[Config], directory: Path, verbosity_level=0) -> 
     Output from each simulation is saved in a .npz file.
 
     :param list_of_cfg: list of configurations
-    :type list_of_cfg: List[celestine.params.Config]
+    :type list_of_cfg: List[seaice3p.params.Config]
 
     """
     optprint = get_printer(verbosity_level)

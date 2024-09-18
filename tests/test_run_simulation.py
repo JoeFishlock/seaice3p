@@ -1,7 +1,7 @@
 import pytest
 from glob import glob
 from pathlib import Path
-from celestine import (
+from seaice3p import (
     solve,
     DimensionalParams,
     Config,

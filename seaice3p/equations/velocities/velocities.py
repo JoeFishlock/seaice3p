@@ -1,6 +1,6 @@
 import numpy as np
-from celestine.grids import geometric, Grids
-from celestine.params import (
+from ...grids import geometric, Grids
+from ...params import (
     Config,
     MonoBubbleParams,
     PowerLawBubbleParams,
@@ -37,7 +37,7 @@ def calculate_liquid_darcy_velocity(
     :param edge_grid: Vertical coordinates of cell edges
     :type edge_grid: Numpy Array (size I+1)
     :param cfg: simulation configuration object
-    :type cfg: celestine.params.Config
+    :type cfg: seaice3p.params.Config
     :return: liquid darcy velocity on edge grid
     """
     if isinstance(cfg.brine_convection_params, NoBrineConvection):

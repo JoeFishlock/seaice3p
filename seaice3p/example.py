@@ -56,7 +56,7 @@ def main(
     config then run simulation and save data.
     """
 
-    print(f"Celestine version {__version__}")
+    print(f"seaice3p version {__version__}")
 
     cfg = create_and_save_config(data_directory, simulation_dimensional_params)
     solve(cfg, data_directory, verbosity_level=1)
