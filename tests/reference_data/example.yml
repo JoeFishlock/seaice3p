@@ -37,6 +37,7 @@ scales:
   liquid_thermal_conductivity: 0.54
   ocean_freezing_temperature: -2.6570370370370373
   ocean_salinity: 34.0
+  pore_radius: 0.001
   salinity_difference: 236.0
   saturation_concentration: 1.0e-05
   temperature_difference: 18.442962962962966
