@@ -79,7 +79,9 @@ def _calculate_non_dimensional_shortwave_heating(
 
     SW_RANGE = (350, 3000)
     NUM_WAVELENGTH_SAMPLES = 7
-    MEDIAN_DROPLET_RADIUS_MICRONS = 0.5
+    MEDIAN_DROPLET_RADIUS_MICRONS = (
+        cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
+    )
     OIL_DENSITY = 900
     ICE_DENSITY = 916
     wavelengths = np.geomspace(SW_RANGE[0], SW_RANGE[1], NUM_WAVELENGTH_SAMPLES)

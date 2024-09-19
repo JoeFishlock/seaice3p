@@ -17,6 +17,7 @@ class Scales:
     temperature_difference: float  # deg C
     gas_density: float  # kg/m3
     saturation_concentration: float  # kg(gas)/kg(liquid)
+    pore_radius: float  # m
 
     @property
     def time_scale(self):

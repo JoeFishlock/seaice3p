@@ -171,6 +171,7 @@ class DimensionalParams:
             self.water_params.temperature_difference,
             self.gas_params.gas_density,
             self.gas_params.saturation_concentration,
+            self.bubble_params.pore_radius,
         )
 
     def save(self, directory: Path):

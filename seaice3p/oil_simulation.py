@@ -26,7 +26,6 @@ def generate_oil_simulation_config(
     oil_density: float,
     oil_droplet_radius: float,
     SW_irradiance: float,
-    SW_albedo: float,
     SW_penetration_fraction: float,
     LW_irradiance: float,
     air_temp: float,
@@ -76,7 +75,6 @@ def generate_oil_simulation_config(
         forcing_config=DimensionalRadForcing(
             SW_forcing=DimensionalConstantSWForcing(
                 SW_irradiance=SW_irradiance,
-                SW_albedo=SW_albedo,
                 SW_penetration_fraction=SW_penetration_fraction,
             ),
             LW_forcing=DimensionalConstantLWForcing(LW_irradiance=LW_irradiance),
