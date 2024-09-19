@@ -41,11 +41,11 @@ def calculate_total_heat_flux(
     """Takes non-dimensional surface temperature and returns non-dimensional heat flux"""
     surface_temp_K = convert_surface_temperature_to_kelvin(cfg, surface_temp)
     emissivity = calculate_emissivity(cfg, top_cell_is_ice)
-    SW_penetration_fraction = cfg.forcing_config.SW_forcing.SW_penetration_fraction
-    SW_albedo = cfg.forcing_config.SW_forcing.SW_albedo
+    # SW_penetration_fraction = cfg.forcing_config.SW_forcing.SW_penetration_fraction
     dimensional_heat_flux = (
         get_LW_forcing(time, cfg)
-        + (1 - SW_penetration_fraction) * (1 - SW_albedo) * get_SW_forcing(time, cfg)
+        # No SW in boundary condition unless we have heating of radiation in the SSL
+        # + (1 - SW_penetration_fraction) * get_SW_forcing(time, cfg)
         - emissivity * STEFAN_BOLTZMANN * surface_temp_K**4
         + calculate_sensible_heat_flux(cfg, time, top_cell_is_ice, surface_temp_K)
         + calculate_latent_heat_flux(cfg, time, top_cell_is_ice, surface_temp_K)

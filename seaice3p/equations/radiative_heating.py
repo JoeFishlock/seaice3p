@@ -3,7 +3,7 @@
 from typing import Callable
 import numpy as np
 from numpy.typing import NDArray
-from oilrad import calculate_SW_heating_in_ice
+import oilrad as oi
 from ..grids import calculate_ice_ocean_boundary_depth, Grids
 from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams, RadForcing
 from ..params.dimensional import (
@@ -63,66 +63,88 @@ def _DISEQ_radiative_heating(
 
 
 def _calculate_non_dimensional_shortwave_heating(
-    state_bcs: StateBCs, cfg: Config, grids
+    state_bcs: StateBCs, cfg: Config, grids: Grids
 ):
     """Calculate internal shortwave heating due to oil droplets on center grid
 
     Assumes a configuration with the RadForcing object as the forcing config is
     passed."""
-    # To integrate spectrum between in nm
-    MIN_WAVELENGTH = 350
-    MAX_WAVELENGTH = 1200
 
     center_grid = grids.centers
-    edge_grid = grids.edges
     heating = np.zeros_like(center_grid)
 
     # If we don't have radiative forcing then just return array of zeros for heating
     if not isinstance(cfg.forcing_config, RadForcing):
         return heating
 
+    SW_RANGE = (
+        cfg.forcing_config.SW_forcing.SW_min_wavelength,
+        cfg.forcing_config.SW_forcing.SW_max_wavelength,
+    )
+    NUM_WAVELENGTH_SAMPLES = cfg.forcing_config.SW_forcing.num_wavelength_samples
+    MEDIAN_DROPLET_RADIUS_MICRONS = (
+        cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
+    )
+    OIL_DENSITY = 900
+    ICE_DENSITY = 916
+    wavelengths = np.geomspace(SW_RANGE[0], SW_RANGE[1], NUM_WAVELENGTH_SAMPLES)
+    convert_gas_fraction_to_oil_mass = lambda phi: phi * 1e9 * OIL_DENSITY / ICE_DENSITY
+
+    edge_grid = grids.edges
     ice_ocean_boundary_depth = calculate_ice_ocean_boundary_depth(
         state_bcs.liquid_fraction, edge_grid
     )
+    dimensional_edge_grid_in_ice = (
+        edge_grid[edge_grid >= -ice_ocean_boundary_depth] * cfg.scales.lengthscale
+    )
     is_ice = center_grid > -ice_ocean_boundary_depth
-
-    dimensional_ice_thickness = ice_ocean_boundary_depth * cfg.scales.lengthscale
 
     match cfg.forcing_config.oil_heating:
         case DimensionalNoHeating():
             return heating
         case DimensionalBackgroundOilHeating():
-            MODEL_KWARGS = {
-                "oil_mass_ratio": cfg.forcing_config.oil_heating.oil_mass_ratio,
-                "ice_thickness": dimensional_ice_thickness,
-                "ice_type": cfg.forcing_config.oil_heating.ice_type,
-                "median_droplet_radius_in_microns": 0.5,
-            }
-            model_choice = "1L"
+            model = oi.SingleLayerModel(
+                dimensional_edge_grid_in_ice,
+                wavelengths,
+                oil_mass_ratio=cfg.forcing_config.oil_heating.oil_mass_ratio,
+                ice_type=cfg.forcing_config.oil_heating.ice_type,
+                median_droplet_radius_in_microns=MEDIAN_DROPLET_RADIUS_MICRONS,
+            )
 
         case DimensionalMobileOilHeating():
-            oil_mass_ratio = lambda z: np.interp(
-                z, center_grid, state_bcs.gas_fraction[1:-1] * 0.9 * 1e9
+            dimensional_center_grid_in_ice = (
+                center_grid[center_grid > -ice_ocean_boundary_depth]
+                * cfg.scales.lengthscale
             )
-            MODEL_KWARGS = {
-                "oil_mass_ratio": oil_mass_ratio,
-                "ice_thickness": dimensional_ice_thickness,
-                "ice_type": cfg.forcing_config.oil_heating.ice_type,
-                "median_droplet_radius_in_microns": 0.5,
-            }
-            model_choice = "IL"
+            gas_fraction_centers = state_bcs.gas_fraction[1:-1]
+            gas_fraction_edges = np.interp(
+                dimensional_edge_grid_in_ice,
+                dimensional_center_grid_in_ice,
+                gas_fraction_centers[is_ice],
+            )
+            oil_mass_ratio = lambda z: np.interp(
+                z,
+                dimensional_edge_grid_in_ice,
+                convert_gas_fraction_to_oil_mass(gas_fraction_edges),
+            )
+            model = oi.InfiniteLayerModel(
+                dimensional_edge_grid_in_ice,
+                wavelengths,
+                oil_mass_ratio=oil_mass_ratio,
+                ice_type=cfg.forcing_config.oil_heating.ice_type,
+                median_droplet_radius_in_microns=MEDIAN_DROPLET_RADIUS_MICRONS,
+            )
         case _:
             raise NotImplementedError()
 
-    dimensional_heating = calculate_SW_heating_in_ice(
-        get_SW_forcing(state_bcs.time, cfg),
-        center_grid[is_ice],
-        model_choice,
-        MIN_WAVELENGTH,
-        MAX_WAVELENGTH,
-        num_samples=5,
-        **MODEL_KWARGS
+    irradiances = oi.integrate_over_SW(oi.solve_two_stream_model(model))
+    # dimensional heating rate in W/m3
+    PEN = cfg.forcing_config.SW_forcing.SW_penetration_fraction
+    heating[is_ice] = (
+        PEN
+        * get_SW_forcing(state_bcs.time, cfg)
+        * np.diff(irradiances.net_irradiance)
+        / np.diff(dimensional_edge_grid_in_ice)
     )
 
-    heating[is_ice] = cfg.scales.convert_from_dimensional_heating(dimensional_heating)
-    return heating
+    return cfg.scales.convert_from_dimensional_heating(heating)

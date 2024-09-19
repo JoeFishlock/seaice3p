@@ -16,7 +16,9 @@ class DimensionalYearlyForcing:
 @dataclass(frozen=True)
 class DimensionalConstantSWForcing:
     SW_irradiance: float = 280  # W/m2
-    SW_albedo: float = 0.7
+    SW_min_wavelength: float = 350
+    SW_max_wavelength: float = 3000
+    num_wavelength_samples: int = 7
     SW_penetration_fraction: float = 0.4
 
 

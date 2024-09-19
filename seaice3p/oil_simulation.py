@@ -26,7 +26,6 @@ def generate_oil_simulation_config(
     oil_density: float,
     oil_droplet_radius: float,
     SW_irradiance: float,
-    SW_albedo: float,
     SW_penetration_fraction: float,
     LW_irradiance: float,
     air_temp: float,
@@ -39,6 +38,9 @@ def generate_oil_simulation_config(
     initial_ice_temperature: float,
     initial_ocean_temperature: float,
     initial_ice_bulk_salinity: float = 34,
+    SW_min_wavelength=350,
+    SW_max_wavelength=3000,
+    num_wavelength_samples=7,
     brine_convection_params: DimensionalRJW14Params
     | NoBrineConvection = DimensionalRJW14Params(),
     I=50,
@@ -52,7 +54,7 @@ def generate_oil_simulation_config(
 
     The initially uniform mass concentration of oil in the domain is set in ng/g.
     """
-    LIQUID_DENSITY = 1028
+    ICE_DENSITY = 916
     DimensionalParams(
         name=name,
         total_time_in_days=total_time_in_days,
@@ -76,7 +78,9 @@ def generate_oil_simulation_config(
         forcing_config=DimensionalRadForcing(
             SW_forcing=DimensionalConstantSWForcing(
                 SW_irradiance=SW_irradiance,
-                SW_albedo=SW_albedo,
+                SW_min_wavelength=SW_min_wavelength,
+                SW_max_wavelength=SW_max_wavelength,
+                num_wavelength_samples=num_wavelength_samples,
                 SW_penetration_fraction=SW_penetration_fraction,
             ),
             LW_forcing=DimensionalConstantLWForcing(LW_irradiance=LW_irradiance),
@@ -95,11 +99,11 @@ def generate_oil_simulation_config(
             initial_ocean_temperature=initial_ocean_temperature,
             initial_oil_volume_fraction=initial_oil_mass_ratio
             * 1e-9
-            * LIQUID_DENSITY
+            * ICE_DENSITY
             / oil_density,
         ),
         water_params=DimensionalWaterParams(
-            liquid_density=LIQUID_DENSITY,
+            liquid_density=1028,
             ocean_salinity=34,
             ocean_temperature=initial_ocean_temperature,
             phase_average_conductivity=True,

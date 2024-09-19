@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.16.0 (2024-09-19) ##
+
+### Summary ###
+Change to use oilrad v0.4.0 for radiative transfer calculation.
+This now integrates accross all shortwave wavelengths so we no longer need to have the shortwave in the surface boundary condition.
+The SW_penetration_fraction dictates how much radiation passes through the initial surface scattering layer to the solver.
+
 ## v0.15.0 (2024-09-18) ##
 
 ### Summary ###
