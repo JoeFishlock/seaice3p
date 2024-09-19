@@ -38,6 +38,9 @@ def generate_oil_simulation_config(
     initial_ice_temperature: float,
     initial_ocean_temperature: float,
     initial_ice_bulk_salinity: float = 34,
+    SW_min_wavelength=350,
+    SW_max_wavelength=3000,
+    num_wavelength_samples=7,
     brine_convection_params: DimensionalRJW14Params
     | NoBrineConvection = DimensionalRJW14Params(),
     I=50,
@@ -75,6 +78,9 @@ def generate_oil_simulation_config(
         forcing_config=DimensionalRadForcing(
             SW_forcing=DimensionalConstantSWForcing(
                 SW_irradiance=SW_irradiance,
+                SW_min_wavelength=SW_min_wavelength,
+                SW_max_wavelength=SW_max_wavelength,
+                num_wavelength_samples=num_wavelength_samples,
                 SW_penetration_fraction=SW_penetration_fraction,
             ),
             LW_forcing=DimensionalConstantLWForcing(LW_irradiance=LW_irradiance),

@@ -77,8 +77,11 @@ def _calculate_non_dimensional_shortwave_heating(
     if not isinstance(cfg.forcing_config, RadForcing):
         return heating
 
-    SW_RANGE = (350, 3000)
-    NUM_WAVELENGTH_SAMPLES = 7
+    SW_RANGE = (
+        cfg.forcing_config.SW_forcing.SW_min_wavelength,
+        cfg.forcing_config.SW_forcing.SW_max_wavelength,
+    )
+    NUM_WAVELENGTH_SAMPLES = cfg.forcing_config.SW_forcing.num_wavelength_samples
     MEDIAN_DROPLET_RADIUS_MICRONS = (
         cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
     )
