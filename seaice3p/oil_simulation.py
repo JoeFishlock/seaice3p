@@ -52,7 +52,7 @@ def generate_oil_simulation_config(
 
     The initially uniform mass concentration of oil in the domain is set in ng/g.
     """
-    LIQUID_DENSITY = 1028
+    ICE_DENSITY = 916
     DimensionalParams(
         name=name,
         total_time_in_days=total_time_in_days,
@@ -95,11 +95,11 @@ def generate_oil_simulation_config(
             initial_ocean_temperature=initial_ocean_temperature,
             initial_oil_volume_fraction=initial_oil_mass_ratio
             * 1e-9
-            * LIQUID_DENSITY
+            * ICE_DENSITY
             / oil_density,
         ),
         water_params=DimensionalWaterParams(
-            liquid_density=LIQUID_DENSITY,
+            liquid_density=1028,
             ocean_salinity=34,
             ocean_temperature=initial_ocean_temperature,
             phase_average_conductivity=True,
