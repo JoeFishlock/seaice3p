@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.17.0 (2024-09-21) ##
+
+### Summary ###
+Change to use oilrad v0.5.0 for radiative transfer calculation.
+This just takes liquid fraction within the entire domain and so solves a depth dependent radiative transfer model with meltpond and ocean regions present.
+Once a meltpond forms on the surface of the ice the surface SW penetration fraction is set to 1 as there can be no SSL when a meltpond has formed.
+
 ## v0.16.0 (2024-09-19) ##
 
 ### Summary ###
