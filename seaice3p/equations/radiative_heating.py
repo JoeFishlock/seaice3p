@@ -129,7 +129,6 @@ def _calculate_non_dimensional_shortwave_heating(
     else:
         PEN = 1
 
-    print(PEN)
     # dimensional heating rate in W/m3
     heating = (
         PEN
