@@ -1,43 +1,123 @@
+from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
+from numpy.typing import NDArray
 
 
-from . import Config, DimensionalParams, get_config
-from .params.physical import DISEQPhysicalParams, EQMPhysicalParams
-from .state import get_unpacker
+from . import (
+    Config,
+    DimensionalParams,
+    get_config,
+    DISEQPhysicalParams,
+    EQMPhysicalParams,
+    Grids,
+)
+from .state import EQMState, DISEQState, StateFull
 from .enthalpy_method import get_enthalpy_method
 
 
-def load_data(
-    sim_name: str,
-    data_directory: Path,
-    sim_config_name=None,
-    is_dimensional=False,
-    config_extension="yml",
-):
-    if sim_config_name is None:
-        sim_config_name = sim_name
+@dataclass
+class BaseResults:
+    cfg: Config
+    dcfg: None | DimensionalParams
+    times: NDArray
+    enthalpy: NDArray
+    salt: NDArray
 
-    SIM_DATA_PATH = data_directory / f"{sim_name}.npz"
+
+@dataclass
+class EQMResults(BaseResults):
+    bulk_gas: NDArray
+
+    def __post_init__(self):
+        _set_derived_attributes(
+            self,
+            [
+                "solid_fraction",
+                "liquid_fraction",
+                "gas_fraction",
+                "temperature",
+                "liquid_salinity",
+                "dissolved_gas",
+            ],
+        )
+
+
+@dataclass
+class DISEQResults(BaseResults):
+    bulk_dissolved_gas: NDArray
+    gas_fraction: NDArray
+
+    def __post_init__(self):
+        _set_derived_attributes(
+            self,
+            [
+                "solid_fraction",
+                "liquid_fraction",
+                "temperature",
+                "liquid_salinity",
+                "dissolved_gas",
+            ],
+        )
+
+
+Results = EQMResults | DISEQResults
+
+
+def _set_derived_attributes(results: Results, enthalpy_method_attrs: list[str]) -> None:
+    def get_state(time) -> StateFull:
+        index = np.argmin(np.abs(results.times - time))
+        match results:
+            case EQMResults():
+                state = EQMState(
+                    results.times[index],
+                    results.enthalpy[:, index],
+                    results.salt[:, index],
+                    results.bulk_gas[:, index],
+                )
+            case DISEQResults():
+                state = DISEQState(
+                    results.times[index],
+                    results.enthalpy[:, index],
+                    results.salt[:, index],
+                    results.bulk_dissolved_gas[:, index],
+                    results.gas_fraction[:, index],
+                )
+
+        enthalpy_method = get_enthalpy_method(results.cfg)
+        return enthalpy_method(state)
+
+    setattr(results, "states", list(map(get_state, results.times)))
+
+    for attr in enthalpy_method_attrs:
+        array_data = _get_array_data(attr, results.states)
+        setattr(results, attr, array_data)
+
+    setattr(results, "grids", Grids(results.cfg.numerical_params.I))
+
+
+def load_simulation(
+    sim_config_path: Path,
+    sim_data_path: Path,
+    is_dimensional: bool = True,
+) -> Results:
 
     if is_dimensional:
-        sim_cfg = get_config(
-            DimensionalParams.load(
-                data_directory / f"{sim_config_name}_dimensional.{config_extension}"
-            )
-        )
+        dcfg = DimensionalParams.load(sim_config_path)
+        cfg = get_config(dcfg)
     else:
-        sim_cfg = Config.load(data_directory / f"{sim_config_name}.{config_extension}")
+        dcfg = None
+        cfg = Config.load(sim_config_path)
 
-    with np.load(SIM_DATA_PATH) as data:
-        match sim_cfg.physical_params:
+    with np.load(sim_data_path) as data:
+        match cfg.physical_params:
             case EQMPhysicalParams():
                 times = data["arr_0"]
                 enthalpy = data["arr_1"]
                 salt = data["arr_2"]
                 bulk_gas = data["arr_3"]
 
-                data_tuple = (enthalpy, salt, bulk_gas)
+                return EQMResults(cfg, dcfg, times, enthalpy, salt, bulk_gas)
 
             case DISEQPhysicalParams():
                 times = data["arr_0"]
@@ -46,27 +126,17 @@ def load_data(
                 bulk_dissolved_gas = data["arr_3"]
                 gas_fraction = data["arr_4"]
 
-                data_tuple = (enthalpy, salt, bulk_dissolved_gas, gas_fraction)
+                return DISEQResults(
+                    cfg, dcfg, times, enthalpy, salt, bulk_dissolved_gas, gas_fraction
+                )
 
             case _:
                 raise NotImplementedError
 
-    return sim_cfg, times, data_tuple
 
-
-def get_state(non_dimensional_time, times, data, cfg):
-    index = np.argmin(np.abs(times - non_dimensional_time))
-    data_at_time = [quantity[:, index] for quantity in data]
-    unpacker = get_unpacker(cfg)
-    return unpacker(times[index], np.concatenate(tuple(data_at_time)))
-
-
-def get_array_data(attr: str, cfg, times, data):
+def _get_array_data(attr: str, states: list[StateFull]) -> NDArray:
     data_slices = []
-    for time in times:
-        state = get_state(time, times, data, cfg)
-        enthalpy_method = get_enthalpy_method(cfg)
-        full_state = enthalpy_method(state)
-        data_slices.append(getattr(full_state, attr))
+    for state in states:
+        data_slices.append(getattr(state, attr))
 
     return np.vstack(tuple(data_slices)).T
