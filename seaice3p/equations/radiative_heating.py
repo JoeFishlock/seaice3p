@@ -13,6 +13,7 @@ from ..params.dimensional import (
 )
 from ..forcing import get_SW_forcing, get_SW_penetration_fraction
 from ..state import StateBCs, EQMStateBCs, DISEQStateBCs
+from ..oil_mass import convert_gas_fraction_to_oil_mass_ratio
 
 
 def get_radiative_heating(cfg: Config, grids: Grids) -> Callable[[StateBCs], NDArray]:
@@ -75,9 +76,6 @@ def run_two_stream_model(
     MEDIAN_DROPLET_RADIUS_MICRONS = (
         cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
     )
-    OIL_DENSITY = cfg.scales.gas_density
-    ICE_DENSITY = cfg.scales.ice_density
-    convert_gas_fraction_to_oil_mass = lambda phi: phi * 1e9 * OIL_DENSITY / ICE_DENSITY
 
     match cfg.forcing_config.oil_heating:
         case DimensionalBackgroundOilHeating():
@@ -86,8 +84,10 @@ def run_two_stream_model(
             )
 
         case DimensionalMobileOilHeating():
-            oil_mass_ratio = convert_gas_fraction_to_oil_mass(
-                average(state_bcs.gas_fraction)
+            oil_mass_ratio = convert_gas_fraction_to_oil_mass_ratio(
+                average(state_bcs.gas_fraction),
+                cfg.scales.gas_density,
+                cfg.scales.ice_density,
             )
         case _:
             raise NotImplementedError()

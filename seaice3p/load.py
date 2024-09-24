@@ -22,6 +22,7 @@ from .forcing.boundary_conditions import get_boundary_conditions
 from .forcing import get_SW_penetration_fraction, get_SW_forcing
 from .equations.radiative_heating import run_two_stream_model
 from .grids import calculate_ice_ocean_boundary_depth
+from .oil_mass import convert_gas_fraction_to_oil_mass_ratio
 
 
 @dataclass
@@ -65,6 +66,13 @@ class _BaseResults:
     @property
     def dissolved_gas(self) -> NDArray:
         return _get_array_data("dissolved_gas", self.states)
+
+    @property
+    def oil_mass_ratio(self) -> NDArray:
+        """in ng/g"""
+        return convert_gas_fraction_to_oil_mass_ratio(
+            self.gas_fraction, self.cfg.scales.gas_density, self.cfg.scales.ice_density
+        )
 
     def get_spectral_irradiance(self, time: float) -> oi.SpectralIrradiance:
         if not isinstance(self.cfg.forcing_config, RadForcing):
