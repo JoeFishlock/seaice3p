@@ -119,7 +119,7 @@ class DimensionalParams:
                 return (
                     self.water_params.liquid_density
                     * self.gravity
-                    * self.brine_convection_params.haline_contraction_coefficient
+                    * self.water_params.haline_contraction_coefficient
                     * self.water_params.salinity_difference
                     * self.lengthscale
                     * self.brine_convection_params.reference_permeability
@@ -170,8 +170,11 @@ class DimensionalParams:
             self.water_params.ocean_freezing_temperature,
             self.water_params.temperature_difference,
             self.gas_params.gas_density,
+            self.water_params.liquid_density,
+            self.water_params.ice_density,
             self.gas_params.saturation_concentration,
             self.bubble_params.pore_radius,
+            self.water_params.haline_contraction_coefficient,
         )
 
     def save(self, directory: Path):

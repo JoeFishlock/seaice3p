@@ -7,6 +7,7 @@ from serde import serde, coerce
 @dataclass(frozen=True)
 class DimensionalWaterParams:
     liquid_density: float = 1028  # kg/m3
+    ice_density: float = 916  # kg/m3
     ocean_salinity: float = 34  # g/kg
     eutectic_salinity: float = 270  # g/kg
     eutectic_temperature: float = -21.1  # deg Celsius
@@ -19,6 +20,8 @@ class DimensionalWaterParams:
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
 
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
+    # used to calculate Rayleigh number for convection and density contraction in liquid equation of state
+    haline_contraction_coefficient: float = 7.5e-4  # 1/ppt
 
     # calculated from moreau et al 2014 value of kinematic viscosity for sewater 2.7e-6
     # dynamic liquid_viscosity = 2.7e-6 * liquid_density

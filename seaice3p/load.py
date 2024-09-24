@@ -186,6 +186,45 @@ class _BaseResults:
             raise ValueError("Corrected liquid fraction is negative")
         return corrected_liquid_fraction
 
+    @property
+    def dimensional_salinity_dependent_liquid_density(self) -> NDArray:
+        reference_liquid_density = self.cfg.scales.liquid_density
+        return reference_liquid_density * (
+            1
+            + self.cfg.scales.haline_contraction_coefficient
+            * self.cfg.scales.salinity_difference
+            * self.liquid_salinity
+        )
+
+    @property
+    def dimensional_bulk_density(self) -> NDArray:
+        return (
+            (self.corrected_solid_fraction * self.cfg.scales.ice_density)
+            + (
+                self.corrected_liquid_fraction
+                * self.dimensional_salinity_dependent_liquid_density
+            )
+            + (self.gas_fraction * self.cfg.scales.gas_density)
+        )
+
+    def dimensional_ice_average_bulk_density(self, time: float) -> float:
+        index = self._get_index(time)
+        is_ice = (self.grids.centers > self.ice_ocean_boundary(time)) * (
+            self.grids.centers < self.ice_meltpond_boundary(time)
+        )
+        grid = self.grids.centers[is_ice]
+        bulk_density = self.dimensional_bulk_density[is_ice, index]
+        if grid.size == 0:
+            return np.NaN
+
+        if grid.size == 1:
+            return bulk_density[0]
+
+        return trapezoid(
+            bulk_density,
+            grid,
+        ) / (trapezoid(np.ones_like(bulk_density), grid))
+
 
 @dataclass
 class EQMResults(_BaseResults):

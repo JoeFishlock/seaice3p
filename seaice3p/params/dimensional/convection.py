@@ -17,5 +17,4 @@ class DimensionalRJW14Params:
     # Rees Jones and Worster 2014
     Rayleigh_critical: float = 2.9
     convection_strength: float = 0.13
-    haline_contraction_coefficient: float = 7.5e-4
     reference_permeability: float = 1e-8

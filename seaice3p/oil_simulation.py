@@ -104,6 +104,7 @@ def generate_oil_simulation_config(
         ),
         water_params=DimensionalWaterParams(
             liquid_density=1028,
+            ice_density=ICE_DENSITY,
             ocean_salinity=34,
             ocean_temperature=initial_ocean_temperature,
             phase_average_conductivity=True,

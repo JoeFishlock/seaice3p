@@ -76,7 +76,7 @@ def run_two_stream_model(
         cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
     )
     OIL_DENSITY = cfg.scales.gas_density
-    ICE_DENSITY = 916
+    ICE_DENSITY = cfg.scales.ice_density
     convert_gas_fraction_to_oil_mass = lambda phi: phi * 1e9 * OIL_DENSITY / ICE_DENSITY
 
     match cfg.forcing_config.oil_heating:
