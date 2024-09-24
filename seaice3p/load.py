@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 import oilrad as oi
+from scipy.integrate import trapezoid
 
 
 from . import (
@@ -19,6 +20,7 @@ from .enthalpy_method import get_enthalpy_method
 from .forcing.boundary_conditions import get_boundary_conditions
 from .forcing import get_SW_penetration_fraction
 from .equations.radiative_heating import run_two_stream_model
+from .grids import calculate_ice_ocean_boundary_depth
 
 
 @dataclass
@@ -86,6 +88,70 @@ class _BaseResults:
         """Total spectrally integrated transmittance"""
         spec_irrad = self.get_spectral_irradiance(time)
         return oi.integrate_over_SW(spec_irrad).transmittance
+
+    def ice_ocean_boundary(self, time: float) -> float:
+        index = self._get_index(time)
+        liquid_fraction = self.liquid_fraction[:, index]
+        return -calculate_ice_ocean_boundary_depth(liquid_fraction, self.grids.edges)
+
+    def ice_meltpond_boundary(self, time: float) -> float:
+        index = self._get_index(time)
+        liquid_fraction = self.liquid_fraction[:, index]
+
+        # if no ice then no meltpond
+        if np.all(liquid_fraction == 1):
+            return np.NaN
+
+        is_ice = np.where(liquid_fraction < 1)[0]
+        top_index = is_ice[-1]
+        boundary = self.grids.edges[top_index + 1]
+
+        # if no meltpond is present we are just detecting ice_ocean_boundary
+        if boundary == self.ice_ocean_boundary(time):
+            return 0
+
+        return boundary
+
+    def ice_thickness(self, time: float) -> float:
+        index = self._get_index(time)
+        liquid_fraction = self.liquid_fraction[:, index]
+
+        # if no ice no thickness
+        if np.all(liquid_fraction == 1):
+            return 0
+        return self.ice_meltpond_boundary(time) - self.ice_ocean_boundary(time)
+
+    def integrated_solid_fraction(self, time: float) -> float:
+        index = self._get_index(time)
+        return trapezoid(self.solid_fraction[:, index], self.grids.centers)
+
+    @property
+    def corrected_solid_fraction(self) -> NDArray:
+        """Adjusted so that corrected_solid_fraction + corrected_liquid_fraction + gas_fraction = 1"""
+        corrected_solid_fraction = np.empty_like(self.solid_fraction)
+        is_frozen = self.liquid_fraction == 0
+
+        corrected_solid_fraction[is_frozen] = (
+            self.solid_fraction[is_frozen] - self.gas_fraction[is_frozen]
+        )
+        corrected_solid_fraction[~is_frozen] = self.solid_fraction[~is_frozen]
+        if np.any(corrected_solid_fraction < 0):
+            raise ValueError("Corrected solid fraction is negative")
+        return corrected_solid_fraction
+
+    @property
+    def corrected_liquid_fraction(self) -> NDArray:
+        """Adjusted so that corrected_solid_fraction + corrected_liquid_fraction + gas_fraction = 1"""
+        corrected_liquid_fraction = np.empty_like(self.liquid_fraction)
+        is_frozen = self.liquid_fraction == 0
+
+        corrected_liquid_fraction[is_frozen] = self.liquid_fraction[is_frozen]
+        corrected_liquid_fraction[~is_frozen] = (
+            self.liquid_fraction[~is_frozen] - self.gas_fraction[~is_frozen]
+        )
+        if np.any(corrected_liquid_fraction < 0):
+            raise ValueError("Corrected liquid fraction is negative")
+        return corrected_liquid_fraction
 
 
 @dataclass
