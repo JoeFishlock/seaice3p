@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 import oilrad as oi
+from oilrad.black_body import get_normalised_black_body_spectrum
 from scipy.integrate import trapezoid
 
 
@@ -18,7 +19,7 @@ from . import (
 from .state import EQMState, DISEQState, DISEQStateFull, EQMStateFull, StateFull
 from .enthalpy_method import get_enthalpy_method
 from .forcing.boundary_conditions import get_boundary_conditions
-from .forcing import get_SW_penetration_fraction
+from .forcing import get_SW_penetration_fraction, get_SW_forcing
 from .equations.radiative_heating import run_two_stream_model
 from .grids import calculate_ice_ocean_boundary_depth
 
@@ -88,6 +89,38 @@ class _BaseResults:
         """Total spectrally integrated transmittance"""
         spec_irrad = self.get_spectral_irradiance(time)
         return oi.integrate_over_SW(spec_irrad).transmittance
+
+    def dimensional_PAR_transmittance(self, time: float) -> float:
+        """Total photosynthetically active radiation transmitted through ice in W/m2"""
+        spec_irrad = self.get_spectral_irradiance(time)
+        is_PAR = (spec_irrad.wavelengths >= 400) & (spec_irrad.wavelengths <= 700)
+        PAR_wavelengths = spec_irrad.wavelengths[is_PAR]
+        if PAR_wavelengths.size == 0:
+            raise RuntimeError("Not enough points in wavelength space to integrate")
+
+        PAR_irrad = oi.SpectralIrradiance(
+            spec_irrad.z,
+            PAR_wavelengths,
+            spec_irrad.upwelling[:, is_PAR],
+            spec_irrad.downwelling[:, is_PAR],
+            ice_base_index=spec_irrad.ice_base_index,
+        )
+        SW = get_SW_forcing(time, self.cfg)
+        spectrum = get_normalised_black_body_spectrum(
+            (spec_irrad.wavelengths[0], spec_irrad.wavelengths[-1])
+        )
+
+        if PAR_wavelengths.size == 1:
+            return (
+                SW
+                * spectrum(PAR_irrad.wavelengths[0])
+                * PAR_irrad.transmittance[0]
+                * (700 - 400)
+            )
+
+        return SW * trapezoid(
+            PAR_irrad.transmittance * spectrum(PAR_irrad.wavelengths), PAR_wavelengths
+        )
 
     def ice_ocean_boundary(self, time: float) -> float:
         index = self._get_index(time)
