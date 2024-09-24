@@ -3,6 +3,7 @@ brine_convection_params:
 bubble_params:
   DimensionalMonoBubbleParams:
     bubble_radius: 0.0002
+    escape_ice_surface: true
     pore_radius: 0.001
     pore_throat_scaling: 0.5
     porosity_threshold: false
@@ -32,6 +33,8 @@ total_time_in_days: 164.0
 water_params:
   eutectic_salinity: 270.0
   eutectic_temperature: -21.1
+  haline_contraction_coefficient: 0.00075
+  ice_density: 916.0
   latent_heat: 334000.0
   liquid_density: 1028.0
   liquid_thermal_conductivity: 0.54
