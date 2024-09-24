@@ -272,6 +272,11 @@ class DISEQResults(_BaseResults):
         enthalpy_method = get_enthalpy_method(self.cfg)
         return enthalpy_method(state)
 
+    @property
+    def bulk_gas(self) -> NDArray:
+        """Dimensionless bulk gas the same as the EQM model"""
+        return self.bulk_dissolved_gas + self.gas_fraction
+
 
 Results = EQMResults | DISEQResults
 
