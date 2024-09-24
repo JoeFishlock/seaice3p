@@ -11,6 +11,14 @@ from ..params.dimensional import (
     DimensionalConstantSWForcing,
     DimensionalConstantLWForcing,
 )
+from ..state import StateBCs
+
+
+def get_SW_penetration_fraction(state_bcs: StateBCs, cfg: Config) -> float:
+    # if there is ice set penetration through SSL
+    if state_bcs.liquid_fraction[-2] < 1:
+        return cfg.forcing_config.SW_forcing.SW_penetration_fraction
+    return 1
 
 
 def get_SW_forcing(time, cfg: Config):
