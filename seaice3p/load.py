@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
+import oilrad as oi
 
 
 from . import (
@@ -11,89 +12,122 @@ from . import (
     DISEQPhysicalParams,
     EQMPhysicalParams,
     Grids,
+    RadForcing,
 )
-from .state import EQMState, DISEQState, StateFull
+from .state import EQMState, DISEQState, DISEQStateFull, EQMStateFull, StateFull
 from .enthalpy_method import get_enthalpy_method
+from .forcing.boundary_conditions import get_boundary_conditions
+from .forcing import get_SW_penetration_fraction
+from .equations.radiative_heating import run_two_stream_model
 
 
 @dataclass
-class BaseResults:
+class _BaseResults:
     cfg: Config
     dcfg: None | DimensionalParams
     times: NDArray
     enthalpy: NDArray
     salt: NDArray
 
-
-@dataclass
-class EQMResults(BaseResults):
-    bulk_gas: NDArray
-
     def __post_init__(self):
-        _set_derived_attributes(
-            self,
-            [
-                "solid_fraction",
-                "liquid_fraction",
-                "gas_fraction",
-                "temperature",
-                "liquid_salinity",
-                "dissolved_gas",
-            ],
+        self.states = list(map(self._get_state, self.times))
+
+        boundary_conditions = get_boundary_conditions(self.cfg)
+        self.states_bcs = list(map(boundary_conditions, self.states))
+
+        self.grids = Grids(self.cfg.numerical_params.I)
+
+    def _get_state(self, time: float) -> StateFull:
+        raise NotImplementedError
+
+    def _get_index(self, time: float) -> int:
+        return np.argmin(np.abs(self.times - time))
+
+    @property
+    def solid_fraction(self) -> NDArray:
+        return _get_array_data("solid_fraction", self.states)
+
+    @property
+    def liquid_fraction(self) -> NDArray:
+        return _get_array_data("liquid_fraction", self.states)
+
+    @property
+    def temperature(self) -> NDArray:
+        return _get_array_data("temperature", self.states)
+
+    @property
+    def liquid_salinity(self) -> NDArray:
+        return _get_array_data("liquid_salinity", self.states)
+
+    @property
+    def dissolved_gas(self) -> NDArray:
+        return _get_array_data("dissolved_gas", self.states)
+
+    def get_spectral_irradiance(self, time: float) -> oi.SpectralIrradiance:
+        if not isinstance(self.cfg.forcing_config, RadForcing):
+            raise TypeError("Simulation was not run with radiative forcing")
+
+        return run_two_stream_model(
+            self.states_bcs[self._get_index(time)], self.cfg, self.grids
         )
 
+    def total_albedo(self, time: float) -> float:
+        """Total albedo including the effect of the surface scattering layer if present,
+        if not present then the penetration fraction is 1 and so we regain just albedo
+        calculated from the two stream radiative transfer model"""
+        spec_irrad = self.get_spectral_irradiance(time)
+        ice_albedo = oi.integrate_over_SW(spec_irrad).albedo
+        PEN = get_SW_penetration_fraction(
+            self.states_bcs[self._get_index(time)], self.cfg
+        )
+        return 1 - PEN * (1 - ice_albedo)
+
+    def total_transmittance(self, time: float) -> float:
+        """Total spectrally integrated transmittance"""
+        spec_irrad = self.get_spectral_irradiance(time)
+        return oi.integrate_over_SW(spec_irrad).transmittance
+
 
 @dataclass
-class DISEQResults(BaseResults):
+class EQMResults(_BaseResults):
+    bulk_gas: NDArray
+
+    def _get_state(self, time: float) -> EQMStateFull:
+        index = np.argmin(np.abs(self.times - time))
+        state = EQMState(
+            self.times[index],
+            self.enthalpy[:, index],
+            self.salt[:, index],
+            self.bulk_gas[:, index],
+        )
+        enthalpy_method = get_enthalpy_method(self.cfg)
+        return enthalpy_method(state)
+
+    @property
+    def gas_fraction(self) -> NDArray:
+        return _get_array_data("gas_fraction", self.states)
+
+
+@dataclass
+class DISEQResults(_BaseResults):
     bulk_dissolved_gas: NDArray
     gas_fraction: NDArray
 
-    def __post_init__(self):
-        _set_derived_attributes(
-            self,
-            [
-                "solid_fraction",
-                "liquid_fraction",
-                "temperature",
-                "liquid_salinity",
-                "dissolved_gas",
-            ],
+    def _get_state(self, time: float) -> DISEQStateFull:
+        index = np.argmin(np.abs(self.times - time))
+        state = DISEQState(
+            self.times[index],
+            self.enthalpy[:, index],
+            self.salt[:, index],
+            self.bulk_dissolved_gas[:, index],
+            self.gas_fraction[:, index],
         )
+
+        enthalpy_method = get_enthalpy_method(self.cfg)
+        return enthalpy_method(state)
 
 
 Results = EQMResults | DISEQResults
-
-
-def _set_derived_attributes(results: Results, enthalpy_method_attrs: list[str]) -> None:
-    def get_state(time) -> StateFull:
-        index = np.argmin(np.abs(results.times - time))
-        match results:
-            case EQMResults():
-                state = EQMState(
-                    results.times[index],
-                    results.enthalpy[:, index],
-                    results.salt[:, index],
-                    results.bulk_gas[:, index],
-                )
-            case DISEQResults():
-                state = DISEQState(
-                    results.times[index],
-                    results.enthalpy[:, index],
-                    results.salt[:, index],
-                    results.bulk_dissolved_gas[:, index],
-                    results.gas_fraction[:, index],
-                )
-
-        enthalpy_method = get_enthalpy_method(results.cfg)
-        return enthalpy_method(state)
-
-    setattr(results, "states", list(map(get_state, results.times)))
-
-    for attr in enthalpy_method_attrs:
-        array_data = _get_array_data(attr, results.states)
-        setattr(results, attr, array_data)
-
-    setattr(results, "grids", Grids(results.cfg.numerical_params.I))
 
 
 def load_simulation(
