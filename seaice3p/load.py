@@ -168,8 +168,10 @@ class _BaseResults:
         return self.ice_meltpond_boundary(time) - self.ice_ocean_boundary(time)
 
     def integrated_solid_fraction(self, time: float) -> float:
-        index = self._get_index(time)
-        return trapezoid(self.solid_fraction[:, index], self.grids.centers)
+        return _integrate(
+            self.solid_fraction[:, self._get_index(time)],
+            self.cfg.numerical_params.step,
+        )
 
     @property
     def corrected_solid_fraction(self) -> NDArray:
@@ -222,21 +224,12 @@ class _BaseResults:
 
     def dimensional_ice_average_bulk_density(self, time: float) -> float:
         index = self._get_index(time)
-        is_ice = (self.grids.centers > self.ice_ocean_boundary(time)) * (
-            self.grids.centers < self.ice_meltpond_boundary(time)
-        )
-        grid = self.grids.centers[is_ice]
+        is_ice = self._is_ice(time)
         bulk_density = self.dimensional_bulk_density[is_ice, index]
-        if grid.size == 0:
+        if bulk_density.size == 0:
             return np.NaN
 
-        if grid.size == 1:
-            return bulk_density[0]
-
-        return trapezoid(
-            bulk_density,
-            grid,
-        ) / (trapezoid(np.ones_like(bulk_density), grid))
+        return np.mean(bulk_density)
 
     def total_bulk_gas_content(self, time: float) -> float:
         """To get dimensional bulk gas in domain multiply by
@@ -250,9 +243,7 @@ class _BaseResults:
         gas_density * lengthscale
         """
         index = self._get_index(time)
-        is_ice = (self.grids.centers > self.ice_ocean_boundary(time)) * (
-            self.grids.centers < self.ice_meltpond_boundary(time)
-        )
+        is_ice = self._is_ice(time)
         return _integrate(self.bulk_gas[is_ice, index], self.cfg.numerical_params.step)
 
 
