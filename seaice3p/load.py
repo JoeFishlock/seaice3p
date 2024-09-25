@@ -239,7 +239,7 @@ class EQMResults(_BaseResults):
     bulk_gas: NDArray
 
     def _get_state(self, time: float) -> EQMStateFull:
-        index = np.argmin(np.abs(self.times - time))
+        index = self._get_index(time)
         state = EQMState(
             self.times[index],
             self.enthalpy[:, index],
@@ -260,7 +260,7 @@ class DISEQResults(_BaseResults):
     gas_fraction: NDArray
 
     def _get_state(self, time: float) -> DISEQStateFull:
-        index = np.argmin(np.abs(self.times - time))
+        index = self._get_index(time)
         state = DISEQState(
             self.times[index],
             self.enthalpy[:, index],
