@@ -21,7 +21,6 @@ from .enthalpy_method import get_enthalpy_method
 from .forcing.boundary_conditions import get_boundary_conditions
 from .forcing import get_SW_penetration_fraction, get_SW_forcing
 from .equations.radiative_heating import run_two_stream_model
-from .grids import calculate_ice_ocean_boundary_depth
 from .oil_mass import convert_gas_fraction_to_oil_mass_ratio
 
 
@@ -46,6 +45,11 @@ class _BaseResults:
 
     def _get_index(self, time: float) -> int:
         return np.argmin(np.abs(self.times - time))
+
+    def _is_ice(self, time: float) -> NDArray:
+        """Boolean mask True where ice is present on center grid cells at given
+        non-dimensional time"""
+        return self.liquid_fraction[:, self._get_index(time)] < 1
 
     @property
     def solid_fraction(self) -> NDArray:
@@ -133,7 +137,14 @@ class _BaseResults:
     def ice_ocean_boundary(self, time: float) -> float:
         index = self._get_index(time)
         liquid_fraction = self.liquid_fraction[:, index]
-        return -calculate_ice_ocean_boundary_depth(liquid_fraction, self.grids.edges)
+
+        # if no ice then no boundary
+        if np.all(liquid_fraction == 1):
+            return np.NaN
+
+        is_ice_centers = self._is_ice(time)
+        is_ice_edges = np.hstack((is_ice_centers, is_ice_centers[-1]))
+        return self.grids.edges[is_ice_edges][0]
 
     def ice_meltpond_boundary(self, time: float) -> float:
         index = self._get_index(time)
@@ -143,15 +154,9 @@ class _BaseResults:
         if np.all(liquid_fraction == 1):
             return np.NaN
 
-        is_ice = np.where(liquid_fraction < 1)[0]
-        top_index = is_ice[-1]
-        boundary = self.grids.edges[top_index + 1]
-
-        # if no meltpond is present we are just detecting ice_ocean_boundary
-        if boundary == self.ice_ocean_boundary(time):
-            return 0
-
-        return boundary
+        is_ice_centers = self._is_ice(time)
+        is_ice_edges = np.hstack((is_ice_centers[0], is_ice_centers))
+        return self.grids.edges[is_ice_edges][-1]
 
     def ice_thickness(self, time: float) -> float:
         index = self._get_index(time)
