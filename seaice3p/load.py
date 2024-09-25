@@ -233,6 +233,29 @@ class _BaseResults:
             grid,
         ) / (trapezoid(np.ones_like(bulk_density), grid))
 
+    def total_bulk_gas_content(self, time: float) -> float:
+        """To get dimensional bulk gas in domain multiply by
+        gas_density * lengthscale
+        """
+        index = self._get_index(time)
+        return _integrate(self.bulk_gas[:, index], self.cfg.numerical_params.step)
+
+    def ice_bulk_gas_content(self, time: float) -> float:
+        """To get dimensional bulk gas in ice multiply by
+        gas_density * lengthscale
+        """
+        index = self._get_index(time)
+        is_ice = (self.grids.centers > self.ice_ocean_boundary(time)) * (
+            self.grids.centers < self.ice_meltpond_boundary(time)
+        )
+        return _integrate(self.bulk_gas[is_ice, index], self.cfg.numerical_params.step)
+
+
+def _integrate(quantity: NDArray, step: float) -> float:
+    if quantity.size == 0:
+        return np.NaN
+    return step * np.sum(quantity)
+
 
 @dataclass
 class EQMResults(_BaseResults):
