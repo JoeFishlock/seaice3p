@@ -106,14 +106,14 @@ def run_two_stream_model(
 def _calculate_dimensional_SW_heating(
     state_bcs: StateBCs, cfg: Config, grids: Grids, integrated_irradiance: oi.Irradiance
 ) -> NDArray:
-    PEN = get_SW_penetration_fraction(state_bcs, cfg)
-    SW = get_SW_forcing(state_bcs.time, cfg)
-    # dimensional heating rate in W/m3
+    """dimensional heating rate in W/m3"""
+    dz_dF_net = (
+        (1 / cfg.scales.lengthscale) * grids.D_e @ integrated_irradiance.net_irradiance
+    )
     return (
-        PEN
-        * SW
-        * np.diff(integrated_irradiance.net_irradiance)
-        / np.diff(grids.edges * cfg.scales.lengthscale)
+        get_SW_penetration_fraction(state_bcs, cfg)
+        * get_SW_forcing(state_bcs.time, cfg)
+        * dz_dF_net
     )
 
 
