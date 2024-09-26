@@ -103,20 +103,6 @@ def run_two_stream_model(
     return oi.solve_two_stream_model(model)
 
 
-def _calculate_dimensional_SW_heating(
-    state_bcs: StateBCs, cfg: Config, grids: Grids, integrated_irradiance: oi.Irradiance
-) -> NDArray:
-    """dimensional heating rate in W/m3"""
-    dz_dF_net = (
-        (1 / cfg.scales.lengthscale) * grids.D_e @ integrated_irradiance.net_irradiance
-    )
-    return (
-        get_SW_penetration_fraction(state_bcs, cfg)
-        * get_SW_forcing(state_bcs.time, cfg)
-        * dz_dF_net
-    )
-
-
 def _calculate_non_dimensional_shortwave_heating(
     state_bcs: StateBCs, cfg: Config, grids: Grids
 ) -> NDArray:
@@ -133,6 +119,10 @@ def _calculate_non_dimensional_shortwave_heating(
 
     spectral_irradiances = run_two_stream_model(state_bcs, cfg, grids)
     integrated_irradiance = oi.integrate_over_SW(spectral_irradiances)
-    return cfg.scales.convert_from_dimensional_heating(
-        _calculate_dimensional_SW_heating(state_bcs, cfg, grids, integrated_irradiance)
+
+    dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
+        get_SW_penetration_fraction(state_bcs, cfg)
+        * get_SW_forcing(state_bcs.time, cfg)
     )
+    dz_dF_net = grids.D_e @ integrated_irradiance.net_irradiance
+    return dimensionless_incident_SW * dz_dF_net
