@@ -94,5 +94,16 @@ class DimensionalConstantForcing:
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
+class DimensionalRobinForcing:
+    """This forcing imposes a Robin boundary condition of the form
+    surface_heat_flux=heat_transfer_coefficient * (restoring_temp - surface_temp)
+    """
+
+    heat_transfer_coefficient: float = 6.3  # W/m2K
+    restoring_temperature: float = -30  # deg C
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
 class DimensionalBRW09Forcing:
     Barrow_top_temperature_data_choice: str = "air"

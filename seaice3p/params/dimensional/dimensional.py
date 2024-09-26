@@ -26,6 +26,7 @@ from .forcing import (
     DimensionalConstantForcing,
     DimensionalRadForcing,
     DimensionalYearlyForcing,
+    DimensionalRobinForcing,
 )
 from .initial_conditions import (
     DimensionalOilInitialConditions,
@@ -54,7 +55,7 @@ class DimensionalParams:
     gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
     brine_convection_params: DimensionalRJW14Params | NoBrineConvection
-    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing
+    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing
     initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()

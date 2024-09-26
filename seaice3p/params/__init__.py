@@ -4,6 +4,7 @@ from .forcing import (
     YearlyForcing,
     BRW09Forcing,
     RadForcing,
+    RobinForcing,
 )
 from .initial_conditions import (
     InitialConditionsConfig,

@@ -1,5 +1,17 @@
 import numpy as np
+from numpy.typing import NDArray
 from ...grids import upwind, geometric
+from ...params import Config
+
+
+def calculate_conductivity(
+    cfg: Config, solid_fraction: NDArray | float
+) -> NDArray | float:
+    if not cfg.physical_params.phase_average_conductivity:
+        return np.ones_like(solid_fraction)
+
+    liquid_fraction = 1 - solid_fraction
+    return liquid_fraction + cfg.physical_params.conductivity_ratio * solid_fraction
 
 
 def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
@@ -22,15 +34,10 @@ def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
 
     """
     temperature = state_BCs.temperature
-    if not cfg.physical_params.phase_average_conductivity:
-        return -np.matmul(D_g, temperature)
-
-    conductivity_ratio = cfg.physical_params.conductivity_ratio
     edge_liquid_fraction = geometric(state_BCs.liquid_fraction)
     edge_solid_fraction = 1 - edge_liquid_fraction
-    return -(
-        edge_liquid_fraction + conductivity_ratio * edge_solid_fraction
-    ) * np.matmul(D_g, temperature)
+    conductivity = calculate_conductivity(cfg, edge_solid_fraction)
+    return -conductivity * np.matmul(D_g, temperature)
 
 
 def calculate_advective_heat_flux(temperature, Wl):
