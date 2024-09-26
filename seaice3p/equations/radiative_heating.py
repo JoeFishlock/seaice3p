@@ -93,7 +93,7 @@ def run_two_stream_model(
             raise NotImplementedError()
 
     model = oi.InfiniteLayerModel(
-        grids.edges,
+        grids.edges * cfg.scales.lengthscale,
         wavelengths,
         oil_mass_ratio=oil_mass_ratio,
         ice_type=cfg.forcing_config.oil_heating.ice_type,
@@ -101,20 +101,6 @@ def run_two_stream_model(
         liquid_fraction=average(state_bcs.liquid_fraction),
     )
     return oi.solve_two_stream_model(model)
-
-
-def _calculate_dimensional_SW_heating(
-    state_bcs: StateBCs, cfg: Config, grids: Grids, integrated_irradiance: oi.Irradiance
-) -> NDArray:
-    PEN = get_SW_penetration_fraction(state_bcs, cfg)
-    SW = get_SW_forcing(state_bcs.time, cfg)
-    # dimensional heating rate in W/m3
-    return (
-        PEN
-        * SW
-        * np.diff(integrated_irradiance.net_irradiance)
-        / np.diff(grids.edges * cfg.scales.lengthscale)
-    )
 
 
 def _calculate_non_dimensional_shortwave_heating(
@@ -132,7 +118,15 @@ def _calculate_non_dimensional_shortwave_heating(
         return np.zeros_like(grids.centers)
 
     spectral_irradiances = run_two_stream_model(state_bcs, cfg, grids)
-    integrated_irradiance = oi.integrate_over_SW(spectral_irradiances)
-    return cfg.scales.convert_from_dimensional_heating(
-        _calculate_dimensional_SW_heating(state_bcs, cfg, grids, integrated_irradiance)
+    spectrum = oi.BlackBodySpectrum(
+        cfg.forcing_config.SW_forcing.SW_min_wavelength,
+        cfg.forcing_config.SW_forcing.SW_max_wavelength,
     )
+    integrated_irradiance = oi.integrate_over_SW(spectral_irradiances, spectrum)
+
+    dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
+        get_SW_penetration_fraction(state_bcs, cfg)
+        * get_SW_forcing(state_bcs.time, cfg)
+    )
+    dz_dF_net = grids.D_e @ integrated_irradiance.net_irradiance
+    return dimensionless_incident_SW * dz_dF_net

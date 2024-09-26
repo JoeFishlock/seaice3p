@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 from numpy.typing import NDArray
 import oilrad as oi
-from oilrad.black_body import get_normalised_black_body_spectrum
 from scipy.integrate import trapezoid
 
 
@@ -91,7 +90,11 @@ class _BaseResults:
         if not present then the penetration fraction is 1 and so we regain just albedo
         calculated from the two stream radiative transfer model"""
         spec_irrad = self.get_spectral_irradiance(time)
-        ice_albedo = oi.integrate_over_SW(spec_irrad).albedo
+        spectrum = oi.BlackBodySpectrum(
+            self.cfg.forcing_config.SW_forcing.SW_min_wavelength,
+            self.cfg.forcing_config.SW_forcing.SW_max_wavelength,
+        )
+        ice_albedo = oi.integrate_over_SW(spec_irrad, spectrum).albedo
         PEN = get_SW_penetration_fraction(
             self.states_bcs[self._get_index(time)], self.cfg
         )
@@ -100,7 +103,11 @@ class _BaseResults:
     def total_transmittance(self, time: float) -> float:
         """Total spectrally integrated transmittance"""
         spec_irrad = self.get_spectral_irradiance(time)
-        return oi.integrate_over_SW(spec_irrad).transmittance
+        spectrum = oi.BlackBodySpectrum(
+            self.cfg.forcing_config.SW_forcing.SW_min_wavelength,
+            self.cfg.forcing_config.SW_forcing.SW_max_wavelength,
+        )
+        return oi.integrate_over_SW(spec_irrad, spectrum).transmittance
 
     def dimensional_PAR_transmittance(self, time: float) -> float:
         """Total photosynthetically active radiation transmitted through ice in W/m2"""
