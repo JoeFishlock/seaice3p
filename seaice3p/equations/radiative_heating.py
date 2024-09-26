@@ -118,7 +118,11 @@ def _calculate_non_dimensional_shortwave_heating(
         return np.zeros_like(grids.centers)
 
     spectral_irradiances = run_two_stream_model(state_bcs, cfg, grids)
-    integrated_irradiance = oi.integrate_over_SW(spectral_irradiances)
+    spectrum = oi.BlackBodySpectrum(
+        cfg.forcing_config.SW_forcing.SW_min_wavelength,
+        cfg.forcing_config.SW_forcing.SW_max_wavelength,
+    )
+    integrated_irradiance = oi.integrate_over_SW(spectral_irradiances, spectrum)
 
     dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
         get_SW_penetration_fraction(state_bcs, cfg)
