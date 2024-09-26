@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.18.0 (2024-09-26) ##
+
+### Summary ###
+Change to use oilrad v0.6.0 for radiative transfer calculation.
+Fix bug where non-dimensional grid was passed to oilrad causing incorrect internal melting.
+Fix implementation of surface energy balance to estimate surface temprature correctly.
+Create the load_simulation function to return a results class useful for plotting simulations.
+Add a forcing option for a Robin boundary condition.
+Fix bug in non-dimensionalisation of DISEQ model so that this can now be run.
+
 ## v0.17.0 (2024-09-21) ##
 
 ### Summary ###
