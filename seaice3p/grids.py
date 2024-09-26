@@ -76,6 +76,16 @@ def geometric(ghosts):
     return np.sqrt(upper_ghosts * lower_ghosts)
 
 
+def average(points: NDArray) -> NDArray:
+    """Returns arithmetic mean of adjacent points in an array
+
+    takes ghosts -> edges -> centers
+    """
+    upper = points[1:]
+    lower = points[:-1]
+    return 0.5 * (upper + lower)
+
+
 def add_ghost_cells(centers, bottom, top):
     """Add specified bottom and top value to center grid
 

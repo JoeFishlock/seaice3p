@@ -4,10 +4,18 @@ Note that the barrow temperature data is read in from a file if needed by the
 simulation configuration.
 """
 import numpy as np
+from scipy.optimize import fsolve
 from ..params import Config
-from ..params.forcing import BRW09Forcing, YearlyForcing, ConstantForcing, RadForcing
+from ..params.forcing import (
+    BRW09Forcing,
+    YearlyForcing,
+    ConstantForcing,
+    RadForcing,
+    RobinForcing,
+)
 from .surface_energy_balance import find_ghost_cell_temperature
 from ..state import StateFull
+from ..equations.flux.heat_flux import calculate_conductivity
 
 
 def get_temperature_forcing(state: StateFull, cfg: Config):
@@ -16,6 +24,7 @@ def get_temperature_forcing(state: StateFull, cfg: Config):
         YearlyForcing: _yearly_temperature_forcing,
         BRW09Forcing: _barrow_temperature_forcing,
         RadForcing: find_ghost_cell_temperature,
+        RobinForcing: _Robin_forcing,
     }
     return TEMPERATURE_FORCINGS[type(cfg.forcing_config)](state, cfg)
 
@@ -26,6 +35,7 @@ def get_bottom_temperature_forcing(time, cfg: Config):
         YearlyForcing: _yearly_ocean_temperature_forcing,
         BRW09Forcing: _barrow_ocean_temperature_forcing,
         RadForcing: _constant_ocean_temperature_forcing,
+        RobinForcing: _constant_ocean_temperature_forcing,
     }
     return OCEAN_TEMPERATURE_FORCINGS[type(cfg.forcing_config)](time, cfg)
 
@@ -63,6 +73,26 @@ def _barrow_temperature_forcing(state: StateFull, cfg: Config):
         dimensional_temperature
     )
     return temperature
+
+
+def _Robin_forcing(state: StateFull, cfg: Config):
+    """Returns non dimensional ghost cell temperature such that surface heat flux
+    is given by Robin boundary condition"""
+
+    def residual(ghost_cell_temperature: float) -> float:
+        surface_temperature = 0.5 * (ghost_cell_temperature + state.temperature[-1])
+        temp_gradient = (1 / cfg.numerical_params.step) * (
+            ghost_cell_temperature - state.temperature[-1]
+        )
+        return calculate_conductivity(
+            cfg, state.solid_fraction[-1]
+        ) * temp_gradient - cfg.forcing_config.biot * (
+            cfg.forcing_config.restoring_temperature - surface_temperature
+        )
+
+    initial_guess = state.temperature[-1]
+    solution = fsolve(residual, initial_guess)[0]
+    return solution
 
 
 def _constant_ocean_temperature_forcing(time, cfg: Config):

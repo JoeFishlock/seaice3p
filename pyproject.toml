@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seaice3p"
-version = "0.17.1"
+version = "0.18.0"
 description = "Simulate gas bubbles and oil droplets in sea ice."
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"
@@ -11,7 +11,7 @@ python = "^3.12"
 numpy = "^1.26.4"
 scipy = "^1.13.0"
 pyserde = {version = "^0.20.1", extras = ["yaml"]}
-oilrad = "0.5.0"
+oilrad = "0.6.0"
 
 
 [tool.poetry.group.scripts.dependencies]

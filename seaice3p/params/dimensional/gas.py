@@ -4,7 +4,7 @@ from serde import serde, coerce
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
-class DimensionalEQMGasParams:
+class _DimensionalGasParams:
     gas_density: float = 1  # kg/m3
     saturation_concentration: float = 1e-5  # kg(gas)/kg(liquid)
     ocean_saturation_state: float = 1.0  # fraction of saturation in ocean
@@ -15,6 +15,12 @@ class DimensionalEQMGasParams:
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
-class DimensionalDISEQGasParams(DimensionalEQMGasParams):
+class DimensionalEQMGasParams(_DimensionalGasParams):
+    pass
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class DimensionalDISEQGasParams(_DimensionalGasParams):
     # timescale of nucleation to set damkohler number (in seconds)
     nucleation_timescale: float = 6869075

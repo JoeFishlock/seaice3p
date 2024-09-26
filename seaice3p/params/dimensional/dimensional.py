@@ -26,6 +26,7 @@ from .forcing import (
     DimensionalConstantForcing,
     DimensionalRadForcing,
     DimensionalYearlyForcing,
+    DimensionalRobinForcing,
 )
 from .initial_conditions import (
     DimensionalOilInitialConditions,
@@ -54,7 +55,7 @@ class DimensionalParams:
     gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
     brine_convection_params: DimensionalRJW14Params | NoBrineConvection
-    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing
+    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing
     initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()
@@ -119,7 +120,7 @@ class DimensionalParams:
                 return (
                     self.water_params.liquid_density
                     * self.gravity
-                    * self.brine_convection_params.haline_contraction_coefficient
+                    * self.water_params.haline_contraction_coefficient
                     * self.water_params.salinity_difference
                     * self.lengthscale
                     * self.brine_convection_params.reference_permeability
@@ -170,8 +171,11 @@ class DimensionalParams:
             self.water_params.ocean_freezing_temperature,
             self.water_params.temperature_difference,
             self.gas_params.gas_density,
+            self.water_params.liquid_density,
+            self.water_params.ice_density,
             self.gas_params.saturation_concentration,
             self.bubble_params.pore_radius,
+            self.water_params.haline_contraction_coefficient,
         )
 
     def save(self, directory: Path):

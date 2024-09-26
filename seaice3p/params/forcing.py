@@ -8,6 +8,7 @@ from .dimensional import (
     DimensionalBRW09Forcing,
     DimensionalYearlyForcing,
     DimensionalRadForcing,
+    DimensionalRobinForcing,
     DimensionalSWForcing,
     DimensionalConstantSWForcing,
     DimensionalOilHeating,
@@ -120,7 +121,18 @@ class RadForcing(BaseOceanForcing):
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
 
-ForcingConfig = ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class RobinForcing(BaseOceanForcing):
+    """Dimensionless forcing parameters for Robin boundary condition"""
+
+    biot: float = 12
+    restoring_temperature: float = -1.3
+
+
+ForcingConfig = (
+    ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing | RobinForcing
+)
 
 
 def get_dimensionless_forcing_config(
@@ -168,6 +180,23 @@ def get_dimensionless_forcing_config(
                 LW_forcing=dimensional_params.forcing_config.LW_forcing,
                 turbulent_flux=dimensional_params.forcing_config.turbulent_flux,
                 oil_heating=dimensional_params.forcing_config.oil_heating,
+            )
+        case DimensionalRobinForcing():
+            restoring_temperature = (
+                dimensional_params.forcing_config.restoring_temperature
+                - dimensional_params.water_params.ocean_freezing_temperature
+            ) / dimensional_params.water_params.temperature_difference
+            biot = (
+                dimensional_params.lengthscale
+                * dimensional_params.forcing_config.heat_transfer_coefficient
+                / dimensional_params.water_params.liquid_thermal_conductivity
+            )
+            return RobinForcing(
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                biot=biot,
+                restoring_temperature=restoring_temperature,
             )
         case _:
             raise NotImplementedError

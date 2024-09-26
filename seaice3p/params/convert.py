@@ -16,8 +16,11 @@ class Scales:
     ocean_freezing_temperature: float  # deg C
     temperature_difference: float  # deg C
     gas_density: float  # kg/m3
+    liquid_density: float  # kg/m3
+    ice_density: float  # kg/m3
     saturation_concentration: float  # kg(gas)/kg(liquid)
     pore_radius: float  # m
+    haline_contraction_coefficient: float  # 1/ppt
 
     @property
     def time_scale(self):
