@@ -93,7 +93,7 @@ def run_two_stream_model(
             raise NotImplementedError()
 
     model = oi.InfiniteLayerModel(
-        grids.edges,
+        grids.edges * cfg.scales.lengthscale,
         wavelengths,
         oil_mass_ratio=oil_mass_ratio,
         ice_type=cfg.forcing_config.oil_heating.ice_type,
