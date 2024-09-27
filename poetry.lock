@@ -649,13 +649,13 @@ files = [
 
 [[package]]
 name = "oilrad"
-version = "0.6.0"
+version = "0.7.0"
 description = "Two stream radiative transfer model for sea ice containing oil droplets."
 optional = false
 python-versions = "<4.0,>=3.12"
 files = [
-    {file = "oilrad-0.6.0-py3-none-any.whl", hash = "sha256:6647e411ede2aa7fb155ef7d0ca6a8e165c6ab70ed315af9bbd6d6e00faa4d83"},
-    {file = "oilrad-0.6.0.tar.gz", hash = "sha256:74e3d8123d2e9cc563f02c851cf1fefa823e490cb9ce6004e58947fb37899ee9"},
+    {file = "oilrad-0.7.0-py3-none-any.whl", hash = "sha256:ea7e00f1f93fabda95c9e227747b68717d13c6d21be7ccd9bfb99a17bae36ef6"},
+    {file = "oilrad-0.7.0.tar.gz", hash = "sha256:a6a61f26a80c84badbd075e445e4be53a53ca4ac5852cc7075f99617c6c0f21a"},
 ]
 
 [package.dependencies]
@@ -1118,4 +1118,4 @@ typing-extensions = ">=3.7.4"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "2fde88fc8b9c89ae3ec73a6254bba5b18e3ac468630f0ce52206931954fd0612"
+content-hash = "4c69893c943ab03f2a41c7886f4bd503ed24141c8898e4d707fd834cd9c4392e"
