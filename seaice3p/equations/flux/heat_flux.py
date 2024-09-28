@@ -8,10 +8,18 @@ def calculate_conductivity(
     cfg: Config, solid_fraction: NDArray | float
 ) -> NDArray | float:
     if not cfg.physical_params.phase_average_conductivity:
-        return np.ones_like(solid_fraction)
+        return np.where(
+            solid_fraction > 0,
+            np.ones_like(solid_fraction),
+            cfg.physical_params.turbulent_conductivity_ratio,
+        )
 
     liquid_fraction = 1 - solid_fraction
-    return liquid_fraction + cfg.physical_params.conductivity_ratio * solid_fraction
+    return np.where(
+        solid_fraction > 0,
+        liquid_fraction + cfg.physical_params.conductivity_ratio * solid_fraction,
+        cfg.physical_params.turbulent_conductivity_ratio,
+    )
 
 
 def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
