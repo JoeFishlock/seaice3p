@@ -42,6 +42,8 @@ def generate_oil_simulation_config(
     SW_min_wavelength=350,
     SW_max_wavelength=3000,
     num_wavelength_samples=7,
+    solver_choice="RK23",
+    turbulent_thermal_conductivity=0.54,
     brine_convection_params: DimensionalRJW14Params
     | NoBrineConvection = DimensionalRJW14Params(),
     I=50,
@@ -109,7 +111,9 @@ def generate_oil_simulation_config(
             ocean_temperature=initial_ocean_temperature,
             phase_average_conductivity=True,
             salt_diffusivity=0,
+            turbulent_liquid_thermal_conductivity=turbulent_thermal_conductivity,
+            liquid_thermal_conductivity=0.54,
         ),
-        numerical_params=NumericalParams(I=I),
+        numerical_params=NumericalParams(I=I, solver_choice=solver_choice),
         frame_velocity_dimensional=0,
     ).save(config_directory)

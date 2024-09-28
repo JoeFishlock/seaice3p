@@ -9,6 +9,7 @@ class NumericalParams:
 
     I: int = 50
     regularisation: float = 1e-6
+    solver_choice: str = "RK23"  # scipy.integrate.solve_IVP solver choice
 
     @property
     def step(self):

@@ -44,14 +44,6 @@ def run_batch(list_of_cfg: List[Config], directory: Path, verbosity_level=0) -> 
             optprint(f"{e}")
 
 
-# For explicit heat diffusion stability we require timestep < 0.5 * step^2
-# In the case of enhanced conduction in solid we multiply by
-# (liquid_fraction * conductivity_ratio*solid_fraction)
-# For typical sea ice parameters reducing the Courant coefficient for stability
-# to 0.1 should suffice.
-THERMAL_DIFFUSION_TIMESTEP_LIMIT = 0.1
-
-
 def solve(cfg: Config, directory: Path, verbosity_level=0) -> Literal[0]:
     if isinstance(cfg.physical_params, EQMPhysicalParams):
         number_of_solution_components = 3
@@ -65,13 +57,24 @@ def solve(cfg: Config, directory: Path, verbosity_level=0) -> Literal[0]:
     t_eval = np.arange(0, T, cfg.savefreq)
     ode_fun = _get_ode_fun(cfg, verbosity_level=verbosity_level)
 
+    if cfg.numerical_params.solver_choice in ["RK23", "RK45", "DOP853"]:
+        # Explicit method so set courant timestep limit
+        max_conductivity = max(
+            cfg.physical_params.conductivity_ratio,
+            cfg.physical_params.turbulent_conductivity_ratio,
+        )
+        max_step = 0.45 * (1 / max_conductivity) * cfg.numerical_params.step**2
+    else:
+        # Implicit method no timestep restriction
+        max_step = np.inf
+
     sol = solve_ivp(
         ode_fun,
         [0, T],
         initial,
         t_eval=t_eval,
-        max_step=THERMAL_DIFFUSION_TIMESTEP_LIMIT * cfg.numerical_params.step**2,
-        method="RK23",
+        max_step=max_step,
+        method=cfg.numerical_params.solver_choice,
     )
 
     # Note that to keep the solution components general we must just save with
