@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from serde import serde, coerce
+from typing import Optional
 
 
 @serde(type_check=coerce)
@@ -27,12 +28,16 @@ class DimensionalConstantSWForcing:
 class DimensionalBackgroundOilHeating:
     oil_mass_ratio: float = 0  # ng/g
     ice_type: str = "FYI"
+    fast_solve: bool = False
+    wavelength_cutoff: Optional[float] = 1200
 
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
 class DimensionalMobileOilHeating:
     ice_type: str = "FYI"
+    fast_solve: bool = False
+    wavelength_cutoff: Optional[float] = 1200
 
 
 @serde(type_check=coerce)

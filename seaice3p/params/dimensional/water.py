@@ -18,6 +18,7 @@ class DimensionalWaterParams:
     phase_average_conductivity: bool = False
     liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
+    turbulent_liquid_thermal_conductivity: float = 0.54
 
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
     # used to calculate Rayleigh number for convection and density contraction in liquid equation of state
@@ -94,6 +95,19 @@ class DimensionalWaterParams:
 
         """
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
+
+    @property
+    def turbulent_conductivity_ratio(self):
+        r"""Calculate the enhancement of thermal conductivity due to turbulence in
+        the liquid phase
+
+        .. math:: \lambda = \frac{k_\text{turbulent}}{k_l}
+
+        """
+        return (
+            self.turbulent_liquid_thermal_conductivity
+            / self.liquid_thermal_conductivity
+        )
 
     @property
     def lewis_salt(self):

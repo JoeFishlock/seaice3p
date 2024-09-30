@@ -91,7 +91,7 @@ def _dissolved_gas_BCs(dissolved_gas_centers, cfg: Config):
 
 def _gas_fraction_BCs(gas_fraction_centers):
     """Add ghost cells with BCs to center quantity"""
-    return add_ghost_cells(gas_fraction_centers, bottom=0, top=0)
+    return add_ghost_cells(gas_fraction_centers, bottom=gas_fraction_centers[0], top=0)
 
 
 def _gas_BCs(gas_centers, cfg: Config):

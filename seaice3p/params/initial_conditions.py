@@ -5,6 +5,7 @@ from .dimensional import (
     DimensionalOilInitialConditions,
     UniformInitialConditions,
     BRW09InitialConditions,
+    PreviousSimulation,
 )
 
 
@@ -19,10 +20,14 @@ class OilInitialConditions:
     initial_ice_temperature: float = -0.1
     initial_oil_volume_fraction: float = 1e-7
     initial_ice_bulk_salinity: float = -0.1
+    initial_oil_free_depth: float = 0
 
 
 InitialConditionsConfig = (
-    UniformInitialConditions | BRW09InitialConditions | OilInitialConditions
+    UniformInitialConditions
+    | BRW09InitialConditions
+    | OilInitialConditions
+    | PreviousSimulation
 )
 
 
@@ -51,6 +56,10 @@ def get_dimensionless_initial_conditions_config(
                 initial_ice_bulk_salinity=scales.convert_from_dimensional_bulk_salinity(
                     dimensional_params.initial_conditions_config.initial_ice_bulk_salinity
                 ),
+                initial_oil_free_depth=dimensional_params.initial_conditions_config.initial_oil_free_depth
+                / dimensional_params.lengthscale,
             )
+        case PreviousSimulation():
+            return dimensional_params.initial_conditions_config
         case _:
             raise NotImplementedError

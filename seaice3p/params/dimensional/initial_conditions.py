@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 from serde import serde, coerce
 
 
@@ -25,3 +26,10 @@ class DimensionalOilInitialConditions:
     initial_ice_temperature: float = -4  # in deg C
     initial_oil_volume_fraction: float = 1e-7
     initial_ice_bulk_salinity: float = 5.92  # in g/kg
+    initial_oil_free_depth: float = 0  # in m
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class PreviousSimulation:
+    data_path: Path

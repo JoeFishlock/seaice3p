@@ -32,6 +32,7 @@ from .initial_conditions import (
     DimensionalOilInitialConditions,
     BRW09InitialConditions,
     UniformInitialConditions,
+    PreviousSimulation,
 )
 from .numerical import (
     NumericalParams,
@@ -56,7 +57,7 @@ class DimensionalParams:
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
     brine_convection_params: DimensionalRJW14Params | NoBrineConvection
     forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing
-    initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions
+    initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions | PreviousSimulation
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()
     numerical_params: NumericalParams = NumericalParams()

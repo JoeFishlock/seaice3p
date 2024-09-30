@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.19.0 (2024-09-30) ##
+
+### Summary ###
+Change to use oilrad v0.7.0 for radiative transfer calculation.
+This allows us to use an optimized faster radiation solve if we set fast_solve=True.
+Given a cutoff wavelength you should choose based on the grid resolution for wavelengths above this
+approximate the radiation as entirely absorbed in the first grid cell.
+
+Add turbulent liquid thermal conductivity parameter to represent enhanced heat transport in liquid regions (ocean and meltpond).
+Also add the option to choose the solver used by scipy.integrate.solve_IVP.
+An implicit method such as the Radau or LSODA option is best used when an enhanced turbulent conductivity is added to avoid very small timesteps.
+
+Add option to load simulation initial condition as the final state of an existing saved simulation.
+
+Make gas fraction boundary condition extend the bottom value of the domain into the ocean.
+This is useful for simulating an oil configuration where oil will be able to rise into the domain.
+
+Add plot module to visualise saved simulation data from the command line.
+
+Add the initial_oil_free_ice_depth parameter to the oil simulation initial conditions config to specify the initial oil mass ratio profile as a step function with no oil in the upper portion of the domain.
+This is to simulate the release of oil below the ice at some time before the simulation starts.
+
 ## v0.18.0 (2024-09-26) ##
 
 ### Summary ###

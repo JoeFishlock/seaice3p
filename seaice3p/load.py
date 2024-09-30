@@ -77,6 +77,14 @@ class _BaseResults:
             self.gas_fraction, self.cfg.scales.gas_density, self.cfg.scales.ice_density
         )
 
+    @property
+    def bulk_argon(self) -> NDArray:
+        """in mircomole Ar/L"""
+        scales = self.cfg.scales
+        return scales.convert_dimensional_bulk_air_to_argon_content(
+            scales.convert_to_dimensional_bulk_gas(self.bulk_gas)
+        )
+
     def get_spectral_irradiance(self, time: float) -> oi.SpectralIrradiance:
         if not isinstance(self.cfg.forcing_config, RadForcing):
             raise TypeError("Simulation was not run with radiative forcing")

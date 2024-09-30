@@ -99,6 +99,8 @@ def run_two_stream_model(
         ice_type=cfg.forcing_config.oil_heating.ice_type,
         median_droplet_radius_in_microns=MEDIAN_DROPLET_RADIUS_MICRONS,
         liquid_fraction=average(state_bcs.liquid_fraction),
+        fast_solve=cfg.forcing_config.oil_heating.fast_solve,
+        wavelength_cutoff=cfg.forcing_config.oil_heating.wavelength_cutoff,
     )
     return oi.solve_two_stream_model(model)
 
