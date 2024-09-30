@@ -5,6 +5,7 @@ from .dimensional import (
     DimensionalOilInitialConditions,
     UniformInitialConditions,
     BRW09InitialConditions,
+    PreviousSimulation,
 )
 
 
@@ -23,7 +24,10 @@ class OilInitialConditions:
 
 
 InitialConditionsConfig = (
-    UniformInitialConditions | BRW09InitialConditions | OilInitialConditions
+    UniformInitialConditions
+    | BRW09InitialConditions
+    | OilInitialConditions
+    | PreviousSimulation
 )
 
 
@@ -55,5 +59,7 @@ def get_dimensionless_initial_conditions_config(
                 initial_oil_free_depth=dimensional_params.initial_conditions_config.initial_oil_free_depth
                 / dimensional_params.lengthscale,
             )
+        case PreviousSimulation():
+            return dimensional_params.initial_conditions_config
         case _:
             raise NotImplementedError

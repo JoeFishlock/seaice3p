@@ -2,7 +2,6 @@
 simulation.
 """
 import numpy as np
-from serde import init
 
 from .params import (
     Config,
@@ -12,6 +11,7 @@ from .params import (
     NoBrineConvection,
     EQMPhysicalParams,
     DISEQPhysicalParams,
+    PreviousSimulation,
 )
 from .state import EQMState, DISEQState, State
 from .grids import Grids
@@ -22,6 +22,7 @@ def get_initial_conditions(cfg: Config):
         UniformInitialConditions: _get_uniform_initial_conditions,
         BRW09InitialConditions: _get_barrow_initial_conditions,
         OilInitialConditions: _get_oil_initial_conditions,
+        PreviousSimulation: _get_previous_simulation_final_state,
     }
     initial_state = INITIAL_CONDITIONS[type(cfg.initial_conditions_config)](cfg)
     match cfg.physical_params:
@@ -52,6 +53,38 @@ def _apply_value_in_ice_layer(depth_of_ice, ice_value, liquid_value, grid):
     """
     output = np.where(grid > -depth_of_ice, ice_value, liquid_value)
     return output
+
+
+def _get_previous_simulation_final_state(cfg: Config):
+    """Generate initial state from the final state of a saved simulation
+
+    :returns: initial solution arrays on ghost grid (enthalpy, salt, gas)
+    """
+    with np.load(cfg.initial_conditions_config.data_path) as data:
+        match cfg.physical_params:
+            case EQMPhysicalParams():
+                enthalpy = data["arr_1"]
+                salt = data["arr_2"]
+                bulk_gas = data["arr_3"]
+
+                return EQMState(0, enthalpy[:, -1], salt[:, -1], bulk_gas[:, -1])
+
+            case DISEQPhysicalParams():
+                enthalpy = data["arr_1"]
+                salt = data["arr_2"]
+                bulk_dissolved_gas = data["arr_3"]
+                gas_fraction = data["arr_4"]
+
+                return DISEQState(
+                    0,
+                    enthalpy[:, -1],
+                    salt[:, -1],
+                    bulk_dissolved_gas[:, -1],
+                    gas_fraction[:, -1],
+                )
+
+            case _:
+                raise NotImplementedError
 
 
 def _get_uniform_initial_conditions(cfg: Config):

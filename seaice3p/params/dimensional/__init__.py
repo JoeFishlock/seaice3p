@@ -22,6 +22,7 @@ from .initial_conditions import (
     BRW09InitialConditions,
     DimensionalOilInitialConditions,
     UniformInitialConditions,
+    PreviousSimulation,
 )
 from .convection import NoBrineConvection, DimensionalRJW14Params
 from .numerical import NumericalParams
