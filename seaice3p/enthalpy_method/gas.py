@@ -27,7 +27,11 @@ def calculate_EQM_dissolved_gas(
     chi = physical_params.expansion_coefficient
     gas = state.gas
     tolerable_super_saturation = physical_params.tolerable_super_saturation_fraction
-    dissolved_gas = np.full_like(gas, np.NaN)
+    dissolved_gas = np.zeros_like(gas)
+
+    # If no dissolved phase
+    if chi == 0:
+        return dissolved_gas
 
     gas_sat = chi * liquid_fraction * tolerable_super_saturation
     is_super_saturated = gas >= gas_sat

@@ -2,6 +2,7 @@
 simulation.
 """
 import numpy as np
+from serde import init
 
 from .params import (
     Config,
@@ -151,7 +152,11 @@ def _get_oil_initial_conditions(cfg: Config):
     salt = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=SALT_IN_ICE, liquid_value=BOTTOM_SALT, grid=centers
     )
-    gas = np.full_like(salt, INITIAL_OIL_VOLUME_FRACTION)
+    gas = np.where(
+        centers < -cfg.initial_conditions_config.initial_oil_free_depth,
+        INITIAL_OIL_VOLUME_FRACTION,
+        0,
+    )
 
     temp = _apply_value_in_ice_layer(
         ICE_DEPTH, ice_value=TEMP_IN_ICE, liquid_value=BOTTOM_TEMP, grid=centers

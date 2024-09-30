@@ -38,7 +38,8 @@ def generate_oil_simulation_config(
     initial_ice_depth: float,
     initial_ice_temperature: float,
     initial_ocean_temperature: float,
-    initial_ice_bulk_salinity: float = 34,
+    initial_ice_bulk_salinity: float = 5.92,
+    initial_oil_free_ice_depth: float = 0,
     SW_min_wavelength=350,
     SW_max_wavelength=3000,
     num_wavelength_samples=7,
@@ -103,6 +104,7 @@ def generate_oil_simulation_config(
             initial_oil_volume_fraction=convert_oil_mass_ratio_to_gas_fraction(
                 initial_oil_mass_ratio, oil_density, ice_density=ICE_DENSITY
             ),
+            initial_oil_free_depth=initial_oil_free_ice_depth,
         ),
         water_params=DimensionalWaterParams(
             liquid_density=1028,
