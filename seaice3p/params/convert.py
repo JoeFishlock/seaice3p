@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from serde import serde, coerce
 
 
@@ -21,6 +22,7 @@ class Scales:
     saturation_concentration: float  # kg(gas)/kg(liquid)
     pore_radius: float  # m
     haline_contraction_coefficient: float  # 1/ppt
+    start_date: Optional[str] = None
 
     @property
     def time_scale(self):
