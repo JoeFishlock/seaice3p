@@ -28,6 +28,10 @@ pytest = "^8.1.1"
 pytest-xdist = "^3.5.0"
 coverage = "^7.5.0"
 
+
+[tool.poetry.group.ERA5.dependencies]
+xarray = {extras = ["complete"], version = "^2024.9.0"}
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
