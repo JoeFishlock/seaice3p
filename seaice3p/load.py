@@ -14,6 +14,7 @@ from . import (
     EQMPhysicalParams,
     Grids,
     RadForcing,
+    ERA5Forcing,
 )
 from .state import EQMState, DISEQState, DISEQStateFull, EQMStateFull, StateFull
 from .enthalpy_method import get_enthalpy_method
@@ -21,6 +22,17 @@ from .forcing.boundary_conditions import get_boundary_conditions
 from .forcing import get_SW_penetration_fraction, get_SW_forcing
 from .equations.radiative_heating import run_two_stream_model
 from .oil_mass import convert_gas_fraction_to_oil_mass_ratio
+from .forcing.surface_energy_balance.turbulent_heat_flux import (
+    calculate_sensible_heat_flux,
+    calculate_latent_heat_flux,
+)
+from .forcing.surface_energy_balance.surface_energy_balance import (
+    _convert_non_dim_temperature_to_kelvin,
+    _calculate_emissivity,
+    STEFAN_BOLTZMANN,
+    find_ghost_cell_temperature,
+)
+from .forcing.radiative_forcing import get_LW_forcing
 
 
 @dataclass
@@ -50,6 +62,10 @@ class _BaseResults:
         non-dimensional time"""
         return self.liquid_fraction[:, self._get_index(time)] < 1
 
+    def _top_cell_is_ice(self, time: float) -> bool:
+        """Return True if top cell is ice or False if liquid"""
+        return self._is_ice(time)[-1]
+
     @property
     def solid_fraction(self) -> NDArray:
         return _get_array_data("solid_fraction", self.states)
@@ -71,6 +87,15 @@ class _BaseResults:
         return _get_array_data("dissolved_gas", self.states)
 
     @property
+    def dimensional_meltpond_onset_time(self) -> float:
+        """Get meltpond onset time from start of simulation in days"""
+        top_liquid_fraction = self.liquid_fraction[-1, :]
+        times_with_meltpond = self.times[top_liquid_fraction == 1]
+        if times_with_meltpond.size == 0:
+            return np.NaN
+        return self.cfg.scales.convert_to_dimensional_time(times_with_meltpond[0])
+
+    @property
     def oil_mass_ratio(self) -> NDArray:
         """in ng/g"""
         return convert_gas_fraction_to_oil_mass_ratio(
@@ -86,7 +111,9 @@ class _BaseResults:
         )
 
     def get_spectral_irradiance(self, time: float) -> oi.SpectralIrradiance:
-        if not isinstance(self.cfg.forcing_config, RadForcing):
+        if not isinstance(self.cfg.forcing_config, RadForcing) or isinstance(
+            self.cfg.forcing_config, ERA5Forcing
+        ):
             raise TypeError("Simulation was not run with radiative forcing")
 
         return run_two_stream_model(
@@ -260,6 +287,44 @@ class _BaseResults:
         index = self._get_index(time)
         is_ice = self._is_ice(time)
         return _integrate(self.bulk_gas[is_ice, index], self.cfg.numerical_params.step)
+
+    def surface_temp_K(self, time: float) -> float:
+        """Return surface temperature in K"""
+        index = self._get_index(time)
+        ghost_cell_temp = find_ghost_cell_temperature(self.states[index], self.cfg)
+        return _convert_non_dim_temperature_to_kelvin(
+            self.cfg, 0.5 * (ghost_cell_temp + self.temperature[-1, index])
+        )
+
+    def sensible_heat_flux(self, time: float) -> float:
+        """W/m2"""
+        return calculate_sensible_heat_flux(
+            self.cfg, time, self._top_cell_is_ice(time), self.surface_temp_K(time)
+        )
+
+    def latent_heat_flux(self, time: float) -> float:
+        """W/m2"""
+        return calculate_latent_heat_flux(
+            self.cfg, time, self._top_cell_is_ice(time), self.surface_temp_K(time)
+        )
+
+    def emitted_LW(self, time: float) -> float:
+        """W/m2 radiated away from ice surface"""
+        emissivity = _calculate_emissivity(self.cfg, self._top_cell_is_ice(time))
+        return emissivity * STEFAN_BOLTZMANN * self.surface_temp_K(time) ** 4
+
+    def net_LW(self, time: float) -> float:
+        """W/m2 net into ice"""
+        incident_LW = get_LW_forcing(time, self.cfg)
+        return incident_LW - self.emitted_LW(time)
+
+    def surface_heat_flux(self, time: float) -> float:
+        """W/m2 net into ice"""
+        return (
+            self.net_LW(time)
+            + self.sensible_heat_flux(time)
+            + self.latent_heat_flux(time)
+        )
 
 
 def _integrate(quantity: NDArray, step: float) -> float:
