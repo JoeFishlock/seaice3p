@@ -43,7 +43,12 @@ def _calculate_ref_air_temp(cfg: Config, time: float) -> float:
 
 def _calculate_ref_specific_humidity(cfg: Config, time: float) -> float:
     """return specific humidity at reference level above the ice"""
-    return cfg.forcing_config.turbulent_flux.specific_humidity
+    if isinstance(cfg.forcing_config, RadForcing):
+        return cfg.forcing_config.turbulent_flux.specific_humidity
+    elif isinstance(cfg.forcing_config, ERA5Forcing):
+        return cfg.forcing_config.get_spec_hum(time)
+    else:
+        raise NotImplementedError
 
 
 def _calculate_ref_atmospheric_pressure(cfg: Config, time: float) -> float:

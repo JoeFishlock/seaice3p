@@ -32,6 +32,7 @@ coverage = "^7.5.0"
 [tool.poetry.group.ERA5.dependencies]
 xarray = {extras = ["complete"], version = "^2024.9.0"}
 netcdf4 = "^1.7.1.post2"
+metpy = "^1.6.3"
 
 [build-system]
 requires = ["poetry-core"]

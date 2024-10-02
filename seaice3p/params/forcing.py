@@ -1,5 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass
+from numpy.typing import NDArray
 from serde import serde, coerce
 import numpy as np
 from .dimensional import (
@@ -21,6 +22,8 @@ from .dimensional import (
 )
 import xarray as xr
 from scipy.interpolate import CubicSpline
+from metpy.calc import specific_humidity_from_dewpoint
+from metpy.units import units as metpyunits
 
 
 def _filter_missing_values(air_temp, days):
@@ -158,6 +161,7 @@ class ERA5Forcing:
 
         # convert to deg C
         T2M = daily_data.t2m[:, 0, 0].to_numpy() - 273.15
+        D2M = daily_data.d2m[:, 0, 0].to_numpy() - 273.15
 
         LW = daily_data.msdwlwrf[:, 0, 0].to_numpy()
         SW = daily_data.msdwswrf[:, 0, 0].to_numpy()
@@ -165,10 +169,25 @@ class ERA5Forcing:
         # convert to KPa
         ATM = daily_data.sp[:, 0, 0].to_numpy() / 1e3
 
+        # Calculate specific humidity in kg/kg from dewpoint temperature
+        SPEC_HUM = _calculate_specific_humidity(ATM, D2M)
+
         self.get_2m_temp = CubicSpline(DIMLESS_TIMES, T2M, extrapolate=False)
         self.get_LW = CubicSpline(DIMLESS_TIMES, LW, extrapolate=False)
         self.get_SW = CubicSpline(DIMLESS_TIMES, SW, extrapolate=False)
         self.get_ATM = CubicSpline(DIMLESS_TIMES, ATM, extrapolate=False)
+        self.get_spec_hum = CubicSpline(DIMLESS_TIMES, SPEC_HUM, extrapolate=False)
+
+
+def _calculate_specific_humidity(pressure: NDArray, dewpoint: NDArray) -> NDArray:
+    """Take ERA5 data and return specific humidity at 2m in kg/kg"""
+    return (
+        specific_humidity_from_dewpoint(
+            pressure * metpyunits.kPa, dewpoint * metpyunits.degC
+        )
+        .to("kg/kg")
+        .magnitude
+    )
 
 
 @serde(type_check=coerce)
