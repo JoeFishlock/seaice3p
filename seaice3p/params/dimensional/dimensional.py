@@ -9,7 +9,6 @@ output between physical and non-dimensional variables.
 """
 
 from pathlib import Path
-from typing import Optional
 import numpy as np
 from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
@@ -25,6 +24,7 @@ from .convection import NoBrineConvection, DimensionalRJW14Params
 from .forcing import (
     DimensionalBRW09Forcing,
     DimensionalConstantForcing,
+    DimensionalERA5Forcing,
     DimensionalRadForcing,
     DimensionalYearlyForcing,
     DimensionalRobinForcing,
@@ -57,14 +57,13 @@ class DimensionalParams:
     gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
     brine_convection_params: DimensionalRJW14Params | NoBrineConvection
-    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing
+    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing | DimensionalERA5Forcing
     initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions | PreviousSimulation
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()
     numerical_params: NumericalParams = NumericalParams()
     frame_velocity_dimensional: float = 0  # velocity of frame in m/day
     gravity: float = 9.81  # m/s2
-    start_date: Optional[str] = None  # YYYY-MM-DD
 
     @property
     def damkohler_number(self):
@@ -179,7 +178,6 @@ class DimensionalParams:
             self.gas_params.saturation_concentration,
             self.bubble_params.pore_radius,
             self.water_params.haline_contraction_coefficient,
-            start_date=self.start_date,
         )
 
     def save(self, directory: Path):

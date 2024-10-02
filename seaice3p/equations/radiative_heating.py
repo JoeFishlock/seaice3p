@@ -5,7 +5,13 @@ import numpy as np
 from numpy.typing import NDArray
 import oilrad as oi
 from ..grids import Grids, average
-from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams, RadForcing
+from ..params import (
+    Config,
+    EQMPhysicalParams,
+    DISEQPhysicalParams,
+    RadForcing,
+    ERA5Forcing,
+)
 from ..params.dimensional import (
     DimensionalBackgroundOilHeating,
     DimensionalMobileOilHeating,
@@ -113,7 +119,9 @@ def _calculate_non_dimensional_shortwave_heating(
     Assumes a configuration with the RadForcing object as the forcing config is
     passed."""
     # If we don't have radiative forcing then just return array of zeros for heating
-    if not isinstance(cfg.forcing_config, RadForcing):
+    if not isinstance(cfg.forcing_config, RadForcing) or isinstance(
+        cfg.forcing_config, ERA5Forcing
+    ):
         return np.zeros_like(grids.centers)
 
     if isinstance(cfg.forcing_config.oil_heating, DimensionalNoHeating):

@@ -11,6 +11,7 @@ from ..params.forcing import (
     YearlyForcing,
     ConstantForcing,
     RadForcing,
+    ERA5Forcing,
     RobinForcing,
 )
 from .surface_energy_balance import find_ghost_cell_temperature
@@ -24,6 +25,7 @@ def get_temperature_forcing(state: StateFull, cfg: Config):
         YearlyForcing: _yearly_temperature_forcing,
         BRW09Forcing: _barrow_temperature_forcing,
         RadForcing: find_ghost_cell_temperature,
+        ERA5Forcing: find_ghost_cell_temperature,
         RobinForcing: _Robin_forcing,
     }
     return TEMPERATURE_FORCINGS[type(cfg.forcing_config)](state, cfg)
@@ -35,6 +37,7 @@ def get_bottom_temperature_forcing(time, cfg: Config):
         YearlyForcing: _yearly_ocean_temperature_forcing,
         BRW09Forcing: _barrow_ocean_temperature_forcing,
         RadForcing: _constant_ocean_temperature_forcing,
+        ERA5Forcing: _constant_ocean_temperature_forcing,
         RobinForcing: _constant_ocean_temperature_forcing,
     }
     return OCEAN_TEMPERATURE_FORCINGS[type(cfg.forcing_config)](time, cfg)

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from serde import serde, coerce
 from typing import Optional
+from pathlib import Path
 
 
 @serde(type_check=coerce)
@@ -66,6 +67,14 @@ DimensionalLWForcing = DimensionalConstantLWForcing
 @serde(type_check=coerce)
 @dataclass(frozen=True)
 class DimensionalConstantTurbulentFlux:
+    """Parameters for calculating the turbulent surface sensible and latent heat
+    fluxes
+
+    NOTE: If you are running a simulation with ERA5 reanalysis forcing you must set
+    the ref_height=2m as this is the appropriate value for the atmospheric reanalysis
+    quantities
+    """
+
     ref_height: float = 10  # m
     windspeed: float = 5  # m/s
     air_temp: float = 0  # deg C
@@ -84,6 +93,22 @@ DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux
 @dataclass(frozen=True)
 class DimensionalRadForcing:
     # Short wave forcing parameters
+    SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
+    LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
+    turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
+    oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
+
+
+@serde(type_check=coerce)
+class DimensionalERA5Forcing:
+    """read ERA5 data from netCDF file located at data_path.
+
+    Simulation will take atmospheric forcings from the start date specified in the
+    format YYYY-MM-DD
+    """
+
+    data_path: Path
+    start_date: str  # YYYY-MM-DD
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()

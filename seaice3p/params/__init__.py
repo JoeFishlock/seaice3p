@@ -5,6 +5,7 @@ from .forcing import (
     BRW09Forcing,
     RadForcing,
     RobinForcing,
+    ERA5Forcing,
 )
 from .initial_conditions import (
     InitialConditionsConfig,

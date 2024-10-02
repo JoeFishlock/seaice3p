@@ -17,6 +17,7 @@ from .forcing import (
     DimensionalConstantTurbulentFlux,
     DimensionalTurbulentFlux,
     DimensionalRobinForcing,
+    DimensionalERA5Forcing,
 )
 from .initial_conditions import (
     BRW09InitialConditions,

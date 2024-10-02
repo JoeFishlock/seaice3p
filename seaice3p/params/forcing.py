@@ -17,7 +17,10 @@ from .dimensional import (
     DimensionalConstantLWForcing,
     DimensionalTurbulentFlux,
     DimensionalConstantTurbulentFlux,
+    DimensionalERA5Forcing,
 )
+import xarray as xr
+from scipy.interpolate import CubicSpline
 
 
 def _filter_missing_values(air_temp, days):
@@ -122,6 +125,53 @@ class RadForcing(BaseOceanForcing):
 
 
 @serde(type_check=coerce)
+class ERA5Forcing:
+    """Forcing parameters for simulation forced with atmospheric variables
+    from reanalysis data in netCDF file located at data_path.
+
+    Never create this object directly but instead initialise from a dimensional
+    simulation configuration as we must pass it the simulation timescale to correctly
+    read the atmospheric variables from the netCDF file.
+    """
+
+    data_path: Path
+    start_date: str
+    timescale_in_days: float
+    SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
+    LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
+    turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
+    oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
+    ocean_temp: float = 0.1
+    ocean_bulk_salinity: float = 0
+    ocean_gas_sat: float = 1.0
+
+    def __post_init__(self):
+        data = xr.open_dataset(self.data_path)
+        daily_data = data.resample(valid_time="1d").mean()
+        DATES = daily_data.valid_time.to_numpy()
+        DIMLESS_TIMES = (1 / self.timescale_in_days) * np.array(
+            [
+                (date - np.datetime64(self.start_date)) / np.timedelta64(1, "D")
+                for date in DATES
+            ]
+        )
+
+        # convert to deg C
+        T2M = daily_data.t2m[:, 0, 0].to_numpy() - 273.15
+
+        LW = daily_data.msdwlwrf[:, 0, 0].to_numpy()
+        SW = daily_data.msdwswrf[:, 0, 0].to_numpy()
+
+        # convert to KPa
+        ATM = daily_data.sp[:, 0, 0].to_numpy() / 1e3
+
+        self.get_2m_temp = CubicSpline(DIMLESS_TIMES, T2M, extrapolate=False)
+        self.get_LW = CubicSpline(DIMLESS_TIMES, LW, extrapolate=False)
+        self.get_SW = CubicSpline(DIMLESS_TIMES, SW, extrapolate=False)
+        self.get_ATM = CubicSpline(DIMLESS_TIMES, ATM, extrapolate=False)
+
+
+@serde(type_check=coerce)
 @dataclass(frozen=True)
 class RobinForcing(BaseOceanForcing):
     """Dimensionless forcing parameters for Robin boundary condition"""
@@ -131,7 +181,12 @@ class RobinForcing(BaseOceanForcing):
 
 
 ForcingConfig = (
-    ConstantForcing | YearlyForcing | BRW09Forcing | RadForcing | RobinForcing
+    ConstantForcing
+    | YearlyForcing
+    | BRW09Forcing
+    | RadForcing
+    | RobinForcing
+    | ERA5Forcing
 )
 
 
@@ -197,6 +252,19 @@ def get_dimensionless_forcing_config(
                 ocean_gas_sat=ocean_gas_sat,
                 biot=biot,
                 restoring_temperature=restoring_temperature,
+            )
+        case DimensionalERA5Forcing():
+            return ERA5Forcing(
+                data_path=dimensional_params.forcing_config.data_path,
+                start_date=dimensional_params.forcing_config.start_date,
+                timescale_in_days=dimensional_params.scales.time_scale,
+                ocean_temp=ocean_temp,
+                ocean_bulk_salinity=ocean_bulk_salinity,
+                ocean_gas_sat=ocean_gas_sat,
+                SW_forcing=dimensional_params.forcing_config.SW_forcing,
+                LW_forcing=dimensional_params.forcing_config.LW_forcing,
+                turbulent_flux=dimensional_params.forcing_config.turbulent_flux,
+                oil_heating=dimensional_params.forcing_config.oil_heating,
             )
         case _:
             raise NotImplementedError
