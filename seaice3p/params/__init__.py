@@ -1,3 +1,9 @@
+from .ocean_forcing import (
+    OceanForcingConfig,
+    FixedHeatFluxOceanForcing,
+    FixedTempOceanForcing,
+    BRW09OceanForcing,
+)
 from .forcing import (
     ForcingConfig,
     ConstantForcing,

@@ -15,6 +15,7 @@ from . import (
     DimensionalNoHeating,
     DimensionalConstantTurbulentFlux,
     DimensionalConstantLWForcing,
+    DimensionalFixedTempOceanForcing,
 )
 from .oil_mass import convert_oil_mass_ratio_to_gas_fraction
 
@@ -96,6 +97,9 @@ def generate_oil_simulation_config(
             ),
             oil_heating=oil_heating_params,
         ),
+        ocean_forcing_config=DimensionalFixedTempOceanForcing(
+            ocean_temp=initial_ocean_temperature
+        ),
         initial_conditions_config=DimensionalOilInitialConditions(
             initial_ice_depth=initial_ice_depth,
             initial_ice_bulk_salinity=initial_ice_bulk_salinity,
@@ -110,7 +114,6 @@ def generate_oil_simulation_config(
             liquid_density=1028,
             ice_density=ICE_DENSITY,
             ocean_salinity=34,
-            ocean_temperature=initial_ocean_temperature,
             phase_average_conductivity=True,
             salt_diffusivity=0,
             turbulent_liquid_thermal_conductivity=turbulent_thermal_conductivity,

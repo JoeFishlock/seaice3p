@@ -11,7 +11,6 @@ class DimensionalWaterParams:
     ocean_salinity: float = 34  # g/kg
     eutectic_salinity: float = 270  # g/kg
     eutectic_temperature: float = -21.1  # deg Celsius
-    ocean_temperature: float = -0.81  # deg Celsius
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     specific_heat_capacity: float = 4184  # ice and water assumed equal in J/kg degC
     # Option to average the conductivity term.

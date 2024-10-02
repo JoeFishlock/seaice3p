@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from serde import serde, coerce
 from serde.yaml import from_yaml, to_yaml
 
+from .ocean_forcing import OceanForcingConfig, get_dimensionless_ocean_forcing_config
 from .forcing import ForcingConfig, get_dimensionless_forcing_config
 from .initial_conditions import (
     InitialConditionsConfig,
@@ -41,6 +42,7 @@ class Config:
     bubble_params: BubbleParams
     brine_convection_params: BrineConvectionParams
     forcing_config: ForcingConfig
+    ocean_forcing_config: OceanForcingConfig
     initial_conditions_config: InitialConditionsConfig
     numerical_params: NumericalParams = NumericalParams()
     scales: Scales | None = None
@@ -71,6 +73,7 @@ def get_config(dimensional_params: DimensionalParams) -> Config:
     )
     bubble_params = get_dimensionless_bubble_params(dimensional_params)
     forcing_config = get_dimensionless_forcing_config(dimensional_params)
+    ocean_forcing_config = get_dimensionless_ocean_forcing_config(dimensional_params)
     return Config(
         name=dimensional_params.name,
         physical_params=physical_params,
@@ -78,6 +81,7 @@ def get_config(dimensional_params: DimensionalParams) -> Config:
         brine_convection_params=brine_convection_params,
         bubble_params=bubble_params,
         forcing_config=forcing_config,
+        ocean_forcing_config=ocean_forcing_config,
         numerical_params=dimensional_params.numerical_params,
         scales=dimensional_params.scales,
         total_time=dimensional_params.total_time,

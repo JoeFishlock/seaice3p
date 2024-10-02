@@ -19,6 +19,7 @@ from ..params import (
     EQMPhysicalParams,
     ConstantForcing,
     UniformInitialConditions,
+    FixedTempOceanForcing,
 )
 from ..grids import calculate_ice_ocean_boundary_depth
 
@@ -56,6 +57,7 @@ def main(output_dir: Path):
         bubble_params=MonoBubbleParams(),
         physical_params=EQMPhysicalParams(),
         forcing_config=ConstantForcing(),
+        ocean_forcing_config=FixedTempOceanForcing(),
         initial_conditions_config=UniformInitialConditions(),
     )
     I = cfg.numerical_params.I

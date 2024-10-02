@@ -94,9 +94,9 @@ def _get_uniform_initial_conditions(cfg: Config):
     """
     chi = cfg.physical_params.expansion_coefficient
 
-    bottom_temp = cfg.forcing_config.ocean_temp
-    bottom_bulk_salinity = cfg.forcing_config.ocean_bulk_salinity
-    bottom_dissolved_gas = cfg.forcing_config.ocean_gas_sat
+    bottom_temp = cfg.ocean_forcing_config.ocean_temp
+    bottom_bulk_salinity = 0
+    bottom_dissolved_gas = cfg.ocean_forcing_config.ocean_gas_sat
     bottom_bulk_gas = bottom_dissolved_gas * chi
 
     # Initialise uniform enthalpy assuming completely liquid initial domain
@@ -119,17 +119,17 @@ def _get_barrow_initial_conditions(cfg: Config):
     Ice temperature is given as -8.15 degC and ocean is the far value from boundary
     config.
     """
-    far_gas_sat = cfg.forcing_config.ocean_gas_sat
+    far_gas_sat = cfg.ocean_forcing_config.ocean_gas_sat
     ICE_DEPTH = cfg.scales.convert_from_dimensional_grid(0.7)
 
     # if we are going to have brine convection ice will desalinate on its own
     if not isinstance(cfg.brine_convection_params, NoBrineConvection):
-        SALT_IN_ICE = cfg.forcing_config.ocean_bulk_salinity
+        SALT_IN_ICE = 0
     else:
         SALT_IN_ICE = cfg.scales.convert_from_dimensional_bulk_salinity(5.92)
 
     BOTTOM_TEMP = cfg.scales.convert_from_dimensional_temperature(-1.8)
-    BOTTOM_SALT = cfg.forcing_config.ocean_bulk_salinity
+    BOTTOM_SALT = 0
     TEMP_IN_ICE = cfg.scales.convert_from_dimensional_temperature(-8.15)
 
     chi = cfg.physical_params.expansion_coefficient
@@ -174,7 +174,7 @@ def _get_oil_initial_conditions(cfg: Config):
     SALT_IN_ICE = cfg.initial_conditions_config.initial_ice_bulk_salinity
 
     BOTTOM_TEMP = cfg.initial_conditions_config.initial_ocean_temperature
-    BOTTOM_SALT = cfg.forcing_config.ocean_bulk_salinity
+    BOTTOM_SALT = 0
     TEMP_IN_ICE = cfg.initial_conditions_config.initial_ice_temperature
 
     INITIAL_OIL_VOLUME_FRACTION = (

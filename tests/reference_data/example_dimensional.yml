@@ -28,6 +28,9 @@ name: example
 numerical_params:
   I: 24
   regularisation: 1.0e-06
+  solver_choice: RK23
+ocean_forcing_config:
+  DimensionalBRW09OceanForcing: {}
 savefreq_in_days: 3.0
 total_time_in_days: 164.0
 water_params:
@@ -40,8 +43,8 @@ water_params:
   liquid_thermal_conductivity: 0.54
   liquid_viscosity: 0.00278
   ocean_salinity: 34.0
-  ocean_temperature: -0.81
   phase_average_conductivity: false
   salt_diffusivity: 0.0
   solid_thermal_conductivity: 2.22
   specific_heat_capacity: 4184.0
+  turbulent_liquid_thermal_conductivity: 0.54

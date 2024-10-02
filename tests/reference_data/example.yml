@@ -11,8 +11,6 @@ bubble_params:
 forcing_config:
   BRW09Forcing:
     Barrow_top_temperature_data_choice: air
-    ocean_bulk_salinity: 0.0
-    ocean_gas_sat: 1.0
 initial_conditions_config:
   BRW09InitialConditions:
     Barrow_initial_bulk_gas_in_ice: 0.2
@@ -20,6 +18,10 @@ name: example
 numerical_params:
   I: 24
   regularisation: 1.0e-06
+  solver_choice: RK23
+ocean_forcing_config:
+  BRW09OceanForcing:
+    ocean_gas_sat: 1.0
 physical_params:
   EQMPhysicalParams:
     concentration_ratio: 0.1440677966101695
@@ -31,6 +33,7 @@ physical_params:
     phase_average_conductivity: false
     stefan_number: 4.328367195135119
     tolerable_super_saturation_fraction: 1.0
+    turbulent_conductivity_ratio: 1.0
 savefreq: 0.00564964921025809
 scales:
   gas_density: 1.0

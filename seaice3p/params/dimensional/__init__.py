@@ -1,3 +1,8 @@
+from .ocean_forcing import (
+    DimensionalBRW09OceanForcing,
+    DimensionalFixedHeatFluxOceanForcing,
+    DimensionalFixedTempOceanForcing,
+)
 from .dimensional import (
     DimensionalParams,
 )
