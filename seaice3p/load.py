@@ -111,8 +111,9 @@ class _BaseResults:
         )
 
     def get_spectral_irradiance(self, time: float) -> oi.SpectralIrradiance:
-        if not isinstance(self.cfg.forcing_config, RadForcing) or isinstance(
-            self.cfg.forcing_config, ERA5Forcing
+        if not (
+            isinstance(self.cfg.forcing_config, RadForcing)
+            or isinstance(self.cfg.forcing_config, ERA5Forcing)
         ):
             raise TypeError("Simulation was not run with radiative forcing")
 
