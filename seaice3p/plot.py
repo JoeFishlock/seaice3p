@@ -4,6 +4,8 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib import colors
+from matplotlib.cm import ScalarMappable
 from . import load_simulation
 
 
@@ -49,9 +51,16 @@ def plot(
             "bulk_argon",
         ],
     ):
+        if attr == "solid_fraction":
+            cmap = plt.colormaps["Blues_r"].with_extremes(under="b", over="w")
+        elif attr == "temperature":
+            cmap = plt.colormaps["OrRd"]
+        else:
+            cmap = plt.colormaps["viridis"]
+
         data = converter(getattr(results, attr))
         plt.figure()
-        plt.contourf(dimensional_times, dimensional_grid, data)
+        plt.contourf(dimensional_times, dimensional_grid, data, cmap=cmap)
         plt.colorbar()
         plt.title(f"{attr} {unit}")
         plt.xlabel("time [days]")
