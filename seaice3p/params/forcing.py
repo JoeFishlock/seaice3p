@@ -1,5 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass
+from typing import ClassVar
 from numpy.typing import NDArray
 from serde import serde, coerce
 import numpy as np
@@ -115,10 +116,15 @@ class ERA5Forcing:
     data_path: Path
     start_date: str
     timescale_in_days: float
+    use_snow_data: bool = False
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
+
+    NEGLIGIBLE_SNOW_DEPTH: ClassVar[
+        float
+    ] = 0.02  # snow depth in m below which we assume snow is negligible
 
     def __post_init__(self):
         data = xr.open_dataset(self.data_path)
@@ -149,6 +155,19 @@ class ERA5Forcing:
         self.get_SW = CubicSpline(DIMLESS_TIMES, SW, extrapolate=False)
         self.get_ATM = CubicSpline(DIMLESS_TIMES, ATM, extrapolate=False)
         self.get_spec_hum = CubicSpline(DIMLESS_TIMES, SPEC_HUM, extrapolate=False)
+
+        if self.use_snow_data:
+            SNOW_DENSITY = 400  # kg/m3
+            ICE_TEMP = daily_data.istl1[:, 0, 0].to_numpy() - 273.15  # in deg C
+            SNOW_DEPTH = daily_data.sd[:, 0, 0].to_numpy() * (
+                1000 / SNOW_DENSITY
+            )  # in m
+            self.get_snow_depth = CubicSpline(
+                DIMLESS_TIMES, SNOW_DEPTH, extrapolate=False
+            )
+            self.get_top_ice_temp = CubicSpline(
+                DIMLESS_TIMES, ICE_TEMP, extrapolate=False
+            )
 
 
 def _calculate_specific_humidity(pressure: NDArray, dewpoint: NDArray) -> NDArray:
@@ -228,6 +247,7 @@ def get_dimensionless_forcing_config(
                 data_path=dimensional_params.forcing_config.data_path,
                 start_date=dimensional_params.forcing_config.start_date,
                 timescale_in_days=dimensional_params.scales.time_scale,
+                use_snow_data=dimensional_params.forcing_config.use_snow_data,
                 SW_forcing=dimensional_params.forcing_config.SW_forcing,
                 LW_forcing=dimensional_params.forcing_config.LW_forcing,
                 turbulent_flux=dimensional_params.forcing_config.turbulent_flux,

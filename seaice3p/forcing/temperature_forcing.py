@@ -30,7 +30,7 @@ def get_temperature_forcing(state: StateFull, cfg: Config):
         YearlyForcing: _yearly_temperature_forcing,
         BRW09Forcing: _barrow_temperature_forcing,
         RadForcing: find_ghost_cell_temperature,
-        ERA5Forcing: find_ghost_cell_temperature,
+        ERA5Forcing: _ERA5_temperature_forcing,
         RobinForcing: _Robin_forcing,
     }
     return TEMPERATURE_FORCINGS[type(cfg.forcing_config)](state, cfg)
@@ -43,6 +43,19 @@ def get_bottom_temperature_forcing(state: StateFull, cfg: Config):
         FixedHeatFluxOceanForcing: _constant_ocean_heat_flux_ghost_temperature,
     }
     return OCEAN_TEMPERATURE_FORCINGS[type(cfg.ocean_forcing_config)](state, cfg)
+
+
+def _ERA5_temperature_forcing(state: StateFull, cfg: Config) -> float:
+    if cfg.forcing_config.use_snow_data:
+        if (
+            cfg.forcing_config.get_snow_depth(state.time)
+            > cfg.forcing_config.NEGLIGIBLE_SNOW_DEPTH
+        ):
+            return cfg.scales.convert_from_dimensional_temperature(
+                cfg.forcing_config.get_top_ice_temp(state.time)
+            )
+
+    return find_ghost_cell_temperature(state, cfg)
 
 
 def _constant_temperature_forcing(state: StateFull, cfg: Config):

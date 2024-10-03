@@ -28,6 +28,7 @@ class DimensionalConstantSWForcing:
 @dataclass(frozen=True)
 class DimensionalBackgroundOilHeating:
     oil_mass_ratio: float = 0  # ng/g
+    median_oil_droplet_radius: float = 0.5  # microns
     ice_type: str = "FYI"
     fast_solve: bool = False
     wavelength_cutoff: Optional[float] = 1200
@@ -109,6 +110,7 @@ class DimensionalERA5Forcing:
 
     data_path: Path
     start_date: str  # YYYY-MM-DD
+    use_snow_data: bool = False
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()

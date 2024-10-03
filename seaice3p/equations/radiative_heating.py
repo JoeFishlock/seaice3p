@@ -79,14 +79,14 @@ def run_two_stream_model(
     )
     NUM_WAVELENGTH_SAMPLES = cfg.forcing_config.SW_forcing.num_wavelength_samples
     wavelengths = np.geomspace(SW_RANGE[0], SW_RANGE[1], NUM_WAVELENGTH_SAMPLES)
-    MEDIAN_DROPLET_RADIUS_MICRONS = (
-        cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
-    )
 
     match cfg.forcing_config.oil_heating:
         case DimensionalBackgroundOilHeating():
             oil_mass_ratio = np.full_like(
                 grids.edges, cfg.forcing_config.oil_heating.oil_mass_ratio
+            )
+            MEDIAN_DROPLET_RADIUS_MICRONS = (
+                cfg.forcing_config.oil_heating.median_oil_droplet_radius
             )
 
         case DimensionalMobileOilHeating():
@@ -94,6 +94,9 @@ def run_two_stream_model(
                 average(state_bcs.gas_fraction),
                 cfg.scales.gas_density,
                 cfg.scales.ice_density,
+            )
+            MEDIAN_DROPLET_RADIUS_MICRONS = (
+                cfg.scales.pore_radius * cfg.bubble_params.bubble_radius_scaled * 1e6
             )
         case _:
             raise NotImplementedError()
@@ -128,6 +131,14 @@ def _calculate_non_dimensional_shortwave_heating(
     if isinstance(cfg.forcing_config.oil_heating, DimensionalNoHeating):
         return np.zeros_like(grids.centers)
 
+    dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
+        get_SW_penetration_fraction(state_bcs, cfg)
+        * get_SW_forcing(state_bcs.time, cfg)
+    )
+    # If no incident SW don't need to run radiation model
+    if dimensionless_incident_SW == 0:
+        return np.zeros_like(grids.centers)
+
     spectral_irradiances = run_two_stream_model(state_bcs, cfg, grids)
     spectrum = oi.BlackBodySpectrum(
         cfg.forcing_config.SW_forcing.SW_min_wavelength,
@@ -135,9 +146,5 @@ def _calculate_non_dimensional_shortwave_heating(
     )
     integrated_irradiance = oi.integrate_over_SW(spectral_irradiances, spectrum)
 
-    dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
-        get_SW_penetration_fraction(state_bcs, cfg)
-        * get_SW_forcing(state_bcs.time, cfg)
-    )
     dz_dF_net = grids.D_e @ integrated_irradiance.net_irradiance
     return dimensionless_incident_SW * dz_dF_net
