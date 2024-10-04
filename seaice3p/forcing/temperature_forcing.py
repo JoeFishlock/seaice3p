@@ -147,7 +147,7 @@ def _barrow_ocean_temperature_forcing(state: StateFull, cfg: Config) -> float:
 
 def _constant_ocean_heat_flux_ghost_temperature(state: StateFull, cfg: Config) -> float:
     conductivity = calculate_conductivity(cfg, state.solid_fraction[0])
-    return state.temperature[0] - (
-        (-cfg.ocean_forcing_config.ocean_heat_flux * cfg.numerical_params.step)
+    return state.temperature[0] + (
+        (cfg.ocean_forcing_config.ocean_heat_flux * cfg.numerical_params.step)
         / conductivity
     )
