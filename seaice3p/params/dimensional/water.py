@@ -17,6 +17,7 @@ class DimensionalWaterParams:
     phase_average_conductivity: bool = False
     liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
+    snow_thermal_conductivity: float = 0.31  # snow thermal conductivity in W/m deg C
     turbulent_liquid_thermal_conductivity: float = 0.54
 
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
@@ -107,6 +108,15 @@ class DimensionalWaterParams:
             self.turbulent_liquid_thermal_conductivity
             / self.liquid_thermal_conductivity
         )
+
+    @property
+    def snow_conductivity_ratio(self):
+        r"""Calculate the ratio of snow to liquid thermal conductivity
+
+        .. math:: \lambda = \frac{k_{sn}}{k_l}
+
+        """
+        return self.snow_thermal_conductivity / self.liquid_thermal_conductivity
 
     @property
     def lewis_salt(self):

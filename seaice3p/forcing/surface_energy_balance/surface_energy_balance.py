@@ -9,7 +9,7 @@ doi: 10.1029/2004JC002361.
 """
 from scipy.optimize import fsolve
 from ...state import StateFull
-from ...params import Config
+from ...params import Config, ERA5Forcing
 from .turbulent_heat_flux import (
     calculate_latent_heat_flux,
     calculate_sensible_heat_flux,
@@ -36,10 +36,26 @@ def _convert_non_dim_temperature_to_kelvin(
 
 
 def _calculate_total_heat_flux(
-    cfg: Config, time: float, top_cell_is_ice: bool, surface_temp: float
+    cfg: Config,
+    time: float,
+    top_cell_is_ice: bool,
+    surface_temp: float,
+    temp_gradient: float,
+    top_cell_conductivity: float,
 ) -> float:
     """Takes non-dimensional surface temperature and returns non-dimensional heat flux"""
-    surface_temp_K = _convert_non_dim_temperature_to_kelvin(cfg, surface_temp)
+    if isinstance(cfg.forcing_config, ERA5Forcing) and cfg.forcing_config.use_snow_data:
+        dimensional_temperature_gradient = (
+            cfg.scales.temperature_difference * temp_gradient / cfg.scales.lengthscale
+        )
+        surface_temp_K = (
+            _convert_non_dim_temperature_to_kelvin(cfg, surface_temp)
+            + (top_cell_conductivity / cfg.physical_params.snow_conductivity_ratio)
+            * cfg.forcing_config.get_snow_depth(time)
+            * dimensional_temperature_gradient
+        )
+    else:
+        surface_temp_K = _convert_non_dim_temperature_to_kelvin(cfg, surface_temp)
     emissivity = _calculate_emissivity(cfg, top_cell_is_ice)
     dimensional_heat_flux = (
         get_LW_forcing(time, cfg)
@@ -64,10 +80,14 @@ def find_ghost_cell_temperature(state: StateFull, cfg: Config) -> float:
         temp_gradient = (1 / cfg.numerical_params.step) * (
             ghost_cell_temperature - state.temperature[-1]
         )
-        return calculate_conductivity(
-            cfg, state.solid_fraction[-1]
-        ) * temp_gradient - _calculate_total_heat_flux(
-            cfg, state.time, top_cell_is_ice, surface_temperature
+        conductivity = calculate_conductivity(cfg, state.solid_fraction[-1])
+        return conductivity * temp_gradient - _calculate_total_heat_flux(
+            cfg,
+            state.time,
+            top_cell_is_ice,
+            surface_temperature,
+            temp_gradient,
+            conductivity,
         )
 
     initial_guess = state.temperature[-1]

@@ -27,6 +27,7 @@ class BasePhysicalParams:
     phase_average_conductivity: bool = False
     conductivity_ratio: float = 4.11
     turbulent_conductivity_ratio: float = 1
+    snow_conductivity_ratio: float = 0.574
 
     # Option to change tolerable supersaturation
     tolerable_super_saturation_fraction: float = 1
@@ -66,6 +67,7 @@ def get_dimensionless_physical_params(
                 phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
                 conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
                 turbulent_conductivity_ratio=dimensional_params.water_params.turbulent_conductivity_ratio,
+                snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
             )
         case DimensionalDISEQGasParams():
@@ -79,6 +81,7 @@ def get_dimensionless_physical_params(
                 phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
                 conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
                 turbulent_conductivity_ratio=dimensional_params.water_params.turbulent_conductivity_ratio,
+                snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
                 damkohler_number=dimensional_params.damkohler_number,
             )
