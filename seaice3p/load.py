@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import List
 import numpy as np
 from numpy.typing import NDArray
 import oilrad as oi
@@ -65,6 +67,17 @@ class _BaseResults:
     def _top_cell_is_ice(self, time: float) -> bool:
         """Return True if top cell is ice or False if liquid"""
         return self._is_ice(time)[-1]
+
+    @property
+    def dates(self) -> List[datetime]:
+        if hasattr(self.cfg.forcing_config, "start_date"):
+            days = self.times * self.cfg.scales.time_scale
+            start_date = datetime.strptime(
+                self.cfg.forcing_config.start_date, "%Y-%m-%d"
+            )
+            return [timedelta(days=day) + start_date for day in days]
+        else:
+            raise AttributeError("forcing has no start date")
 
     @property
     def solid_fraction(self) -> NDArray:
