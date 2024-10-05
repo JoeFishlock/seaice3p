@@ -124,7 +124,7 @@ class ERA5Forcing:
 
     NEGLIGIBLE_SNOW_DEPTH: ClassVar[
         float
-    ] = 0.02  # snow depth in m below which we assume snow is negligible
+    ] = 0.05  # snow depth in m below which we assume snow is negligible
 
     def __post_init__(self):
         data = xr.open_dataset(self.data_path)
@@ -157,16 +157,17 @@ class ERA5Forcing:
         self.get_spec_hum = CubicSpline(DIMLESS_TIMES, SPEC_HUM, extrapolate=False)
 
         if self.use_snow_data:
-            SNOW_DENSITY = 400  # kg/m3
-            ICE_TEMP = daily_data.istl1[:, 0, 0].to_numpy() - 273.15  # in deg C
-            SNOW_DEPTH = daily_data.sd[:, 0, 0].to_numpy() * (
-                1000 / SNOW_DENSITY
-            )  # in m
+            SNOW_DENSITY = 100  # kg/m3
+            WATER_DENSITY = 1000  # kg/m3
+
+            # Set to zero if less than negligible snow depth
+            SNOW_DEPTH = np.maximum(
+                daily_data.sd[:, 0, 0].to_numpy() * (WATER_DENSITY / SNOW_DENSITY)
+                - self.NEGLIGIBLE_SNOW_DEPTH,
+                0,
+            )
             self.get_snow_depth = CubicSpline(
                 DIMLESS_TIMES, SNOW_DEPTH, extrapolate=False
-            )
-            self.get_top_ice_temp = CubicSpline(
-                DIMLESS_TIMES, ICE_TEMP, extrapolate=False
             )
 
 

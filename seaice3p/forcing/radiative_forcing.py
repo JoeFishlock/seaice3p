@@ -14,10 +14,7 @@ def get_SW_penetration_fraction(state_bcs: StateBCs, cfg: Config) -> float:
     if isinstance(cfg.forcing_config, ERA5Forcing):
         if cfg.forcing_config.use_snow_data:
             # If there is snow cover no SW penetration
-            if (
-                cfg.forcing_config.get_snow_depth(state_bcs.time)
-                > cfg.forcing_config.NEGLIGIBLE_SNOW_DEPTH
-            ):
+            if cfg.forcing_config.get_snow_depth(state_bcs.time) > 0:
                 return 0
 
     # if there is ice set penetration through SSL
