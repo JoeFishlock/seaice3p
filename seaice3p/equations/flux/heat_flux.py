@@ -11,14 +11,14 @@ def calculate_conductivity(
         return np.where(
             solid_fraction > 0,
             np.ones_like(solid_fraction),
-            cfg.physical_params.turbulent_conductivity_ratio,
+            1 + cfg.physical_params.eddy_diffusivity_ratio,
         )
 
     liquid_fraction = 1 - solid_fraction
     return np.where(
         solid_fraction > 0,
         liquid_fraction + cfg.physical_params.conductivity_ratio * solid_fraction,
-        cfg.physical_params.turbulent_conductivity_ratio,
+        1 + cfg.physical_params.eddy_diffusivity_ratio,
     )
 
 

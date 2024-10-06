@@ -1,14 +1,20 @@
 import numpy as np
 from ...grids import upwind, geometric
+from ...params import Config
 
 
-def calculate_diffusive_salt_flux(liquid_salinity, liquid_fraction, D_g, cfg):
+def calculate_diffusive_salt_flux(liquid_salinity, liquid_fraction, D_g, cfg: Config):
     """Take liquid salinity and liquid fraction on ghost grid and interpolate liquid
     fraction geometrically"""
     lewis_salt = cfg.physical_params.lewis_salt
-    return (
-        -(1 / lewis_salt) * geometric(liquid_fraction) * np.matmul(D_g, liquid_salinity)
+    edge_liquid_fraction = geometric(liquid_fraction)
+    # In pure liquid phase enhanced eddy diffusivity of dissolved salt
+    salt_diffusivity = np.where(
+        edge_liquid_fraction < 1,
+        edge_liquid_fraction * (1 / lewis_salt),
+        (1 / lewis_salt) + cfg.physical_params.eddy_diffusivity_ratio,
     )
+    return -salt_diffusivity * np.matmul(D_g, liquid_salinity)
 
 
 def calculate_advective_salt_flux(liquid_salinity, Wl, cfg):

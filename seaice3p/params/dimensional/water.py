@@ -18,7 +18,8 @@ class DimensionalWaterParams:
     liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
     snow_thermal_conductivity: float = 0.31  # snow thermal conductivity in W/m deg C
-    turbulent_liquid_thermal_conductivity: float = 0.54
+
+    eddy_diffusivity: float = 0
 
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
     # used to calculate Rayleigh number for convection and density contraction in liquid equation of state
@@ -97,17 +98,14 @@ class DimensionalWaterParams:
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
 
     @property
-    def turbulent_conductivity_ratio(self):
-        r"""Calculate the enhancement of thermal conductivity due to turbulence in
+    def eddy_diffusivity_ratio(self):
+        r"""Calculate the ratio of eddy diffusivity to thermal diffusivity in
         the liquid phase
 
-        .. math:: \lambda = \frac{k_\text{turbulent}}{k_l}
+        .. math:: \lambda = \frac{\kappa_\text{turbulent}}{\kappa_l}
 
         """
-        return (
-            self.turbulent_liquid_thermal_conductivity
-            / self.liquid_thermal_conductivity
-        )
+        return self.eddy_diffusivity / self.thermal_diffusivity
 
     @property
     def snow_conductivity_ratio(self):

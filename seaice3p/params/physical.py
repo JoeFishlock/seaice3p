@@ -26,7 +26,7 @@ class BasePhysicalParams:
     # Option to average the conductivity term.
     phase_average_conductivity: bool = False
     conductivity_ratio: float = 4.11
-    turbulent_conductivity_ratio: float = 1
+    eddy_diffusivity_ratio: float = 0
     snow_conductivity_ratio: float = 0.574
 
     # Option to change tolerable supersaturation
@@ -68,7 +68,7 @@ def get_dimensionless_physical_params(
                 frame_velocity=dimensional_params.frame_velocity,
                 phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
                 conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
-                turbulent_conductivity_ratio=dimensional_params.water_params.turbulent_conductivity_ratio,
+                eddy_diffusivity_ratio=dimensional_params.water_params.eddy_diffusivity_ratio,
                 snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
                 gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
@@ -84,7 +84,7 @@ def get_dimensionless_physical_params(
                 frame_velocity=dimensional_params.frame_velocity,
                 phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
                 conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
-                turbulent_conductivity_ratio=dimensional_params.water_params.turbulent_conductivity_ratio,
+                eddy_diffusivity_ratio=dimensional_params.water_params.eddy_diffusivity_ratio,
                 snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
                 gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
