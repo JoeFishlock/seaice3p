@@ -32,6 +32,8 @@ class BasePhysicalParams:
     # Option to change tolerable supersaturation
     tolerable_super_saturation_fraction: float = 1
 
+    gas_viscosity_ratio: float = 0
+
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
@@ -69,6 +71,8 @@ def get_dimensionless_physical_params(
                 turbulent_conductivity_ratio=dimensional_params.water_params.turbulent_conductivity_ratio,
                 snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
+                gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
+                / dimensional_params.water_params.liquid_viscosity,
             )
         case DimensionalDISEQGasParams():
             return DISEQPhysicalParams(
@@ -83,6 +87,8 @@ def get_dimensionless_physical_params(
                 turbulent_conductivity_ratio=dimensional_params.water_params.turbulent_conductivity_ratio,
                 snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
+                gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
+                / dimensional_params.water_params.liquid_viscosity,
                 damkohler_number=dimensional_params.damkohler_number,
             )
         case _:
