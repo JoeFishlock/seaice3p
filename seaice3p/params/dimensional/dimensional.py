@@ -24,9 +24,15 @@ from .convection import NoBrineConvection, DimensionalRJW14Params
 from .forcing import (
     DimensionalBRW09Forcing,
     DimensionalConstantForcing,
+    DimensionalERA5Forcing,
     DimensionalRadForcing,
     DimensionalYearlyForcing,
     DimensionalRobinForcing,
+)
+from .ocean_forcing import (
+    DimensionalBRW09OceanForcing,
+    DimensionalFixedHeatFluxOceanForcing,
+    DimensionalFixedTempOceanForcing,
 )
 from .initial_conditions import (
     DimensionalOilInitialConditions,
@@ -56,7 +62,8 @@ class DimensionalParams:
     gas_params: DimensionalEQMGasParams | DimensionalDISEQGasParams
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
     brine_convection_params: DimensionalRJW14Params | NoBrineConvection
-    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing
+    forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing | DimensionalERA5Forcing
+    ocean_forcing_config: DimensionalBRW09OceanForcing | DimensionalFixedTempOceanForcing | DimensionalFixedHeatFluxOceanForcing
     initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions | PreviousSimulation
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()

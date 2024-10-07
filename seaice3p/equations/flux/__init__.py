@@ -45,7 +45,7 @@ def _DISEQ_dz_fluxes(state_BCs: DISEQStateBCs, Wl, Vg, V, cfg, grids) -> NDArray
     bulk_dissolved_gas_flux = calculate_bulk_dissolved_gas_flux(
         state_BCs, Wl, V, D_g, cfg
     )
-    gas_fraction_flux = calculate_gas_fraction_flux(state_BCs, V, Vg)
+    gas_fraction_flux = calculate_gas_fraction_flux(state_BCs, V, Vg, D_g, cfg)
     return np.hstack(
         (
             dz(heat_flux),

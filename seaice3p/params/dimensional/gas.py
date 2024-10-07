@@ -11,6 +11,8 @@ class _DimensionalGasParams:
     gas_diffusivity: float = 0  # molecular diffusivity of gas in water in m2/s
     # Option to change tolerable super saturation in brines
     tolerable_super_saturation_fraction: float = 1
+    gas_viscosity: float = 0  # Pa s
+    gas_bubble_eddy_diffusion: bool = False
 
 
 @serde(type_check=coerce)

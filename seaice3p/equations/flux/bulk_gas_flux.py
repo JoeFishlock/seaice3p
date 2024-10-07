@@ -1,13 +1,37 @@
 import numpy as np
 from ...grids import upwind, geometric
+from ...params import Config
 
 
-def calculate_diffusive_gas_flux(dissolved_gas, liquid_fraction, D_g, cfg):
+def calculate_diffusive_gas_flux(dissolved_gas, liquid_fraction, D_g, cfg: Config):
     chi = cfg.physical_params.expansion_coefficient
     lewis_gas = cfg.physical_params.lewis_gas
-    return (
-        -(chi / lewis_gas) * geometric(liquid_fraction) * np.matmul(D_g, dissolved_gas)
+    edge_liquid_fraction = geometric(liquid_fraction)
+    # Enhanced eddgy gas diffusivity in pure liquid region
+    gas_diffusivity = chi * np.where(
+        edge_liquid_fraction < 1,
+        edge_liquid_fraction * (1 / lewis_gas),
+        (1 / lewis_gas) + cfg.physical_params.eddy_diffusivity_ratio,
     )
+    return -gas_diffusivity * np.matmul(D_g, dissolved_gas)
+
+
+def calculate_diffusive_gas_bubble_flux(
+    gas_fraction, liquid_fraction, D_g, cfg: Config
+):
+    if not cfg.physical_params.gas_bubble_eddy_diffusion:
+        return np.zeros_like(geometric(liquid_fraction))
+
+    edge_liquid_fraction = geometric(liquid_fraction)
+    # Enhanced eddgy gas diffusivity in pure liquid region
+    gas_bubble_diffusivity = np.where(
+        edge_liquid_fraction < 1,
+        0,
+        cfg.physical_params.eddy_diffusivity_ratio,
+    )
+    diffusive_flux = -gas_bubble_diffusivity * np.matmul(D_g, gas_fraction)
+    diffusive_flux[-1] = 0
+    return diffusive_flux
 
 
 def calculate_bubble_gas_flux(gas_fraction, Vg):
@@ -33,5 +57,6 @@ def calculate_gas_flux(state_BCs, Wl, V, Vg, D_g, cfg):
         + calculate_bubble_gas_flux(gas_fraction, Vg)
         + calculate_advective_dissolved_gas_flux(dissolved_gas, Wl, cfg)
         + calculate_frame_advection_gas_flux(gas, V)
+        + calculate_diffusive_gas_bubble_flux(gas_fraction, liquid_fraction, D_g, cfg)
     )
     return gas_flux

@@ -11,14 +11,15 @@ class DimensionalWaterParams:
     ocean_salinity: float = 34  # g/kg
     eutectic_salinity: float = 270  # g/kg
     eutectic_temperature: float = -21.1  # deg Celsius
-    ocean_temperature: float = -0.81  # deg Celsius
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     specific_heat_capacity: float = 4184  # ice and water assumed equal in J/kg degC
     # Option to average the conductivity term.
     phase_average_conductivity: bool = False
     liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
-    turbulent_liquid_thermal_conductivity: float = 0.54
+    snow_thermal_conductivity: float = 0.31  # snow thermal conductivity in W/m deg C
+
+    eddy_diffusivity: float = 0
 
     salt_diffusivity: float = 0  # molecular diffusivity of salt in water in m2/s
     # used to calculate Rayleigh number for convection and density contraction in liquid equation of state
@@ -97,17 +98,23 @@ class DimensionalWaterParams:
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
 
     @property
-    def turbulent_conductivity_ratio(self):
-        r"""Calculate the enhancement of thermal conductivity due to turbulence in
+    def eddy_diffusivity_ratio(self):
+        r"""Calculate the ratio of eddy diffusivity to thermal diffusivity in
         the liquid phase
 
-        .. math:: \lambda = \frac{k_\text{turbulent}}{k_l}
+        .. math:: \lambda = \frac{\kappa_\text{turbulent}}{\kappa_l}
 
         """
-        return (
-            self.turbulent_liquid_thermal_conductivity
-            / self.liquid_thermal_conductivity
-        )
+        return self.eddy_diffusivity / self.thermal_diffusivity
+
+    @property
+    def snow_conductivity_ratio(self):
+        r"""Calculate the ratio of snow to liquid thermal conductivity
+
+        .. math:: \lambda = \frac{k_{sn}}{k_l}
+
+        """
+        return self.snow_thermal_conductivity / self.liquid_thermal_conductivity
 
     @property
     def lewis_salt(self):

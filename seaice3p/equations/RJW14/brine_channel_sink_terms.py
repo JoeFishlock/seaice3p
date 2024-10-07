@@ -108,9 +108,9 @@ def _calculate_gas_sink(state_BCs, cfg: Config, grids):
 
     if cfg.brine_convection_params.couple_bubble_to_horizontal_flow:
         if isinstance(cfg.bubble_params, MonoBubbleParams):
-            lag_factor = calculate_mono_lag_factor(liquid_fraction, cfg)
+            lag_factor = calculate_mono_lag_factor(state_BCs.liquid_fraction, cfg)
         elif isinstance(cfg.bubble_params, PowerLawBubbleParams):
-            lag_factor = calculate_power_law_lag_factor(liquid_fraction, cfg)
+            lag_factor = calculate_power_law_lag_factor(state_BCs.liquid_fraction, cfg)
         else:
             raise NotImplementedError
 

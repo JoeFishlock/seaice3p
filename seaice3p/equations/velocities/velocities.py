@@ -70,8 +70,16 @@ def calculate_gas_interstitial_velocity(
         liquid_darcy_velocity * 2 / (geometric(liquid_fraction) + REGULARISATION)
     )
 
+    viscosity_factor = (
+        2
+        * (1 + cfg.physical_params.gas_viscosity_ratio)
+        / (2 + 3 * cfg.physical_params.gas_viscosity_ratio)
+    )
     Vg = (
-        B * wall_drag_factor * geometric(liquid_fraction) ** (2 * exponent)
+        viscosity_factor
+        * B
+        * wall_drag_factor
+        * geometric(liquid_fraction) ** (2 * exponent)
         + liquid_interstitial_velocity * lag_factor
     )
 

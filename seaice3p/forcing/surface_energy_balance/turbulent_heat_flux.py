@@ -14,7 +14,11 @@ Journal of Geophysical Research: Oceans, vol. 98, no. C6, pp. 10085–10109, 199
 doi: 10.1029/93JC00656.
 """
 import numpy as np
-from ...params import Config
+from ...params import (
+    Config,
+    RadForcing,
+    ERA5Forcing,
+)
 
 GRAVITY = 9.81  # m/s2
 
@@ -29,17 +33,32 @@ def _calculate_ref_air_temp(cfg: Config, time: float) -> float:
 
     in the configuration the air temperature is given in deg C
     """
-    return cfg.forcing_config.turbulent_flux.air_temp + 273.15
+    if isinstance(cfg.forcing_config, RadForcing):
+        return cfg.forcing_config.turbulent_flux.air_temp + 273.15
+    elif isinstance(cfg.forcing_config, ERA5Forcing):
+        return cfg.forcing_config.get_2m_temp(time) + 273.15
+    else:
+        raise NotImplementedError
 
 
 def _calculate_ref_specific_humidity(cfg: Config, time: float) -> float:
     """return specific humidity at reference level above the ice"""
-    return cfg.forcing_config.turbulent_flux.specific_humidity
+    if isinstance(cfg.forcing_config, RadForcing):
+        return cfg.forcing_config.turbulent_flux.specific_humidity
+    elif isinstance(cfg.forcing_config, ERA5Forcing):
+        return cfg.forcing_config.get_spec_hum(time)
+    else:
+        raise NotImplementedError
 
 
 def _calculate_ref_atmospheric_pressure(cfg: Config, time: float) -> float:
-    """return atmospheric pressure at reference level above the ice"""
-    return cfg.forcing_config.turbulent_flux.atm_pressure
+    """return atmospheric pressure at reference level above the ice in KPa"""
+    if isinstance(cfg.forcing_config, RadForcing):
+        return cfg.forcing_config.turbulent_flux.atm_pressure
+    elif isinstance(cfg.forcing_config, ERA5Forcing):
+        return cfg.forcing_config.get_ATM(time)
+    else:
+        raise NotImplementedError
 
 
 def _calculate_bulk_transfer_coefficient(

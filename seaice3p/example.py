@@ -12,6 +12,7 @@ from . import (
     DimensionalMonoBubbleParams,
     DimensionalEQMGasParams,
     BRW09InitialConditions,
+    DimensionalBRW09OceanForcing,
     NoBrineConvection,
     NumericalParams,
     get_config,
@@ -29,6 +30,7 @@ SIMULATION_DIMENSIONAL_PARAMS = DimensionalParams(
     numerical_params=NumericalParams(I=24),
     initial_conditions_config=BRW09InitialConditions(),
     forcing_config=DimensionalBRW09Forcing(),
+    ocean_forcing_config=DimensionalBRW09OceanForcing(),
     brine_convection_params=NoBrineConvection(),
 )
 

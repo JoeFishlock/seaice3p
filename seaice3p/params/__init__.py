@@ -1,3 +1,9 @@
+from .ocean_forcing import (
+    OceanForcingConfig,
+    FixedHeatFluxOceanForcing,
+    FixedTempOceanForcing,
+    BRW09OceanForcing,
+)
 from .forcing import (
     ForcingConfig,
     ConstantForcing,
@@ -5,6 +11,7 @@ from .forcing import (
     BRW09Forcing,
     RadForcing,
     RobinForcing,
+    ERA5Forcing,
 )
 from .initial_conditions import (
     InitialConditionsConfig,
