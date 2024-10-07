@@ -14,8 +14,10 @@ forcing_config:
 frame_velocity_dimensional: 0.0
 gas_params:
   DimensionalEQMGasParams:
+    gas_bubble_eddy_diffusion: false
     gas_density: 1.0
     gas_diffusivity: 0.0
+    gas_viscosity: 0.0
     ocean_saturation_state: 1.0
     saturation_concentration: 1.0e-05
     tolerable_super_saturation_fraction: 1.0
@@ -34,6 +36,7 @@ ocean_forcing_config:
 savefreq_in_days: 3.0
 total_time_in_days: 164.0
 water_params:
+  eddy_diffusivity: 0.0
   eutectic_salinity: 270.0
   eutectic_temperature: -21.1
   haline_contraction_coefficient: 0.00075
@@ -45,6 +48,6 @@ water_params:
   ocean_salinity: 34.0
   phase_average_conductivity: false
   salt_diffusivity: 0.0
+  snow_thermal_conductivity: 0.31
   solid_thermal_conductivity: 2.22
   specific_heat_capacity: 4184.0
-  turbulent_liquid_thermal_conductivity: 0.54
