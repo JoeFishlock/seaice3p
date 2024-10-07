@@ -7,7 +7,12 @@ import numpy as np
 
 from .temperature_forcing import get_temperature_forcing, get_bottom_temperature_forcing
 from ..grids import add_ghost_cells
-from ..params import Config, EQMPhysicalParams, DISEQPhysicalParams
+from ..params import (
+    Config,
+    EQMPhysicalParams,
+    DISEQPhysicalParams,
+    OilInitialConditions,
+)
 from ..state import (
     StateFull,
     StateBCs,
@@ -38,7 +43,7 @@ def _EQM_boundary_conditions(full_state: EQMStateFull, cfg: Config) -> StateBCs:
 
     liquid_salinity = _liquid_salinity_BCs(full_state.liquid_salinity, cfg)
     dissolved_gas = _dissolved_gas_BCs(full_state.dissolved_gas, cfg)
-    gas_fraction = _gas_fraction_BCs(full_state.gas_fraction)
+    gas_fraction = _gas_fraction_BCs(full_state.gas_fraction, cfg)
     liquid_fraction = _liquid_fraction_BCs(full_state.liquid_fraction)
 
     gas = _gas_BCs(full_state.gas, cfg)
@@ -63,7 +68,7 @@ def _DISEQ_boundary_conditions(full_state: DISEQStateFull, cfg: Config) -> State
 
     liquid_salinity = _liquid_salinity_BCs(full_state.liquid_salinity, cfg)
     dissolved_gas = _dissolved_gas_BCs(full_state.dissolved_gas, cfg)
-    gas_fraction = _gas_fraction_BCs(full_state.gas_fraction)
+    gas_fraction = _gas_fraction_BCs(full_state.gas_fraction, cfg)
     liquid_fraction = _liquid_fraction_BCs(full_state.liquid_fraction)
 
     bulk_dissolved_gas = (
@@ -89,9 +94,18 @@ def _dissolved_gas_BCs(dissolved_gas_centers, cfg: Config):
     )
 
 
-def _gas_fraction_BCs(gas_fraction_centers):
+def _gas_fraction_BCs(gas_fraction_centers, cfg: Config):
     """Add ghost cells with BCs to center quantity"""
-    return add_ghost_cells(gas_fraction_centers, bottom=gas_fraction_centers[0], top=0)
+    if isinstance(cfg.initial_conditions_config, OilInitialConditions):
+        return add_ghost_cells(
+            gas_fraction_centers,
+            bottom=cfg.initial_conditions_config.initial_oil_volume_fraction,
+            top=0,
+        )
+    else:
+        return add_ghost_cells(
+            gas_fraction_centers, bottom=gas_fraction_centers[0], top=0
+        )
 
 
 def _gas_BCs(gas_centers, cfg: Config):

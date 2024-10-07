@@ -33,6 +33,7 @@ class BasePhysicalParams:
     tolerable_super_saturation_fraction: float = 1
 
     gas_viscosity_ratio: float = 0
+    gas_bubble_eddy_diffusion: bool = False
 
 
 @serde(type_check=coerce)
@@ -73,6 +74,7 @@ def get_dimensionless_physical_params(
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
                 gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
                 / dimensional_params.water_params.liquid_viscosity,
+                gas_bubble_eddy_diffusion=dimensional_params.gas_params.gas_bubble_eddy_diffusion,
             )
         case DimensionalDISEQGasParams():
             return DISEQPhysicalParams(
@@ -89,6 +91,7 @@ def get_dimensionless_physical_params(
                 tolerable_super_saturation_fraction=dimensional_params.gas_params.tolerable_super_saturation_fraction,
                 gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
                 / dimensional_params.water_params.liquid_viscosity,
+                gas_bubble_eddy_diffusion=dimensional_params.gas_params.gas_bubble_eddy_diffusion,
                 damkohler_number=dimensional_params.damkohler_number,
             )
         case _:
