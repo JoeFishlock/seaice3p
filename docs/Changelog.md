@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.20.0 (2024-10-07) ##
+
+### Summary ###
+Add ERA5Forcing option for simulation configuration.
+This reads data from a single ERA5 reanalysis netcdf data file at the location provided in configuration.
+This file should onlu contain timeseries data for a single location (lat, lon location) and needs to contain the hourly variables:
+2m air temperature,
+2m dewpoint temperature,
+downward longwave radiation.
+downward shortwave radiation,
+and surface pressure.
+Optionally can also request to use dnow depth data from the data file.
+In this case the surface energy balance boundary condition is modified assuming a quasi steady homogeneous conductive snow layer.
+To read the netcdf file xarray and netCDF4 are added as dependencies as well as metpy to calculate specific humidity at 2m.
+
+Seperate the ocean boundary conditions into a sperate ocean_forcing_config.
+We have implemented three options:
+FixedTempOceanForcing, which provides fixed ocean temperature boudnary conditions;
+FixedHeatFluxOceanForcing, which provides a constant ocean heat flux;
+and BRW09OceanForcing, which provides the bottom ocean temperature from the data measured at 2.4m during the 2009 Barrow field study.
+
+Change from specifying the turbulent liquid thermal conductivity to simply specifying the eddy diffusivity.
+In purely liquid regions this enhances the diffusion of heat, salt and dissolved gas.
+Additionally added the option gas_bubble_eddy_diffusivity, when set to true this also adds eddy diffusion of the gas bubble phase.
+This is useful when simulating oil droplets instead of gas bubbles which are much less buoyant and should be mixed due to turbulence in the liquid.
+
+Added the gas_viscosity parameter.
+By default this is zero and we regain the terminal rise velocity calculation for a free slip sphere.
+However, when a non-zero value is supplied the Hadamaard-Rybczinski equation is used.
+
+Fixed a bug when implementing the brine convection sink so that now we may couple brine convection to the gas / oil droplet phase by setting
+the options couple_bubble_to_horizontal_flow and couple_bubble_to_vertical_flow to true.
+This is useful for simulating oil droplets or bubbles which have become trapped and are not migrating under their buoyancy.
+
+Added the dates property to the results class which can be calcuated for simulations forced useing ERA5Forcing as we specify a start date for these.
+Gives a list of datetimes of the data points of the simulation.
+Added methods to calculate meltpond onset time and surface heat fluxes of a simulation to the results class.
+
 ## v0.19.0 (2024-09-30) ##
 
 ### Summary ###
