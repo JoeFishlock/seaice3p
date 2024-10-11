@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.21.0 (2024-10-11) ##
+
+### Summary ###
+Update dependencies so pip installs xarray, metpy and netcdf4 needed for running simulations with forcing from ERA5 data.
+
+To avoid numerical instability change the calculation of eddy diffusivity to turn on gradually as liquid fraction goes to 1 using an exponential.
+Set the scale for the exponential once as 5e-3 which should mean the diffusivity remains unmodified for liquid fraction less than 0.9.
+This seems to suppress instability and simulations can be run with the BDF solver for a year of ERA5 reanalysis forcing.
+
+Change the calculation of the enthalpy method to account for different specific heat capacities of the solid and liquid phases.
+This is important to predict the correct ice depth.
+
 ## v0.20.0 (2024-10-07) ##
 
 ### Summary ###
