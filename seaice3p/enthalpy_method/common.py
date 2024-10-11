@@ -26,14 +26,15 @@ def _calculate_solid_fraction(state, physical_params: PhysicalParams, phase_mask
     L, M, E, S = phase_masks
     St = physical_params.stefan_number
     conc = physical_params.concentration_ratio
+    ratio = physical_params.specific_heat_ratio
 
-    A = St
-    B = enthalpy[M] - St - conc
+    A = St + conc * (1 - ratio)
+    B = enthalpy[M] - St - conc + salt[M] * (1 - ratio)
     C = -(enthalpy[M] + salt[M])
 
     solid_fraction[L] = 0
     solid_fraction[M] = (1 / (2 * A)) * (-B - np.sqrt(B**2 - 4 * A * C))
-    solid_fraction[E] = -(1 + enthalpy[E]) / St
+    solid_fraction[E] = -(1 + enthalpy[E]) / (St + ratio - 1)
     solid_fraction[S] = 1
 
     return solid_fraction
@@ -45,12 +46,15 @@ def _calculate_temperature(
     enthalpy = state.enthalpy
     L, M, E, S = phase_masks
     St = physical_params.stefan_number
+    ratio = physical_params.specific_heat_ratio
 
     temperature = np.full_like(enthalpy, np.NaN)
     temperature[L] = enthalpy[L]
-    temperature[M] = enthalpy[M] + solid_fraction[M] * St
+    temperature[M] = (enthalpy[M] + solid_fraction[M] * St) / (
+        1 + (ratio - 1) * solid_fraction[M]
+    )
     temperature[E] = -1
-    temperature[S] = enthalpy[S] + St
+    temperature[S] = (enthalpy[S] + St) / ratio
 
     return temperature
 

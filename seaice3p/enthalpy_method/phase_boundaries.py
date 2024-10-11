@@ -15,15 +15,17 @@ def _calculate_liquidus(salt):
     return -salt
 
 
-def _calculate_eutectic(salt, concentration_ratio, stefan_number):
-    C = concentration_ratio
-    St = stefan_number
-    return (St * (salt - 1) / (1 + C)) - 1
+def _calculate_eutectic(salt, physical_params: PhysicalParams):
+    C = physical_params.concentration_ratio
+    St = physical_params.stefan_number
+    ratio = physical_params.specific_heat_ratio
+    return ((St + ratio - 1) * (salt - 1) / (1 + C)) - 1
 
 
-def _calculate_solidus(salt, stefan_number):
-    St = stefan_number
-    return np.full_like(salt, -1 - St)
+def _calculate_solidus(salt, physical_params: PhysicalParams):
+    St = physical_params.stefan_number
+    ratio = physical_params.specific_heat_ratio
+    return np.full_like(salt, -ratio - St)
 
 
 def get_phase_masks(state: State, physical_params: PhysicalParams):
@@ -33,8 +35,8 @@ def get_phase_masks(state: State, physical_params: PhysicalParams):
         physical_params.stefan_number,
     )
     liquidus = _calculate_liquidus(salt)
-    eutectic = _calculate_eutectic(salt, concentration_ratio, stefan_number)
-    solidus = _calculate_solidus(salt, stefan_number)
+    eutectic = _calculate_eutectic(salt, physical_params)
+    solidus = _calculate_solidus(salt, physical_params)
     is_liquid = enthalpy >= liquidus
     is_mush = (enthalpy >= eutectic) & (enthalpy < liquidus)
     is_eutectic = (enthalpy >= solidus) & (enthalpy < eutectic)

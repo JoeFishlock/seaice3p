@@ -1,4 +1,6 @@
 import numpy as np
+
+from seaice3p.equations.flux.heat_flux import pure_liquid_switch
 from ...grids import upwind, geometric
 from ...params import Config
 
@@ -9,10 +11,10 @@ def calculate_diffusive_salt_flux(liquid_salinity, liquid_fraction, D_g, cfg: Co
     lewis_salt = cfg.physical_params.lewis_salt
     edge_liquid_fraction = geometric(liquid_fraction)
     # In pure liquid phase enhanced eddy diffusivity of dissolved salt
-    salt_diffusivity = np.where(
-        edge_liquid_fraction < 1,
-        edge_liquid_fraction * (1 / lewis_salt),
-        (1 / lewis_salt) + cfg.physical_params.eddy_diffusivity_ratio,
+    salt_diffusivity = edge_liquid_fraction * (
+        (1 / lewis_salt)
+        + cfg.physical_params.eddy_diffusivity_ratio
+        * pure_liquid_switch(edge_liquid_fraction)
     )
     return -salt_diffusivity * np.matmul(D_g, liquid_salinity)
 

@@ -33,8 +33,8 @@ physical_params:
     gas_viscosity_ratio: 0.0
     lewis_gas: .inf
     lewis_salt: .inf
-    phase_average_conductivity: false
     snow_conductivity_ratio: 0.5740740740740741
+    specific_heat_ratio: 0.4801625239005736
     stefan_number: 4.328367195135119
     tolerable_super_saturation_fraction: 1.0
 savefreq: 0.00564964921025809

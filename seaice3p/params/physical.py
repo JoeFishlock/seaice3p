@@ -23,8 +23,7 @@ class BasePhysicalParams:
     lewis_gas: float = np.inf
     frame_velocity: float = 0
 
-    # Option to average the conductivity term.
-    phase_average_conductivity: bool = False
+    specific_heat_ratio: float = 0.5
     conductivity_ratio: float = 4.11
     eddy_diffusivity_ratio: float = 0
     snow_conductivity_ratio: float = 0.574
@@ -67,7 +66,7 @@ def get_dimensionless_physical_params(
                 lewis_salt=dimensional_params.water_params.lewis_salt,
                 lewis_gas=dimensional_params.lewis_gas,
                 frame_velocity=dimensional_params.frame_velocity,
-                phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
+                specific_heat_ratio=dimensional_params.water_params.specific_heat_ratio,
                 conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
                 eddy_diffusivity_ratio=dimensional_params.water_params.eddy_diffusivity_ratio,
                 snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,
@@ -84,7 +83,7 @@ def get_dimensionless_physical_params(
                 lewis_salt=dimensional_params.water_params.lewis_salt,
                 lewis_gas=dimensional_params.lewis_gas,
                 frame_velocity=dimensional_params.frame_velocity,
-                phase_average_conductivity=dimensional_params.water_params.phase_average_conductivity,
+                specific_heat_ratio=dimensional_params.water_params.specific_heat_ratio,
                 conductivity_ratio=dimensional_params.water_params.conductivity_ratio,
                 eddy_diffusivity_ratio=dimensional_params.water_params.eddy_diffusivity_ratio,
                 snow_conductivity_ratio=dimensional_params.water_params.snow_conductivity_ratio,

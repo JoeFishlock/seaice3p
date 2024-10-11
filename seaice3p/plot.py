@@ -1,11 +1,18 @@
+"""script to visualise simulation data
+
+usage:
+python -m seaice3p.plot "glob pattern to find npz files" Optional[True/False]
+
+assumes the simulation configurations are to be found in the same directory as the data.
+If the simulation is a non-dimensional configuration file add the False option after
+the glob pattern.
+"""
 import sys
 from glob import glob
 from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import colors
-from matplotlib.cm import ScalarMappable
+from matplotlib import animation
 from . import load_simulation
 
 
@@ -49,15 +56,18 @@ def plot(
             "bulk_argon",
         ],
     ):
+        data = converter(getattr(results, attr))
+        plt.figure()
         if attr == "solid_fraction":
             cmap = plt.colormaps["Blues_r"].with_extremes(under="b", over="w")
+            plt.contour(
+                dimensional_times, dimensional_grid, data, [0.0], color="r", zorder=100
+            )
         elif attr == "temperature":
             cmap = plt.colormaps["OrRd"]
         else:
             cmap = plt.colormaps["viridis"]
 
-        data = converter(getattr(results, attr))
-        plt.figure()
         plt.contourf(dimensional_times, dimensional_grid, data, cmap=cmap)
         plt.colorbar()
         plt.title(f"{attr} {unit}")
@@ -105,20 +115,22 @@ if __name__ == "__main__":
     data directory glob: specify a glob pattern to find path to all data files
     is_dimensional: specify if simulation configurations are dimensional (boolean)
     """
-    output_directory = Path(sys.argv[1])
-    config_directory = Path(sys.argv[2])
-    data_glob = glob(sys.argv[3])
-    is_dimensional = sys.argv[4]
+    data_glob = glob(sys.argv[1])
+    data_paths = [Path(path) for path in data_glob]
+    if len(sys.argv) <= 2:
+        is_dimensional = True
+    else:
+        is_dimensional = sys.argv[2]
 
-    for data_path in data_glob:
-        name = Path(data_path).stem
+    for data_path in data_paths:
+        name = data_path.stem
         if is_dimensional:
-            config_path = Path(config_directory) / (name + "_dimensional.yml")
+            config_path = data_path.parent / f"{name}_dimensional.yml"
         else:
-            config_path = Path(config_directory) / (name + ".yml")
+            config_path = data_path.parent / f"{name}.yml"
         plot(
             config_path,
-            Path(data_path),
-            is_dimensional=True,
-            output_dir=output_directory,
+            data_path,
+            is_dimensional=is_dimensional,
+            output_dir=data_path.parent,
         )

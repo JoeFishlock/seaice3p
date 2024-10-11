@@ -4,31 +4,28 @@ from ...grids import upwind, geometric
 from ...params import Config
 
 
+def pure_liquid_switch(liquid_fraction: NDArray | float) -> NDArray | float:
+    """Take the liquid fraction and return a smoothed switch that is equal to 1 in a
+    pure liquid region and goes to zero rapidly outside of this"""
+    SCALE = 5e-3
+    return np.exp((liquid_fraction - 1) / SCALE)
+
+
 def calculate_conductivity(
     cfg: Config, solid_fraction: NDArray | float
 ) -> NDArray | float:
-    if not cfg.physical_params.phase_average_conductivity:
-        return np.where(
-            solid_fraction > 0,
-            np.ones_like(solid_fraction),
-            1 + cfg.physical_params.eddy_diffusivity_ratio,
-        )
-
     liquid_fraction = 1 - solid_fraction
-    return np.where(
-        solid_fraction > 0,
-        liquid_fraction + cfg.physical_params.conductivity_ratio * solid_fraction,
-        1 + cfg.physical_params.eddy_diffusivity_ratio,
+
+    return (
+        liquid_fraction
+        + cfg.physical_params.conductivity_ratio * solid_fraction
+        + cfg.physical_params.eddy_diffusivity_ratio
+        * pure_liquid_switch(liquid_fraction)
     )
 
 
 def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
     r"""Calculate conductive heat flux as
-
-    .. math:: -\frac{\partial\theta}{\partial z}
-
-    or alteratively if the phase_average_conductivity configuration parameter
-    is set to True then we use the conductivity ratio as follows
 
     .. math:: -[(\phi_l + \lambda \phi_s) \frac{\partial \theta}{\partial z}]
 
