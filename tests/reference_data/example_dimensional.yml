@@ -43,11 +43,11 @@ water_params:
   ice_density: 916.0
   latent_heat: 334000.0
   liquid_density: 1028.0
+  liquid_specific_heat_capacity: 4184.0
   liquid_thermal_conductivity: 0.54
   liquid_viscosity: 0.00278
   ocean_salinity: 34.0
-  phase_average_conductivity: false
   salt_diffusivity: 0.0
   snow_thermal_conductivity: 0.31
+  solid_specific_heat_capacity: 2009.0
   solid_thermal_conductivity: 2.22
-  specific_heat_capacity: 4184.0
