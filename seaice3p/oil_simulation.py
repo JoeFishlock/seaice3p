@@ -114,7 +114,6 @@ def generate_oil_simulation_config(
             liquid_density=1028,
             ice_density=ICE_DENSITY,
             ocean_salinity=34,
-            phase_average_conductivity=True,
             salt_diffusivity=0,
             eddy_diffusivity=eddy_diffusivity,
             liquid_thermal_conductivity=0.54,

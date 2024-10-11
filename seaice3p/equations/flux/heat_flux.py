@@ -15,10 +15,6 @@ def calculate_conductivity(
     cfg: Config, solid_fraction: NDArray | float
 ) -> NDArray | float:
     liquid_fraction = 1 - solid_fraction
-    if not cfg.physical_params.phase_average_conductivity:
-        return 1 + cfg.physical_params.eddy_diffusivity_ratio * pure_liquid_switch(
-            liquid_fraction
-        )
 
     return (
         liquid_fraction
@@ -30,11 +26,6 @@ def calculate_conductivity(
 
 def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
     r"""Calculate conductive heat flux as
-
-    .. math:: -\frac{\partial\theta}{\partial z}
-
-    or alteratively if the phase_average_conductivity configuration parameter
-    is set to True then we use the conductivity ratio as follows
 
     .. math:: -[(\phi_l + \lambda \phi_s) \frac{\partial \theta}{\partial z}]
 
