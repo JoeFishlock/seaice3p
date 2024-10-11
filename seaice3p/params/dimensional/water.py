@@ -13,6 +13,7 @@ class DimensionalWaterParams:
     eutectic_temperature: float = -21.1  # deg Celsius
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     liquid_specific_heat_capacity: float = 4184  # J/kg degC
+    solid_specific_heat_capacity: float = 2009  # J/kg degC
     liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
     snow_thermal_conductivity: float = 0.31  # snow thermal conductivity in W/m deg C
@@ -94,6 +95,15 @@ class DimensionalWaterParams:
 
         """
         return self.solid_thermal_conductivity / self.liquid_thermal_conductivity
+
+    @property
+    def specific_heat_ratio(self):
+        r"""Calculate the ratio of solid to liquid specific heat capacities
+
+        .. math:: \lambda = \frac{c_{p,s}}{c_{p,l}}
+
+        """
+        return self.solid_specific_heat_capacity / self.liquid_specific_heat_capacity
 
     @property
     def eddy_diffusivity_ratio(self):
