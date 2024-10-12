@@ -7,7 +7,7 @@ from ...params import Config
 def pure_liquid_switch(liquid_fraction: NDArray | float) -> NDArray | float:
     """Take the liquid fraction and return a smoothed switch that is equal to 1 in a
     pure liquid region and goes to zero rapidly outside of this"""
-    SCALE = 5e-3
+    SCALE = 1e-2
     return np.exp((liquid_fraction - 1) / SCALE)
 
 
