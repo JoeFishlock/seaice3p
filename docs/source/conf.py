@@ -23,7 +23,7 @@ copyright = "2023, Joseph Fishlock"
 author = "Joseph Fishlock"
 
 # The full version, including alpha/beta/rc tags
-release = "0.21.1"
+release = "0.22.0"
 
 
 # -- General configuration ---------------------------------------------------

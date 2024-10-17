@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.22.0 (2024-10-17) ##
+
+### Summary ###
+To avoid delivering spurious advective heat flux in the ocean when using the RJW14 brine convection scheme we now use an exponential
+to smoothly set the advective heat flux in the ocean to zero. This should improve the underestimate of ice growth compared to field
+observations.
+
 ## v0.21.0 (2024-10-11) ##
 
 ### Summary ###
