@@ -45,8 +45,12 @@ def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
     return -conductivity * np.matmul(D_g, temperature)
 
 
-def calculate_advective_heat_flux(temperature, Wl):
-    return upwind(temperature, Wl)
+def calculate_advective_heat_flux(temperature, liquid_fraction, Wl):
+    # smoothly set advective heat transport in ocean to zero when using RJW14 brine convection
+    # as the ocean should be turbulent and not drawing this additional heat flux
+    return upwind(temperature, Wl) * (
+        1 - pure_liquid_switch(geometric(liquid_fraction))
+    )
 
 
 def calculate_frame_advection_heat_flux(enthalpy, V):
@@ -55,10 +59,11 @@ def calculate_frame_advection_heat_flux(enthalpy, V):
 
 def calculate_heat_flux(state_BCs, Wl, V, D_g, cfg):
     temperature = state_BCs.temperature
+    liquid_fraction = state_BCs.liquid_fraction
     enthalpy = state_BCs.enthalpy
     heat_flux = (
         calculate_conductive_heat_flux(state_BCs, D_g, cfg)
-        + calculate_advective_heat_flux(temperature, Wl)
+        + calculate_advective_heat_flux(temperature, liquid_fraction, Wl)
         + calculate_frame_advection_heat_flux(enthalpy, V)
     )
     return heat_flux
