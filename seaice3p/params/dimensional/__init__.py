@@ -32,6 +32,6 @@ from .initial_conditions import (
 )
 from .convection import NoBrineConvection, DimensionalRJW14Params
 from .numerical import NumericalParams
-from .water import DimensionalWaterParams
+from .water import DimensionalWaterParams, LinearLiquidus, CubicLiquidus
 from .gas import DimensionalDISEQGasParams, DimensionalEQMGasParams
 from .bubble import DimensionalPowerLawBubbleParams, DimensionalMonoBubbleParams

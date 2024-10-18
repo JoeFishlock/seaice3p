@@ -1,6 +1,35 @@
 from dataclasses import dataclass
 import numpy as np
 from serde import serde, coerce
+from scipy.optimize import fsolve
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class LinearLiquidus:
+    eutectic_temperature: float = -21.1  # deg Celsius
+    eutectic_salinity: float = 270  # g/kg
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class CubicLiquidus:
+    eutectic_temperature: float = -21.1  # deg Celsius
+
+    def get_liquidus_salinity(self, temperature):
+        return (
+            -18.7 * temperature - 0.519 * temperature**2 - 0.00535 * temperature**3
+        )
+
+    def get_liquidus_temperature(self, salinity):
+        temperature = fsolve(
+            lambda x: salinity - self.get_liquidus_salinity(x),
+            np.full_like(salinity, -2),
+        )
+        if temperature.size == 1:
+            return temperature[0]
+        else:
+            return temperature
 
 
 @serde(type_check=coerce)
@@ -9,8 +38,7 @@ class DimensionalWaterParams:
     liquid_density: float = 1028  # kg/m3
     ice_density: float = 916  # kg/m3
     ocean_salinity: float = 34  # g/kg
-    eutectic_salinity: float = 270  # g/kg
-    eutectic_temperature: float = -21.1  # deg Celsius
+    liquidus: LinearLiquidus | CubicLiquidus = LinearLiquidus()
     latent_heat: float = 334e3  # latent heat of fusion for ice in J/kg
     liquid_specific_heat_capacity: float = 4184  # J/kg degC
     solid_specific_heat_capacity: float = 2009  # J/kg degC
@@ -29,6 +57,26 @@ class DimensionalWaterParams:
     liquid_viscosity: float = 2.78e-3  # dynamic liquid viscosity in Pa.s
 
     @property
+    def eutectic_salinity(self):
+        if isinstance(self.liquidus, LinearLiquidus):
+            return self.liquidus.eutectic_salinity
+        if isinstance(self.liquidus, CubicLiquidus):
+            return self.liquidus.get_liquidus_salinity(
+                self.liquidus.eutectic_temperature
+            )
+
+        raise NotImplementedError
+
+    @property
+    def eutectic_temperature(self):
+        if isinstance(self.liquidus, LinearLiquidus) or isinstance(
+            self.liquidus, CubicLiquidus
+        ):
+            return self.liquidus.eutectic_temperature
+
+        raise NotImplementedError
+
+    @property
     def salinity_difference(self):
         r"""calculate difference between eutectic salinity and typical ocean salinity
 
@@ -39,13 +87,22 @@ class DimensionalWaterParams:
 
     @property
     def ocean_freezing_temperature(self):
-        """calculate salinity dependent freezing temperature using liquidus for typical
+        """calculate salinity dependent freezing temperature using linear liquidus with
         ocean salinity
 
         .. math:: T_i = T_L(S_i) = T_E S_i / S_E
 
+        or using a cubic fit for the liquidus curve
+
         """
-        return self.eutectic_temperature * self.ocean_salinity / self.eutectic_salinity
+        if isinstance(self.liquidus, LinearLiquidus):
+            return (
+                self.eutectic_temperature * self.ocean_salinity / self.eutectic_salinity
+            )
+        if isinstance(self.liquidus, CubicLiquidus):
+            return self.liquidus.get_liquidus_temperature(self.ocean_salinity)
+
+        raise NotImplementedError
 
     @property
     def temperature_difference(self):
