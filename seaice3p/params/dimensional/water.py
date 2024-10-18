@@ -14,11 +14,25 @@ class LinearLiquidus:
 @serde(type_check=coerce)
 @dataclass(frozen=True)
 class CubicLiquidus:
+    """Cubic fit to liquidus to give liquidus salinity in terms of temperature
+
+    S = a0 + a1 T + a2 T^2 + a3 T^3
+
+    defaults are taken from Notz PhD thesis for fit to Assur seawater data
+    """
+
     eutectic_temperature: float = -21.1  # deg Celsius
+    a0: float = -1.2
+    a1: float = -21.8
+    a2: float = -0.919
+    a3: float = -0.0178
 
     def get_liquidus_salinity(self, temperature):
         return (
-            -18.7 * temperature - 0.519 * temperature**2 - 0.00535 * temperature**3
+            self.a0
+            + self.a1 * temperature
+            + self.a2 * temperature**2
+            + self.a3 * temperature**3
         )
 
     def get_liquidus_temperature(self, salinity):
