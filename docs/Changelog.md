@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.23.0 (2024-10-18) ##
+
+### Summary ###
+As another measure to try and achieve realistic ice growth add the option to use a cubic fit for the liquidus curve.
+Data for this is taken from Dirk Notz PhD thesis.
+This should now predict a more accurate warmer temperature for the ocean water freezing temperature and so should promote
+more ice growth.
+
 ## v0.22.0 (2024-10-17) ##
 
 ### Summary ###
