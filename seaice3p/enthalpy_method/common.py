@@ -1,6 +1,7 @@
 from typing import Tuple
 from numpy.typing import NDArray
 import numpy as np
+from scipy.optimize import fsolve
 from ..state import State
 from ..params import Config, PhysicalParams
 from .phase_boundaries import get_phase_masks
@@ -28,14 +29,38 @@ def _calculate_solid_fraction(state, physical_params: PhysicalParams, phase_mask
     conc = physical_params.concentration_ratio
     ratio = physical_params.specific_heat_ratio
 
-    A = St + conc * (1 - ratio)
-    B = enthalpy[M] - St - conc + salt[M] * (1 - ratio)
-    C = -(enthalpy[M] + salt[M])
-
     solid_fraction[L] = 0
-    solid_fraction[M] = (1 / (2 * A)) * (-B - np.sqrt(B**2 - 4 * A * C))
     solid_fraction[E] = -(1 + enthalpy[E]) / (St + ratio - 1)
     solid_fraction[S] = 1
+
+    if np.all(M == False):
+        return solid_fraction
+
+    # Linear lqiuidus
+    if physical_params.get_liquidus_salinity is None:
+        A = St + conc * (1 - ratio)
+        B = enthalpy[M] - St - conc + salt[M] * (1 - ratio)
+        C = -(enthalpy[M] + salt[M])
+
+        solid_fraction[M] = (1 / (2 * A)) * (-B - np.sqrt(B**2 - 4 * A * C))
+
+        return solid_fraction
+
+    # Cubic liquidus
+    else:
+
+        def residual(solid_fraction):
+            temperature = (enthalpy[M] + solid_fraction * St) / (
+                1 + (ratio - 1) * solid_fraction
+            )
+            return (
+                salt[M]
+                + (conc + physical_params.get_liquidus_salinity(temperature))
+                * solid_fraction
+                - physical_params.get_liquidus_salinity(temperature)
+            )
+
+        solid_fraction[M] = fsolve(residual, np.full_like(enthalpy[M], 0.5))
 
     return solid_fraction
 

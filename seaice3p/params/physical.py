@@ -1,6 +1,9 @@
 from dataclasses import dataclass
+from typing import Callable, Optional
 import numpy as np
 from serde import serde, coerce
+
+from seaice3p.params.dimensional.water import CubicLiquidus, LinearLiquidus
 
 from .dimensional import (
     DimensionalParams,
@@ -34,6 +37,9 @@ class BasePhysicalParams:
     gas_viscosity_ratio: float = 0
     gas_bubble_eddy_diffusion: bool = False
 
+    get_liquidus_temperature: Optional[Callable] = None
+    get_liquidus_salinity: Optional[Callable] = None
+
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
@@ -56,6 +62,29 @@ PhysicalParams = EQMPhysicalParams | DISEQPhysicalParams
 def get_dimensionless_physical_params(
     dimensional_params: DimensionalParams,
 ) -> PhysicalParams:
+
+    if isinstance(dimensional_params.water_params.liquidus, LinearLiquidus):
+        get_liquidus_salinity = None
+        get_liquidus_temperature = None
+    elif isinstance(dimensional_params.water_params.liquidus, CubicLiquidus):
+        get_liquidus_salinity = (
+            lambda T: dimensional_params.scales.convert_from_dimensional_bulk_salinity(
+                dimensional_params.water_params.liquidus.get_liquidus_salinity(
+                    dimensional_params.scales.convert_to_dimensional_temperature(T)
+                )
+            )
+        )
+        get_liquidus_temperature = (
+            lambda S: dimensional_params.scales.convert_from_dimensional_temperature(
+                dimensional_params.water_params.liquidus.get_liquidus_temperature(
+                    dimensional_params.scales.convert_to_dimensional_bulk_salinity(S)
+                )
+            )
+        )
+
+    else:
+        raise NotImplementedError
+
     """return a PhysicalParams object"""
     match dimensional_params.gas_params:
         case DimensionalEQMGasParams():
@@ -74,6 +103,8 @@ def get_dimensionless_physical_params(
                 gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
                 / dimensional_params.water_params.liquid_viscosity,
                 gas_bubble_eddy_diffusion=dimensional_params.gas_params.gas_bubble_eddy_diffusion,
+                get_liquidus_salinity=get_liquidus_salinity,
+                get_liquidus_temperature=get_liquidus_temperature,
             )
         case DimensionalDISEQGasParams():
             return DISEQPhysicalParams(
@@ -91,6 +122,8 @@ def get_dimensionless_physical_params(
                 gas_viscosity_ratio=dimensional_params.gas_params.gas_viscosity
                 / dimensional_params.water_params.liquid_viscosity,
                 gas_bubble_eddy_diffusion=dimensional_params.gas_params.gas_bubble_eddy_diffusion,
+                get_liquidus_salinity=get_liquidus_salinity,
+                get_liquidus_temperature=get_liquidus_temperature,
                 damkohler_number=dimensional_params.damkohler_number,
             )
         case _:
