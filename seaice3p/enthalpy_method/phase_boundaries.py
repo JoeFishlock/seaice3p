@@ -11,8 +11,13 @@ from ..state import State
 from ..params import PhysicalParams
 
 
-def _calculate_liquidus(salt):
-    return -salt
+def _calculate_liquidus(salt, physical_params: PhysicalParams):
+    # linear liquidus
+    if physical_params.get_liquidus_temperature is None:
+        return -salt
+    # cubic liquidus
+    else:
+        return physical_params.get_liquidus_temperature(salt)
 
 
 def _calculate_eutectic(salt, physical_params: PhysicalParams):
@@ -34,7 +39,7 @@ def get_phase_masks(state: State, physical_params: PhysicalParams):
         physical_params.concentration_ratio,
         physical_params.stefan_number,
     )
-    liquidus = _calculate_liquidus(salt)
+    liquidus = _calculate_liquidus(salt, physical_params)
     eutectic = _calculate_eutectic(salt, physical_params)
     solidus = _calculate_solidus(salt, physical_params)
     is_liquid = enthalpy >= liquidus
