@@ -59,6 +59,7 @@ class DimensionalWaterParams:
     liquid_thermal_conductivity: float = 0.54  # water thermal conductivity in W/m deg C
     solid_thermal_conductivity: float = 2.22  # ice thermal conductivity in W/m deg C
     snow_thermal_conductivity: float = 0.31  # snow thermal conductivity in W/m deg C
+    snow_density: float = 150  # snow density kg/m3
 
     eddy_diffusivity: float = 0
 

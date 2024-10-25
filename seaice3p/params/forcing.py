@@ -1,6 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, Optional
 from numpy.typing import NDArray
 from serde import serde, coerce
 import numpy as np
@@ -117,6 +117,7 @@ class ERA5Forcing:
     start_date: str
     timescale_in_days: float
     use_snow_data: bool = False
+    snow_density: Optional[float] = None
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
@@ -157,7 +158,10 @@ class ERA5Forcing:
         self.get_spec_hum = CubicSpline(DIMLESS_TIMES, SPEC_HUM, extrapolate=False)
 
         if self.use_snow_data:
-            SNOW_DENSITY = 100  # kg/m3
+            if self.snow_density is None:
+                raise ValueError("No snow density provided")
+
+            SNOW_DENSITY = self.snow_density  # kg/m3
             WATER_DENSITY = 1000  # kg/m3
 
             # Set to zero if less than negligible snow depth
@@ -249,6 +253,7 @@ def get_dimensionless_forcing_config(
                 start_date=dimensional_params.forcing_config.start_date,
                 timescale_in_days=dimensional_params.scales.time_scale,
                 use_snow_data=dimensional_params.forcing_config.use_snow_data,
+                snow_density=dimensional_params.water_params.snow_density,
                 SW_forcing=dimensional_params.forcing_config.SW_forcing,
                 LW_forcing=dimensional_params.forcing_config.LW_forcing,
                 turbulent_flux=dimensional_params.forcing_config.turbulent_flux,
