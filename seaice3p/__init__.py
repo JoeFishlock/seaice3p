@@ -1,4 +1,4 @@
-__version__ = "0.23.0"
+__version__ = "0.24.0"
 
 # Exported functions and classes
 from .params import *

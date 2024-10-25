@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "seaice3p"
-version = "0.23.0"
+version = "0.24.0"
 description = "Simulate gas bubbles and oil droplets in sea ice."
 authors = ["Joseph Fishlock <joseph.fishlock@physics.ox.ax.uk>"]
 license = "MIT"

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.24.0 (2024-10-25) ##
+
+### Summary ###
+Add snow density as a parameter to the dimensional simulation (in water params).
+This will be used when using ERA5 snow depth data for forcing to infer the snow depth from the given measurement of m of water equivalent.
+This is important to be able to change as snow depth strongly impacts ice thickness.
+
 ## v0.23.0 (2024-10-18) ##
 
 ### Summary ###
