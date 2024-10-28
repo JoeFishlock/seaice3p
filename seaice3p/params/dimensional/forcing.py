@@ -22,6 +22,7 @@ class DimensionalConstantSWForcing:
     SW_max_wavelength: float = 3000
     num_wavelength_samples: int = 7
     SW_penetration_fraction: float = 0.4
+    snow_scattering_coefficient: float = 800  # 1/m
 
 
 @serde(type_check=coerce)
