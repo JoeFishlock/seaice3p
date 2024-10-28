@@ -1,6 +1,7 @@
+from functools import partial
 from pathlib import Path
 from dataclasses import dataclass
-from typing import ClassVar, Optional
+from typing import Optional
 from numpy.typing import NDArray
 from serde import serde, coerce
 import numpy as np
@@ -22,7 +23,6 @@ from .dimensional import (
     DimensionalERA5Forcing,
 )
 import xarray as xr
-from scipy.interpolate import CubicSpline
 from metpy.calc import specific_humidity_from_dewpoint
 from metpy.units import units as metpyunits
 
@@ -123,10 +123,6 @@ class ERA5Forcing:
     turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()
     oil_heating: DimensionalOilHeating = DimensionalBackgroundOilHeating()
 
-    NEGLIGIBLE_SNOW_DEPTH: ClassVar[
-        float
-    ] = 0.05  # snow depth in m below which we assume snow is negligible
-
     def __post_init__(self):
         data = xr.open_dataset(self.data_path)
         daily_data = data.resample(valid_time="1d").mean()
@@ -151,28 +147,32 @@ class ERA5Forcing:
         # Calculate specific humidity in kg/kg from dewpoint temperature
         SPEC_HUM = _calculate_specific_humidity(ATM, D2M)
 
-        self.get_2m_temp = CubicSpline(DIMLESS_TIMES, T2M, extrapolate=False)
-        self.get_LW = CubicSpline(DIMLESS_TIMES, LW, extrapolate=False)
-        self.get_SW = CubicSpline(DIMLESS_TIMES, SW, extrapolate=False)
-        self.get_ATM = CubicSpline(DIMLESS_TIMES, ATM, extrapolate=False)
-        self.get_spec_hum = CubicSpline(DIMLESS_TIMES, SPEC_HUM, extrapolate=False)
-
+        # Convert snow depth from m of water equivalent to m of snow
         if self.use_snow_data:
             if self.snow_density is None:
                 raise ValueError("No snow density provided")
+            SNOW_DEPTH = daily_data.sd[:, 0, 0].to_numpy() * (1000 / self.snow_density)
+        else:
+            SNOW_DEPTH = np.zeros_like(DIMLESS_TIMES)
 
-            SNOW_DENSITY = self.snow_density  # kg/m3
-            WATER_DENSITY = 1000  # kg/m3
-
-            # Set to zero if less than negligible snow depth
-            SNOW_DEPTH = np.maximum(
-                daily_data.sd[:, 0, 0].to_numpy() * (WATER_DENSITY / SNOW_DENSITY)
-                - self.NEGLIGIBLE_SNOW_DEPTH,
-                0,
-            )
-            self.get_snow_depth = CubicSpline(
-                DIMLESS_TIMES, SNOW_DEPTH, extrapolate=False
-            )
+        self.get_2m_temp = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=T2M, left=np.NaN, right=np.NaN
+        )
+        self.get_LW = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=LW, left=np.NaN, right=np.NaN
+        )
+        self.get_SW = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=SW, left=np.NaN, right=np.NaN
+        )
+        self.get_ATM = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=ATM, left=np.NaN, right=np.NaN
+        )
+        self.get_spec_hum = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=SPEC_HUM, left=np.NaN, right=np.NaN
+        )
+        self.get_snow_depth = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=SNOW_DEPTH, left=np.NaN, right=np.NaN
+        )
 
 
 def _calculate_specific_humidity(pressure: NDArray, dewpoint: NDArray) -> NDArray:
