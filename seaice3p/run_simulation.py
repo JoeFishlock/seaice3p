@@ -60,7 +60,8 @@ def solve(cfg: Config, directory: Path, verbosity_level=0) -> Literal[0]:
     if cfg.numerical_params.solver_choice in ["RK23", "RK45", "DOP853"]:
         # Explicit method so set courant timestep limit
         max_diffusivity = max(
-            cfg.physical_params.conductivity_ratio,
+            cfg.physical_params.conductivity_ratio
+            / cfg.physical_params.specific_heat_ratio,
             1 + cfg.physical_params.eddy_diffusivity_ratio,
         )
         max_step = 0.45 * (1 / max_diffusivity) * cfg.numerical_params.step**2
