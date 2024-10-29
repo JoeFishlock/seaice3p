@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.25.0 (2024-10-29) ##
+
+### Summary ###
+Fix bug in calculation of Courant number for methods using explicit timestepping.
+Linearly interpolate forcing quantities from ERA5 data instead of using cubic splines to avoid oscillations.
+Remove the arbitrary threshold in snow depth for surface boundary condition and shortwave radiative transfer.
+Instead use real snow depth in surface energy boundary condition and apply an exponential attenuation of shortwave radiation through the snow layer.
+This is assuming a perfectly scattering snow layer with the extra parameter snow_scattering_coefficient given in SW_forcing parameters.
+
+Update to use oilrad 0.9.0 for the two stream radiative transfer model.
+This requires specifying the appropriate ice_scattering_coefficient directly.
+Additionally, there is the optional absorption_enhancement_factor which accounts for extra absorption due to increase in vertical mean path length
+of a diffuse radiation field.
+The default values of these two new pararmeters best match the computed spectral albedo for 0ng/g of oil in 0.8m thick first-year sea ice in Redmond Roche et al 2022.
+
 ## v0.24.0 (2024-10-25) ##
 
 ### Summary ###
