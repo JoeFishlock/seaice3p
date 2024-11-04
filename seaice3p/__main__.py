@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="count", default=0)
 
     args = parser.parse_args()
-    optprint = get_printer(args.verbose)
+    optprint = get_printer(args.verbose, verbosity_threshold=2)
 
     is_dimensional_configuration = args.dimensional
     configuration_directory_path = Path(args.configuration_directory)

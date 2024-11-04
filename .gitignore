@@ -14,8 +14,8 @@ TODO.txt
 
 .coverage
 
-# Sphinx
-docs/build
+# mkdocs
+site/
 
 # Latex document for numerical method
 docs/numerical_method/*

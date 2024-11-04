@@ -156,22 +156,22 @@ class ERA5Forcing:
             SNOW_DEPTH = np.zeros_like(DIMLESS_TIMES)
 
         self.get_2m_temp = partial(
-            np.interp, xp=DIMLESS_TIMES, fp=T2M, left=np.NaN, right=np.NaN
+            np.interp, xp=DIMLESS_TIMES, fp=T2M, left=np.nan, right=np.nan
         )
         self.get_LW = partial(
-            np.interp, xp=DIMLESS_TIMES, fp=LW, left=np.NaN, right=np.NaN
+            np.interp, xp=DIMLESS_TIMES, fp=LW, left=np.nan, right=np.nan
         )
         self.get_SW = partial(
-            np.interp, xp=DIMLESS_TIMES, fp=SW, left=np.NaN, right=np.NaN
+            np.interp, xp=DIMLESS_TIMES, fp=SW, left=np.nan, right=np.nan
         )
         self.get_ATM = partial(
-            np.interp, xp=DIMLESS_TIMES, fp=ATM, left=np.NaN, right=np.NaN
+            np.interp, xp=DIMLESS_TIMES, fp=ATM, left=np.nan, right=np.nan
         )
         self.get_spec_hum = partial(
-            np.interp, xp=DIMLESS_TIMES, fp=SPEC_HUM, left=np.NaN, right=np.NaN
+            np.interp, xp=DIMLESS_TIMES, fp=SPEC_HUM, left=np.nan, right=np.nan
         )
         self.get_snow_depth = partial(
-            np.interp, xp=DIMLESS_TIMES, fp=SNOW_DEPTH, left=np.NaN, right=np.NaN
+            np.interp, xp=DIMLESS_TIMES, fp=SNOW_DEPTH, left=np.nan, right=np.nan
         )
 
 

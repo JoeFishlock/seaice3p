@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.typing import NDArray
+
 from ...grids import upwind, geometric
-from ...params import Config
+from ...params import Config, NoBrineConvection
 
 
 def pure_liquid_switch(liquid_fraction: NDArray | float) -> NDArray | float:
@@ -45,8 +46,15 @@ def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
     return -conductivity * np.matmul(D_g, temperature)
 
 
-def calculate_advective_heat_flux(temperature, liquid_fraction, Wl):
+def calculate_advective_heat_flux(temperature, liquid_fraction, Wl, cfg):
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
+        return upwind(temperature, Wl)
+
+    if cfg.brine_convection_params.advective_heat_flux_in_ocean:
+        return upwind(temperature, Wl)
+
     # smoothly set advective heat transport in ocean to zero when using RJW14 brine convection
+    # if no advective heat flux in the ocean
     # as the ocean should be turbulent and not drawing this additional heat flux
     return upwind(temperature, Wl) * (
         1 - pure_liquid_switch(geometric(liquid_fraction))
@@ -63,7 +71,7 @@ def calculate_heat_flux(state_BCs, Wl, V, D_g, cfg):
     enthalpy = state_BCs.enthalpy
     heat_flux = (
         calculate_conductive_heat_flux(state_BCs, D_g, cfg)
-        + calculate_advective_heat_flux(temperature, liquid_fraction, Wl)
+        + calculate_advective_heat_flux(temperature, liquid_fraction, Wl, cfg)
         + calculate_frame_advection_heat_flux(enthalpy, V)
     )
     return heat_flux

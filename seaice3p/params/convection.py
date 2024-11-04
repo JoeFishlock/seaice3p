@@ -13,6 +13,7 @@ class RJW14Params:
     convection_strength: float = 0.13
     couple_bubble_to_horizontal_flow: bool = False
     couple_bubble_to_vertical_flow: bool = False
+    advective_heat_flux_in_ocean: bool = True
 
 
 BrineConvectionParams = RJW14Params | NoBrineConvection
@@ -29,6 +30,7 @@ def get_dimensionless_brine_convection_params(
                 convection_strength=dimensional_params.brine_convection_params.convection_strength,
                 couple_bubble_to_horizontal_flow=dimensional_params.brine_convection_params.couple_bubble_to_horizontal_flow,
                 couple_bubble_to_vertical_flow=dimensional_params.brine_convection_params.couple_bubble_to_vertical_flow,
+                advective_heat_flux_in_ocean=dimensional_params.brine_convection_params.advective_heat_flux_in_ocean,
             )
         case NoBrineConvection():
             return NoBrineConvection()

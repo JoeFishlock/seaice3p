@@ -121,7 +121,7 @@ def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
 
     is greater than or equal to zero.
 
-    NOTE: if no convecting region exists return np.NaN
+    NOTE: if no convecting region exists return np.nan
 
     :param Rayleigh_number: local rayleigh number on center grid
     :type Rayleigh_number: Numpy Array of shape (I,)
@@ -133,7 +133,7 @@ def get_convecting_region_height(Rayleigh_number, edge_grid, cfg: Config):
     """
     Rayleigh_critical = cfg.brine_convection_params.Rayleigh_critical
     if np.all(Rayleigh_number - Rayleigh_critical < 0):
-        return np.NaN
+        return np.nan
     indices = np.where(Rayleigh_number >= Rayleigh_critical)
     return edge_grid[indices[0][-1] + 1]
 

@@ -15,6 +15,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
 
+from . import __version__
 from .printing import get_printer
 from .equations import get_equations
 from .state import get_unpacker
@@ -35,8 +36,9 @@ def run_batch(list_of_cfg: List[Config], directory: Path, verbosity_level=0) -> 
     :type list_of_cfg: List[seaice3p.params.Config]
 
     """
-    optprint = get_printer(verbosity_level)
+    optprint = get_printer(verbosity_level, verbosity_threshold=1)
     for cfg in list_of_cfg:
+        optprint(f"seaice3pv{__version__}: {cfg.name}")
         try:
             solve(cfg, directory, verbosity_level=verbosity_level)
         except Exception as e:
@@ -85,7 +87,7 @@ def solve(cfg: Config, directory: Path, verbosity_level=0) -> Literal[0]:
         sol.t,
         *np.split(sol.y, number_of_solution_components),
     )
-    optprint = get_printer(verbosity_level)
+    optprint = get_printer(verbosity_level, verbosity_threshold=2)
     optprint("")
     return 0
 
@@ -98,7 +100,7 @@ def _get_ode_fun(cfg: Config, verbosity_level=0) -> Callable[[float, NDArray], N
     unpack = get_unpacker(cfg)
     equations = get_equations(cfg, grids)
 
-    optprint = get_printer(verbosity_level)
+    optprint = get_printer(verbosity_level, verbosity_threshold=2)
 
     def ode_fun(time, solution_vector):
         optprint(

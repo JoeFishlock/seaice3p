@@ -115,7 +115,7 @@ def calculate_power_law_wall_drag_factor(liquid_fraction, cfg: Config):
         geometric(liquid_fraction),
         cfg,
     )
-    drag_factor = np.full_like(minimum_size_fractions, np.NaN)
+    drag_factor = np.full_like(minimum_size_fractions, np.nan)
     for i, (min, max) in enumerate(zip(minimum_size_fractions, maximum_size_fractions)):
         drag_factor[i] = calculate_wall_drag_integral(min, max, cfg)
     return drag_factor
@@ -137,7 +137,7 @@ def calculate_power_law_lag_factor(liquid_fraction, cfg: Config):
         geometric(liquid_fraction),
         cfg,
     )
-    lag_factor = np.full_like(minimum_size_fractions, np.NaN)
+    lag_factor = np.full_like(minimum_size_fractions, np.nan)
     for i, (min, max) in enumerate(zip(minimum_size_fractions, maximum_size_fractions)):
         lag_factor[i] = calculate_lag_integral(min, max, cfg)
     return lag_factor

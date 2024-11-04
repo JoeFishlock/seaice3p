@@ -62,7 +62,7 @@ def _dimensional_barrow_temperature_forcing(time_in_days, cfg: Config):
     """
     barrow_days = cfg.forcing_config.barrow_days
     barrow_top_temp = cfg.forcing_config.barrow_top_temp
-    return np.interp(time_in_days, barrow_days, barrow_top_temp, right=np.NaN)
+    return np.interp(time_in_days, barrow_days, barrow_top_temp, right=np.nan)
 
 
 def _barrow_temperature_forcing(state: StateFull, cfg: Config):
@@ -112,7 +112,7 @@ def _dimensional_barrow_ocean_temperature_forcing(
     """
     barrow_ocean_days = cfg.ocean_forcing_config.barrow_ocean_days
     barrow_bottom_temp = cfg.ocean_forcing_config.barrow_bottom_temp
-    return np.interp(time_in_days, barrow_ocean_days, barrow_bottom_temp, right=np.NaN)
+    return np.interp(time_in_days, barrow_ocean_days, barrow_bottom_temp, right=np.nan)
 
 
 def _barrow_ocean_temperature_forcing(state: StateFull, cfg: Config) -> float:

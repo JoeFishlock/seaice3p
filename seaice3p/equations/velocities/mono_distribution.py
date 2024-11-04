@@ -16,7 +16,7 @@ def calculate_lag_function(bubble_size_fraction):
     for 0<lambda<1. Edge cases are given by G(0)=1 and G(1) = 0.5 for values outside
     this range.
     """
-    lag = np.full_like(bubble_size_fraction, np.NaN)
+    lag = np.full_like(bubble_size_fraction, np.nan)
     intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
     large = bubble_size_fraction >= 1
     lag[bubble_size_fraction < 0] = 1
@@ -37,7 +37,7 @@ def calculate_wall_drag_function(bubble_size_fraction, cfg: Config):
     for 0<lambda<1. Edge cases are given by K(0)=1 and K(1) = 0 for values outside
     this range.
     """
-    drag = np.full_like(bubble_size_fraction, np.NaN)
+    drag = np.full_like(bubble_size_fraction, np.nan)
     intermediate = (bubble_size_fraction < 1) & (bubble_size_fraction >= 0)
     large = bubble_size_fraction >= 1
     drag[bubble_size_fraction < 0] = 1
