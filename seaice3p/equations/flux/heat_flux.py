@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.typing import NDArray
+
 from ...grids import upwind, geometric
-from ...params import Config
+from ...params import Config, NoBrineConvection
 
 
 def pure_liquid_switch(liquid_fraction: NDArray | float) -> NDArray | float:
@@ -46,6 +47,9 @@ def calculate_conductive_heat_flux(state_BCs, D_g, cfg):
 
 
 def calculate_advective_heat_flux(temperature, liquid_fraction, Wl, cfg):
+    if isinstance(cfg.brine_convection_params, NoBrineConvection):
+        return upwind(temperature, Wl)
+
     if cfg.brine_convection_params.advective_heat_flux_in_ocean:
         return upwind(temperature, Wl)
 
