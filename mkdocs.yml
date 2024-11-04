@@ -1,0 +1,10 @@
+site_name: seaice3p
+
+theme:
+  name: material
+  palette:
+    primary: blue
+
+plugins:
+  - search
+  - mkdocstrings

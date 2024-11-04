@@ -35,10 +35,7 @@ To speed this up run in parallel using `pytest-xdist` with the extra options `py
 ## Release checklist ##
 
 - run tests.
-- bump version number in seaice3p/__init__.py
-- bump version number in sphinx documentation in docs/source/conf.py
-- bump version number in pyproject.toml
-- run `sphinx-apidoc -o docs/source seaice3p` to generate source files for documentation.
-- create docs by running make latexpdf in docs/ directory and put pdf from build directory into docs/
+- bump version number in seaice3p/__init__.py and pyproject.toml
+- run `mkdocs build` to generate documentation and deploy from main with `mkdocs gh-deploy`.
 - update Changelog.md
 - tag commit with version number
