@@ -18,3 +18,5 @@ class DimensionalRJW14Params:
     Rayleigh_critical: float = 2.9
     convection_strength: float = 0.13
     reference_permeability: float = 1e-8
+
+    advective_heat_flux_in_ocean: bool = True
