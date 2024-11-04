@@ -132,13 +132,16 @@ def _calculate_non_dimensional_shortwave_heating(
     if isinstance(cfg.forcing_config.oil_heating, DimensionalNoHeating):
         return np.zeros_like(grids.centers)
 
-    dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
-        get_SW_penetration_fraction(state_bcs, cfg)
-        * get_SW_forcing(state_bcs.time, cfg)
+    incident_SW_in_W_m2 = get_SW_penetration_fraction(state_bcs, cfg) * get_SW_forcing(
+        state_bcs.time, cfg
     )
-    # If no incident SW don't need to run radiation model
-    if dimensionless_incident_SW == 0:
+    # If incident shortwave is small then optimize by not running the two-stream model
+    if incident_SW_in_W_m2 <= 0.5:
         return np.zeros_like(grids.centers)
+
+    dimensionless_incident_SW = cfg.scales.convert_from_dimensional_heat_flux(
+        incident_SW_in_W_m2
+    )
 
     spectral_irradiances = run_two_stream_model(state_bcs, cfg, grids)
     spectrum = oi.BlackBodySpectrum(
