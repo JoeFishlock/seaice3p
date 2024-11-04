@@ -13,10 +13,13 @@ class DimensionalFixedTempOceanForcing:
 @serde(type_check=coerce)
 @dataclass(frozen=True)
 class DimensionalFixedHeatFluxOceanForcing:
-    """Provides constant ocean heat flux at the bottom of the domain and fixed gas
-    saturation state."""
+    """Provides constant ocean heat flux at the bottom of the domain
 
-    ocean_heat_flux: float = 10
+    Args:
+        ocean_heat_flux: The constant heat flux at the bottom of the domain in W/m2
+    """
+
+    ocean_heat_flux: float = 1
 
 
 @serde(type_check=coerce)
