@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.26.0 (2024-11-04) ##
+
+### Summary ###
+Change to use mkdocs instead of sphinx to generate documentation.
+Upgrade oilrad 0.9.0 -> 1.0.0 and upgrade to latest numpy and scipy versions.
+Add option to turn on or off advective heat flux in the ocean when using the RJW14 brine convection scheme.
+Do not run two-stream shortwave radiation model when shortwave flux reaching the top of the domain is less than 0.5 W/m2 (significant performance benefit).
+Export the results classes for better code completion when using seaice3p.
+Add extra verbosity options to the command line interface: '', '-v', or '-vv'.
+Add method to the scales object to calculate the dimensional heat flux in W/m2.
+
 ## v0.25.0 (2024-10-29) ##
 
 ### Summary ###
