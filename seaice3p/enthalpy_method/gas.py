@@ -9,7 +9,7 @@ def calculate_EQM_gas_fraction(
 ) -> NDArray:
     chi = physical_params.expansion_coefficient
     tolerable_super_saturation = physical_params.tolerable_super_saturation_fraction
-    gas_fraction = np.full_like(liquid_fraction, np.NaN)
+    gas_fraction = np.full_like(liquid_fraction, np.nan)
 
     gas_sat = chi * liquid_fraction * tolerable_super_saturation
     is_super_saturated = state.gas >= gas_sat
@@ -53,7 +53,7 @@ def calculate_DISEQ_dissolved_gas(
     # prevent dissolved gas concentration blowing up during total freezing
     REGULARISATION = 1e-6
 
-    dissolved_gas = np.full_like(bulk_dissolved_gas, np.NaN)
+    dissolved_gas = np.full_like(bulk_dissolved_gas, np.nan)
     dissolved_gas[L] = bulk_dissolved_gas[L] / chi
     dissolved_gas[M] = bulk_dissolved_gas[M] / (chi * liquid_fraction[M])
     dissolved_gas[E] = bulk_dissolved_gas[E] / (

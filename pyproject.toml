@@ -8,29 +8,19 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-numpy = "^1.26.4"
-scipy = "^1.13.0"
-pyserde = {version = "^0.20.1", extras = ["yaml"]}
-oilrad = "0.9.0"
-xarray = {extras = ["complete"], version = "^2024.9.0"}
-netcdf4 = "^1.7.1.post2"
+numpy = "^2.1.0"
+scipy = "^1.14.0"
+pyserde = {version = "^0.22.0", extras = ["yaml"]}
+oilrad = "1.0.0"
+xarray = "^2024.10.0"
+netcdf4 = "^1.7.2"
 metpy = "^1.6.3"
-
-
-[tool.poetry.group.scripts.dependencies]
-matplotlib = "^3.8.4"
-
-
-[tool.poetry.group.profile.dependencies]
-snakeviz = "^2.2.0"
-pydeps = "^1.12.20"
-
+matplotlib = "^3.9.2"
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^8.1.1"
 pytest-xdist = "^3.5.0"
 coverage = "^7.5.0"
-
 
 
 [tool.poetry.group.docs.dependencies]

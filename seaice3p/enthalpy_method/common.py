@@ -23,7 +23,7 @@ def calculate_common_enthalpy_method_vars(
 
 def _calculate_solid_fraction(state, physical_params: PhysicalParams, phase_masks):
     enthalpy, salt = state.enthalpy, state.salt
-    solid_fraction = np.full_like(enthalpy, np.NaN)
+    solid_fraction = np.full_like(enthalpy, np.nan)
     L, M, E, S = phase_masks
     St = physical_params.stefan_number
     conc = physical_params.concentration_ratio
@@ -73,7 +73,7 @@ def _calculate_temperature(
     St = physical_params.stefan_number
     ratio = physical_params.specific_heat_ratio
 
-    temperature = np.full_like(enthalpy, np.NaN)
+    temperature = np.full_like(enthalpy, np.nan)
     temperature[L] = enthalpy[L]
     temperature[M] = (enthalpy[M] + solid_fraction[M] * St) / (
         1 + (ratio - 1) * solid_fraction[M]
@@ -90,7 +90,7 @@ def _calculate_liquid_fraction(solid_fraction):
 
 def _calculate_liquid_salinity(state, temperature, phase_masks):
     salt = state.salt
-    liquid_salinity = np.full_like(salt, np.NaN)
+    liquid_salinity = np.full_like(salt, np.nan)
     L, M, E, S = phase_masks
 
     liquid_salinity[L] = salt[L]

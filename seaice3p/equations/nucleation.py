@@ -36,7 +36,7 @@ def _DISEQ_nucleation(state_BCs: DISEQStateBCs, cfg: Config) -> NDArray:
     gas_fraction = state_BCs.gas_fraction[centers]
 
     is_saturated = bulk_dissolved_gas > saturation
-    nucleation = np.full_like(bulk_dissolved_gas, np.NaN)
+    nucleation = np.full_like(bulk_dissolved_gas, np.nan)
     nucleation[is_saturated] = Da * (
         bulk_dissolved_gas[is_saturated] - saturation[is_saturated]
     )

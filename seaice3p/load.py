@@ -105,7 +105,7 @@ class _BaseResults:
         top_liquid_fraction = self.liquid_fraction[-1, :]
         times_with_meltpond = self.times[top_liquid_fraction == 1]
         if times_with_meltpond.size == 0:
-            return np.NaN
+            return np.nan
         return self.cfg.scales.convert_to_dimensional_time(times_with_meltpond[0])
 
     @property
@@ -196,7 +196,7 @@ class _BaseResults:
 
         # if no ice then no boundary
         if np.all(liquid_fraction == 1):
-            return np.NaN
+            return np.nan
 
         is_ice_centers = self._is_ice(time)
         is_ice_edges = np.hstack((is_ice_centers, is_ice_centers[-1]))
@@ -208,7 +208,7 @@ class _BaseResults:
 
         # if no ice then no meltpond
         if np.all(liquid_fraction == 1):
-            return np.NaN
+            return np.nan
 
         is_ice_centers = self._is_ice(time)
         is_ice_edges = np.hstack((is_ice_centers[0], is_ice_centers))
@@ -283,7 +283,7 @@ class _BaseResults:
         is_ice = self._is_ice(time)
         bulk_density = self.dimensional_bulk_density[is_ice, index]
         if bulk_density.size == 0:
-            return np.NaN
+            return np.nan
 
         return np.mean(bulk_density)
 
@@ -343,7 +343,7 @@ class _BaseResults:
 
 def _integrate(quantity: NDArray, step: float) -> float:
     if quantity.size == 0:
-        return np.NaN
+        return np.nan
     return step * np.sum(quantity)
 
 
