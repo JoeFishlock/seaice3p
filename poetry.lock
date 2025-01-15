@@ -1157,13 +1157,13 @@ files = [
 
 [[package]]
 name = "oilrad"
-version = "2.0.1"
+version = "2.0.2"
 description = "Two-stream shortwave radiative transfer model for sea ice containing oil droplets."
 optional = false
 python-versions = "<4.0,>=3.12"
 files = [
-    {file = "oilrad-2.0.1-py3-none-any.whl", hash = "sha256:3d8c4bdc71535251a9590177bac2de2c4c7e893568e592b35a16d2cf3e531569"},
-    {file = "oilrad-2.0.1.tar.gz", hash = "sha256:d51a1f7bd1209fde6f1201598a43ab2fdb4b9143e2669a0f09940e5349147765"},
+    {file = "oilrad-2.0.2-py3-none-any.whl", hash = "sha256:7336daf0dc16c52b1fa1e5d5ce24c8ac4e8343ec98b9a9548a0725dad8536d2f"},
+    {file = "oilrad-2.0.2.tar.gz", hash = "sha256:bf4029ff4e4e2264a44668fa0ed21b864993a82775245bd0d2657ce9ad7eee6d"},
 ]
 
 [package.dependencies]
@@ -2080,4 +2080,4 @@ viz = ["cartopy", "matplotlib", "nc-time-axis", "seaborn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "58933970c0b9ad77513689bc63c3867673f48598028351e01a78498382b44767"
+content-hash = "9b915027fc9769149a86dad4b33ea68816d572ea0d6093891d3abed0bc94b98b"
