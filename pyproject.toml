@@ -11,7 +11,7 @@ python = "^3.12"
 numpy = "^2.1.0"
 scipy = "^1.14.0"
 pyserde = {version = "^0.22.0", extras = ["yaml"]}
-oilrad = "1.0.0"
+oilrad = "2.0.0"
 xarray = "^2024.10.0"
 netcdf4 = "^1.7.2"
 metpy = "^1.6.3"

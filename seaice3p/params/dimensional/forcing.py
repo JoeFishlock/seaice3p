@@ -1,7 +1,9 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from numpy.typing import NDArray
 from serde import serde, coerce
 from typing import Optional
 from pathlib import Path
+import oilrad as oi
 
 
 @serde(type_check=coerce)
@@ -18,13 +20,21 @@ class DimensionalYearlyForcing:
 @dataclass(frozen=True)
 class DimensionalConstantSWForcing:
     SW_irradiance: float = 280  # W/m2
-    SW_min_wavelength: float = 350
-    SW_max_wavelength: float = 3000
-    ice_scattering_coefficient: float = 1.5837  # 1/m
-    absorption_enhancement_factor: float = 1.833
-    num_wavelength_samples: int = 7
-    SW_penetration_fraction: float = 0.4
-    snow_scattering_coefficient: float = 800  # 1/m
+    ice_scattering_coefficient: float = 1.71  # 1/m
+    absorption_enhancement_factor: float = 2
+    snow_spectral_albedos: NDArray = field(
+        default_factory=lambda: oi.SNOW_ALBEDOS["light2022"]
+    )
+    snow_extinction_coefficients: NDArray = field(
+        default_factory=lambda: oi.SNOW_EXTINCTION_COEFFICIENTS["lebrun2023"]
+    )
+    SSL_depth: float = 0.04  # m
+    SSL_spectral_albedos: NDArray = field(
+        default_factory=lambda: oi.SSL_ALBEDOS["light2022"]
+    )
+    SSL_extinction_coefficients: NDArray = field(
+        default_factory=lambda: oi.SSL_EXTINCTION_COEFFICIENTS["perovich1990"]
+    )
 
 
 @serde(type_check=coerce)
@@ -32,17 +42,12 @@ class DimensionalConstantSWForcing:
 class DimensionalBackgroundOilHeating:
     oil_mass_ratio: float = 0  # ng/g
     median_oil_droplet_radius: float = 0.5  # microns
-    ice_type: str = "FYI"
-    fast_solve: bool = False
-    wavelength_cutoff: Optional[float] = 1200
 
 
 @serde(type_check=coerce)
 @dataclass(frozen=True)
 class DimensionalMobileOilHeating:
-    ice_type: str = "FYI"
-    fast_solve: bool = False
-    wavelength_cutoff: Optional[float] = 1200
+    pass
 
 
 @serde(type_check=coerce)

@@ -6,28 +6,7 @@ heating.
 
 Unlike temperature forcing this provides dimensional forcing
 """
-import numpy as np
 from ..params import Config, RadForcing, ERA5Forcing
-from ..state import StateBCs
-
-
-def get_SW_penetration_fraction(state_bcs: StateBCs, cfg: Config) -> float:
-    if isinstance(cfg.forcing_config, ERA5Forcing):
-        # If there is snow cover attenuate shortwave reaching ice
-        snow_depth = cfg.forcing_config.get_snow_depth(state_bcs.time)
-        snow_penetration_fraction = np.exp(
-            -cfg.forcing_config.SW_forcing.snow_scattering_coefficient * snow_depth
-        )
-    else:
-        snow_penetration_fraction = 1
-
-    # if there is ice set penetration through SSL
-    if state_bcs.liquid_fraction[-2] < 1:
-        return (
-            cfg.forcing_config.SW_forcing.SW_penetration_fraction
-            * snow_penetration_fraction
-        )
-    return snow_penetration_fraction
 
 
 def get_SW_forcing(time, cfg: Config):
