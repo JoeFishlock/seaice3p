@@ -5,7 +5,6 @@ from typing import List
 import numpy as np
 from numpy.typing import NDArray
 import oilrad as oi
-from scipy.integrate import trapezoid
 
 
 from . import (
@@ -21,7 +20,6 @@ from . import (
 from .state import EQMState, DISEQState, DISEQStateFull, EQMStateFull, StateFull
 from .enthalpy_method import get_enthalpy_method
 from .forcing.boundary_conditions import get_boundary_conditions
-from .forcing import get_SW_penetration_fraction, get_SW_forcing
 from .equations.radiative_heating import run_two_stream_model
 from .oil_mass import convert_gas_fraction_to_oil_mass_ratio
 from .forcing.surface_energy_balance.turbulent_heat_flux import (
@@ -123,7 +121,7 @@ class _BaseResults:
             scales.convert_to_dimensional_bulk_gas(self.bulk_gas)
         )
 
-    def get_spectral_irradiance(self, time: float) -> oi.SpectralIrradiance:
+    def get_spectral_irradiance(self, time: float) -> oi.SixBandSpectralIrradiance:
         if not (
             isinstance(self.cfg.forcing_config, RadForcing)
             or isinstance(self.cfg.forcing_config, ERA5Forcing)
@@ -139,56 +137,12 @@ class _BaseResults:
         if not present then the penetration fraction is 1 and so we regain just albedo
         calculated from the two stream radiative transfer model"""
         spec_irrad = self.get_spectral_irradiance(time)
-        spectrum = oi.BlackBodySpectrum(
-            self.cfg.forcing_config.SW_forcing.SW_min_wavelength,
-            self.cfg.forcing_config.SW_forcing.SW_max_wavelength,
-        )
-        ice_albedo = oi.integrate_over_SW(spec_irrad, spectrum).albedo
-        PEN = get_SW_penetration_fraction(
-            self.states_bcs[self._get_index(time)], self.cfg
-        )
-        return 1 - PEN * (1 - ice_albedo)
+        return oi.integrate_over_SW(spec_irrad).albedo
 
     def total_transmittance(self, time: float) -> float:
         """Total spectrally integrated transmittance"""
         spec_irrad = self.get_spectral_irradiance(time)
-        spectrum = oi.BlackBodySpectrum(
-            self.cfg.forcing_config.SW_forcing.SW_min_wavelength,
-            self.cfg.forcing_config.SW_forcing.SW_max_wavelength,
-        )
-        return oi.integrate_over_SW(spec_irrad, spectrum).transmittance
-
-    def dimensional_PAR_transmittance(self, time: float) -> float:
-        """Total photosynthetically active radiation transmitted through ice in W/m2"""
-        spec_irrad = self.get_spectral_irradiance(time)
-        is_PAR = (spec_irrad.wavelengths >= 400) & (spec_irrad.wavelengths <= 700)
-        PAR_wavelengths = spec_irrad.wavelengths[is_PAR]
-        if PAR_wavelengths.size == 0:
-            raise RuntimeError("Not enough points in wavelength space to integrate")
-
-        PAR_irrad = oi.SpectralIrradiance(
-            spec_irrad.z,
-            PAR_wavelengths,
-            spec_irrad.upwelling[:, is_PAR],
-            spec_irrad.downwelling[:, is_PAR],
-            ice_base_index=spec_irrad.ice_base_index,
-        )
-        SW = get_SW_forcing(time, self.cfg)
-        spectrum = get_normalised_black_body_spectrum(
-            (spec_irrad.wavelengths[0], spec_irrad.wavelengths[-1])
-        )
-
-        if PAR_wavelengths.size == 1:
-            return (
-                SW
-                * spectrum(PAR_irrad.wavelengths[0])
-                * PAR_irrad.transmittance[0]
-                * (700 - 400)
-            )
-
-        return SW * trapezoid(
-            PAR_irrad.transmittance * spectrum(PAR_irrad.wavelengths), PAR_wavelengths
-        )
+        return oi.integrate_over_SW(spec_irrad).transmittance
 
     def ice_ocean_boundary(self, time: float) -> float:
         index = self._get_index(time)

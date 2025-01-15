@@ -17,7 +17,7 @@ from ..params.dimensional import (
     DimensionalMobileOilHeating,
     DimensionalNoHeating,
 )
-from ..forcing import get_SW_forcing, get_SW_penetration_fraction
+from ..forcing import get_SW_forcing
 from ..state import StateBCs, EQMStateBCs, DISEQStateBCs
 from ..oil_mass import convert_gas_fraction_to_oil_mass_ratio
 
@@ -71,14 +71,7 @@ def _DISEQ_radiative_heating(
 
 def run_two_stream_model(
     state_bcs: StateBCs, cfg: Config, grids: Grids
-) -> oi.SpectralIrradiance:
-
-    SW_RANGE = (
-        cfg.forcing_config.SW_forcing.SW_min_wavelength,
-        cfg.forcing_config.SW_forcing.SW_max_wavelength,
-    )
-    NUM_WAVELENGTH_SAMPLES = cfg.forcing_config.SW_forcing.num_wavelength_samples
-    wavelengths = np.geomspace(SW_RANGE[0], SW_RANGE[1], NUM_WAVELENGTH_SAMPLES)
+) -> oi.SixBandSpectralIrradiance:
 
     match cfg.forcing_config.oil_heating:
         case DimensionalBackgroundOilHeating():
@@ -101,16 +94,29 @@ def run_two_stream_model(
         case _:
             raise NotImplementedError()
 
-    model = oi.InfiniteLayerModel(
+    if isinstance(cfg.forcing_config, ERA5Forcing):
+        snow_depth = cfg.forcing_config.get_snow_depth(state_bcs.time)
+    else:
+        snow_depth = 0
+
+    if state_bcs.liquid_fraction[-2] < 1:
+        SSL_depth = cfg.forcing_config.SW_forcing.SSL_depth
+    else:
+        SSL_depth = 0
+
+    model = oi.SixBandModel(
         grids.edges * cfg.scales.lengthscale,
-        wavelengths,
         oil_mass_ratio=oil_mass_ratio,
         ice_scattering_coefficient=cfg.forcing_config.SW_forcing.ice_scattering_coefficient,
         median_droplet_radius_in_microns=MEDIAN_DROPLET_RADIUS_MICRONS,
         absorption_enhancement_factor=cfg.forcing_config.SW_forcing.absorption_enhancement_factor,
+        snow_depth=snow_depth,
+        snow_spectral_albedos=cfg.forcing_config.SW_forcing.snow_spectral_albedos,
+        snow_extinction_coefficients=cfg.forcing_config.SW_forcing.snow_extinction_coefficients,
+        SSL_depth=SSL_depth,
+        SSL_spectral_albedos=cfg.forcing_config.SW_forcing.SSL_spectral_albedos,
+        SSL_extinction_coefficients=cfg.forcing_config.SW_forcing.SSL_extinction_coefficients,
         liquid_fraction=average(state_bcs.liquid_fraction),
-        fast_solve=cfg.forcing_config.oil_heating.fast_solve,
-        wavelength_cutoff=cfg.forcing_config.oil_heating.wavelength_cutoff,
     )
     return oi.solve_two_stream_model(model)
 
@@ -132,9 +138,7 @@ def _calculate_non_dimensional_shortwave_heating(
     if isinstance(cfg.forcing_config.oil_heating, DimensionalNoHeating):
         return np.zeros_like(grids.centers)
 
-    incident_SW_in_W_m2 = get_SW_penetration_fraction(state_bcs, cfg) * get_SW_forcing(
-        state_bcs.time, cfg
-    )
+    incident_SW_in_W_m2 = get_SW_forcing(state_bcs.time, cfg)
     # If incident shortwave is small then optimize by not running the two-stream model
     if incident_SW_in_W_m2 <= 0.5:
         return np.zeros_like(grids.centers)
@@ -144,11 +148,7 @@ def _calculate_non_dimensional_shortwave_heating(
     )
 
     spectral_irradiances = run_two_stream_model(state_bcs, cfg, grids)
-    spectrum = oi.BlackBodySpectrum(
-        cfg.forcing_config.SW_forcing.SW_min_wavelength,
-        cfg.forcing_config.SW_forcing.SW_max_wavelength,
-    )
-    integrated_irradiance = oi.integrate_over_SW(spectral_irradiances, spectrum)
+    integrated_irradiance = oi.integrate_over_SW(spectral_irradiances)
 
     dz_dF_net = grids.D_e @ integrated_irradiance.net_irradiance
     return dimensionless_incident_SW * dz_dF_net
