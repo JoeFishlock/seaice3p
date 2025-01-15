@@ -1,0 +1,2996 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="..">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.49">
+    
+    
+      
+        <title>Changelog - seaice3p</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.6f8fc17f.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#changelog" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="seaice3p" class="md-header__button md-logo" aria-label="seaice3p" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            seaice3p
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Changelog
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="seaice3p" class="md-nav__button md-logo" aria-label="seaice3p" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    seaice3p
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#v0270-2025-01-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.27.0 (2025-01-15)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.27.0 (2025-01-15)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0260-2024-11-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.26.0 (2024-11-04)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.26.0 (2024-11-04)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0250-2024-10-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.25.0 (2024-10-29)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.25.0 (2024-10-29)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0240-2024-10-25" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.24.0 (2024-10-25)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.24.0 (2024-10-25)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0230-2024-10-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.23.0 (2024-10-18)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.23.0 (2024-10-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0220-2024-10-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.22.0 (2024-10-17)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.22.0 (2024-10-17)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0210-2024-10-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.21.0 (2024-10-11)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.21.0 (2024-10-11)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0200-2024-10-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.20.0 (2024-10-07)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.20.0 (2024-10-07)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0190-2024-09-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.19.0 (2024-09-30)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.19.0 (2024-09-30)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0180-2024-09-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.18.0 (2024-09-26)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.18.0 (2024-09-26)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0170-2024-09-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.17.0 (2024-09-21)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.17.0 (2024-09-21)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0160-2024-09-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.16.0 (2024-09-19)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.16.0 (2024-09-19)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0150-2024-09-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.15.0 (2024-09-18)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.15.0 (2024-09-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0140-2024-04-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.14.0 (2024-04-23)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.14.0 (2024-04-23)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0130-2024-04-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.13.0 (2024-04-22)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.13.0 (2024-04-22)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0120-2024-01-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.12.0 (2024-01-30)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.12.0 (2024-01-30)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Removed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docs_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0110-2024-01-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.11.0 (2024-01-15)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.11.0 (2024-01-15)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Changed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docs_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bugs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0100-2023-11-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.10.0 (2023-11-24)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.10.0 (2023-11-24)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v090-2023-11-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.9.0 (2023-11-12)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.9.0 (2023-11-12)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Changed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v080-2023-05-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.8.0 (2023-05-23)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.8.0 (2023-05-23)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v070-2023-05-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.7.0 (2023-05-19)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.7.0 (2023-05-19)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v060-2023-05-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.6.0 (2023-05-19)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v050-2023-04-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.5.0 (2023-04-27)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v040-2023-04-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.4.0 (2023-04-18)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.4.0 (2023-04-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v030-2023-04-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.3.0 (2023-04-17)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.3.0 (2023-04-17)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v020-2023-04-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.2.0 (2023-04-14)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.2.0 (2023-04-14)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docs_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Removed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v010-2023-04-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.1.0 (2023-04-13)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#v0270-2025-01-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.27.0 (2025-01-15)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.27.0 (2025-01-15)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0260-2024-11-04" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.26.0 (2024-11-04)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.26.0 (2024-11-04)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0250-2024-10-29" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.25.0 (2024-10-29)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.25.0 (2024-10-29)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0240-2024-10-25" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.24.0 (2024-10-25)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.24.0 (2024-10-25)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0230-2024-10-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.23.0 (2024-10-18)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.23.0 (2024-10-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0220-2024-10-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.22.0 (2024-10-17)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.22.0 (2024-10-17)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0210-2024-10-11" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.21.0 (2024-10-11)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.21.0 (2024-10-11)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0200-2024-10-07" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.20.0 (2024-10-07)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.20.0 (2024-10-07)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0190-2024-09-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.19.0 (2024-09-30)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.19.0 (2024-09-30)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0180-2024-09-26" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.18.0 (2024-09-26)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.18.0 (2024-09-26)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0170-2024-09-21" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.17.0 (2024-09-21)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.17.0 (2024-09-21)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0160-2024-09-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.16.0 (2024-09-19)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.16.0 (2024-09-19)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0150-2024-09-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.15.0 (2024-09-18)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.15.0 (2024-09-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0140-2024-04-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.14.0 (2024-04-23)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.14.0 (2024-04-23)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0130-2024-04-22" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.13.0 (2024-04-22)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.13.0 (2024-04-22)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0120-2024-01-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.12.0 (2024-01-30)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.12.0 (2024-01-30)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Removed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docs_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0110-2024-01-15" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.11.0 (2024-01-15)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.11.0 (2024-01-15)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Changed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docs_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bugs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v0100-2023-11-24" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.10.0 (2023-11-24)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.10.0 (2023-11-24)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v090-2023-11-12" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.9.0 (2023-11-12)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.9.0 (2023-11-12)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Changed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#removed_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v080-2023-05-23" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.8.0 (2023-05-23)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.8.0 (2023-05-23)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v070-2023-05-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.7.0 (2023-05-19)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.7.0 (2023-05-19)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#summary_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v060-2023-05-19" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.6.0 (2023-05-19)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary_21" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v050-2023-04-27" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.5.0 (2023-04-27)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v040-2023-04-18" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.4.0 (2023-04-18)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.4.0 (2023-04-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docs_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tests_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v030-2023-04-17" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.3.0 (2023-04-17)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.3.0 (2023-04-17)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#added_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changed_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docs_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#removed_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v020-2023-04-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.2.0 (2023-04-14)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="v0.2.0 (2023-04-14)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docs_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#added_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      Added
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#removed_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Removed
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Removed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changed_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changed
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#v010-2023-04-13" class="md-nav__link">
+    <span class="md-ellipsis">
+      v0.1.0 (2023-04-13)
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="changelog">Changelog</h1>
+<h2 id="v0270-2025-01-15">v0.27.0 (2025-01-15)</h2>
+<h3 id="summary">Summary</h3>
+<p>Upgrade dependency for shortwave radiative transfer scheme oilrad 1.0.0 -&gt; 2.0.0.
+Use the SixBandModel for shortwave radiative transfer which better resolves the propagation of visible wavelengths through snow and SSL.
+Remove redundant parameters from shortwave forcing configuration and add paramters to specify snow and SSL spectral albedos and extinction coefficients and SSL thickness.
+Remove the redundant module oil_simulation.</p>
+<h2 id="v0260-2024-11-04">v0.26.0 (2024-11-04)</h2>
+<h3 id="summary_1">Summary</h3>
+<p>Change to use mkdocs instead of sphinx to generate documentation.
+Upgrade oilrad 0.9.0 -&gt; 1.0.0 and upgrade to latest numpy and scipy versions.
+Add option to turn on or off advective heat flux in the ocean when using the RJW14 brine convection scheme.
+Do not run two-stream shortwave radiation model when shortwave flux reaching the top of the domain is less than 0.5 W/m2 (significant performance benefit).
+Export the results classes for better code completion when using seaice3p.
+Add extra verbosity options to the command line interface: '', '-v', or '-vv'.
+Add method to the scales object to calculate the dimensional heat flux in W/m2.</p>
+<h2 id="v0250-2024-10-29">v0.25.0 (2024-10-29)</h2>
+<h3 id="summary_2">Summary</h3>
+<p>Fix bug in calculation of Courant number for methods using explicit timestepping.
+Linearly interpolate forcing quantities from ERA5 data instead of using cubic splines to avoid oscillations.
+Remove the arbitrary threshold in snow depth for surface boundary condition and shortwave radiative transfer.
+Instead use real snow depth in surface energy boundary condition and apply an exponential attenuation of shortwave radiation through the snow layer.
+This is assuming a perfectly scattering snow layer with the extra parameter snow_scattering_coefficient given in SW_forcing parameters.</p>
+<p>Update to use oilrad 0.9.0 for the two stream radiative transfer model.
+This requires specifying the appropriate ice_scattering_coefficient directly.
+Additionally, there is the optional absorption_enhancement_factor which accounts for extra absorption due to increase in vertical mean path length
+of a diffuse radiation field.
+The default values of these two new pararmeters best match the computed spectral albedo for 0ng/g of oil in 0.8m thick first-year sea ice in Redmond Roche et al 2022.</p>
+<h2 id="v0240-2024-10-25">v0.24.0 (2024-10-25)</h2>
+<h3 id="summary_3">Summary</h3>
+<p>Add snow density as a parameter to the dimensional simulation (in water params).
+This will be used when using ERA5 snow depth data for forcing to infer the snow depth from the given measurement of m of water equivalent.
+This is important to be able to change as snow depth strongly impacts ice thickness.</p>
+<h2 id="v0230-2024-10-18">v0.23.0 (2024-10-18)</h2>
+<h3 id="summary_4">Summary</h3>
+<p>As another measure to try and achieve realistic ice growth add the option to use a cubic fit for the liquidus curve.
+Data for this is taken from Dirk Notz PhD thesis.
+This should now predict a more accurate warmer temperature for the ocean water freezing temperature and so should promote
+more ice growth.</p>
+<h2 id="v0220-2024-10-17">v0.22.0 (2024-10-17)</h2>
+<h3 id="summary_5">Summary</h3>
+<p>To avoid delivering spurious advective heat flux in the ocean when using the RJW14 brine convection scheme we now use an exponential
+to smoothly set the advective heat flux in the ocean to zero. This should improve the underestimate of ice growth compared to field
+observations.</p>
+<h2 id="v0210-2024-10-11">v0.21.0 (2024-10-11)</h2>
+<h3 id="summary_6">Summary</h3>
+<p>Update dependencies so pip installs xarray, metpy and netcdf4 needed for running simulations with forcing from ERA5 data.</p>
+<p>To avoid numerical instability change the calculation of eddy diffusivity to turn on gradually as liquid fraction goes to 1 using an exponential.
+Set the scale for the exponential once as 5e-3 which should mean the diffusivity remains unmodified for liquid fraction less than 0.9.
+This seems to suppress instability and simulations can be run with the BDF solver for a year of ERA5 reanalysis forcing.</p>
+<p>Change the calculation of the enthalpy method to account for different specific heat capacities of the solid and liquid phases.
+This is important to predict the correct ice depth.</p>
+<h2 id="v0200-2024-10-07">v0.20.0 (2024-10-07)</h2>
+<h3 id="summary_7">Summary</h3>
+<p>Add ERA5Forcing option for simulation configuration.
+This reads data from a single ERA5 reanalysis netcdf data file at the location provided in configuration.
+This file should onlu contain timeseries data for a single location (lat, lon location) and needs to contain the hourly variables:
+2m air temperature,
+2m dewpoint temperature,
+downward longwave radiation.
+downward shortwave radiation,
+and surface pressure.
+Optionally can also request to use dnow depth data from the data file.
+In this case the surface energy balance boundary condition is modified assuming a quasi steady homogeneous conductive snow layer.
+To read the netcdf file xarray and netCDF4 are added as dependencies as well as metpy to calculate specific humidity at 2m.</p>
+<p>Seperate the ocean boundary conditions into a sperate ocean_forcing_config.
+We have implemented three options:
+FixedTempOceanForcing, which provides fixed ocean temperature boudnary conditions;
+FixedHeatFluxOceanForcing, which provides a constant ocean heat flux;
+and BRW09OceanForcing, which provides the bottom ocean temperature from the data measured at 2.4m during the 2009 Barrow field study.</p>
+<p>Change from specifying the turbulent liquid thermal conductivity to simply specifying the eddy diffusivity.
+In purely liquid regions this enhances the diffusion of heat, salt and dissolved gas.
+Additionally added the option gas_bubble_eddy_diffusivity, when set to true this also adds eddy diffusion of the gas bubble phase.
+This is useful when simulating oil droplets instead of gas bubbles which are much less buoyant and should be mixed due to turbulence in the liquid.</p>
+<p>Added the gas_viscosity parameter.
+By default this is zero and we regain the terminal rise velocity calculation for a free slip sphere.
+However, when a non-zero value is supplied the Hadamaard-Rybczinski equation is used.</p>
+<p>Fixed a bug when implementing the brine convection sink so that now we may couple brine convection to the gas / oil droplet phase by setting
+the options couple_bubble_to_horizontal_flow and couple_bubble_to_vertical_flow to true.
+This is useful for simulating oil droplets or bubbles which have become trapped and are not migrating under their buoyancy.</p>
+<p>Added the dates property to the results class which can be calcuated for simulations forced useing ERA5Forcing as we specify a start date for these.
+Gives a list of datetimes of the data points of the simulation.
+Added methods to calculate meltpond onset time and surface heat fluxes of a simulation to the results class.</p>
+<h2 id="v0190-2024-09-30">v0.19.0 (2024-09-30)</h2>
+<h3 id="summary_8">Summary</h3>
+<p>Change to use oilrad v0.7.0 for radiative transfer calculation.
+This allows us to use an optimized faster radiation solve if we set fast_solve=True.
+Given a cutoff wavelength you should choose based on the grid resolution for wavelengths above this
+approximate the radiation as entirely absorbed in the first grid cell.</p>
+<p>Add turbulent liquid thermal conductivity parameter to represent enhanced heat transport in liquid regions (ocean and meltpond).
+Also add the option to choose the solver used by scipy.integrate.solve_IVP.
+An implicit method such as the Radau or LSODA option is best used when an enhanced turbulent conductivity is added to avoid very small timesteps.</p>
+<p>Add option to load simulation initial condition as the final state of an existing saved simulation.</p>
+<p>Make gas fraction boundary condition extend the bottom value of the domain into the ocean.
+This is useful for simulating an oil configuration where oil will be able to rise into the domain.</p>
+<p>Add plot module to visualise saved simulation data from the command line.</p>
+<p>Add the initial_oil_free_ice_depth parameter to the oil simulation initial conditions config to specify the initial oil mass ratio profile as a step function with no oil in the upper portion of the domain.
+This is to simulate the release of oil below the ice at some time before the simulation starts.</p>
+<h2 id="v0180-2024-09-26">v0.18.0 (2024-09-26)</h2>
+<h3 id="summary_9">Summary</h3>
+<p>Change to use oilrad v0.6.0 for radiative transfer calculation.
+Fix bug where non-dimensional grid was passed to oilrad causing incorrect internal melting.
+Fix implementation of surface energy balance to estimate surface temprature correctly.
+Create the load_simulation function to return a results class useful for plotting simulations.
+Add a forcing option for a Robin boundary condition.
+Fix bug in non-dimensionalisation of DISEQ model so that this can now be run.</p>
+<h2 id="v0170-2024-09-21">v0.17.0 (2024-09-21)</h2>
+<h3 id="summary_10">Summary</h3>
+<p>Change to use oilrad v0.5.0 for radiative transfer calculation.
+This just takes liquid fraction within the entire domain and so solves a depth dependent radiative transfer model with meltpond and ocean regions present.
+Once a meltpond forms on the surface of the ice the surface SW penetration fraction is set to 1 as there can be no SSL when a meltpond has formed.</p>
+<h2 id="v0160-2024-09-19">v0.16.0 (2024-09-19)</h2>
+<h3 id="summary_11">Summary</h3>
+<p>Change to use oilrad v0.4.0 for radiative transfer calculation.
+This now integrates accross all shortwave wavelengths so we no longer need to have the shortwave in the surface boundary condition.
+The SW_penetration_fraction dictates how much radiation passes through the initial surface scattering layer to the solver.</p>
+<h2 id="v0150-2024-09-18">v0.15.0 (2024-09-18)</h2>
+<h3 id="summary_12">Summary</h3>
+<p>Renamed the project from the working name celestine to seaice3p.
+Updated to use python 3.12.
+Added verbosity option to command line interface -v.
+Removed logging to files.
+Major refactoring.</p>
+<p>Removed redundant enthalpy method and solver classes.
+Simulation state is stored in the State object which keeps the prime variables.
+Running the enthalpy method on this onbect produces a StateFull object with the enthalpy method variables.
+Applying the boundary conditions to this object produces the StateBCs object used in the solver.
+Broken up to configuration of the simulation to be handled by different objects.
+This should mean only necessary parameters for the type of simulation being run need to be given.
+Use pyserde to serialize these configuration objects.
+Added a load module to read in data from simulations.</p>
+<p>Implemented a disequilibrium model for gas dynamics with a finite nucleation rate.</p>
+<p>Added convenience function to adapt gas dynamics to simulate oil droplets.
+The buoyancy parameter is now calculated as the difference in fluid and oil/gas density.
+When simulating oil droplets the top velocity is changed to prevent oil escaping the top surface.</p>
+<p>Implemented a radiative forcing configuration which uses a surface energy balance to calculate
+the appropriate temperature boundary condition.
+Also use the radiative transfer model <code>oilrad</code> (v0.3.0) to calculate internal radiative heating due to 
+shortwave absorption of ice and oil droplets.
+Created an initial condition to investigate melting a layer of ice under radiative and turbulent
+surface fluxes.</p>
+<h2 id="v0140-2024-04-23">v0.14.0 (2024-04-23)</h2>
+<h3 id="summary_13">Summary</h3>
+<p>No new physics in this version just changed the structure so that tests are run with pytest.
+Example script is now a module <code>celestine.example</code>.
+Scripts that plotted gas velocity and brine drainage parameterisation quantities were useful so have been moved to
+a diagnostics module.</p>
+<h3 id="tests">Tests</h3>
+<ul>
+<li>Run all tests with pytest.</li>
+<li>Run tests that aren't slow with <code>pytest -m "not slow"</code>.</li>
+</ul>
+<h3 id="docs">Docs</h3>
+<ul>
+<li>Update installation instructions in the README.</li>
+</ul>
+<h2 id="v0130-2024-04-22">v0.13.0 (2024-04-22)</h2>
+<h3 id="summary_14">Summary</h3>
+<p>To investigate the effect of gas nucleation rate without changing the equilibrium model significantly add parameters
+that control tolerable supersaturation and ocean saturation state. This allows investigation of a case with less gas
+exsolution.</p>
+<p>Package is also now pip installable.</p>
+<h3 id="added">Added</h3>
+<ul>
+<li>Tolerable supersaturation parameter. Used by ReducedEnthalpyMethod.</li>
+</ul>
+<h2 id="changed">Changed</h2>
+<ul>
+<li>Barrow initial condition initialises ocean with <code>far_gas_sat</code> so that ocean can be subsaturated with air.</li>
+<li>Made poetry a package managed by poetry with pyproject.toml so that it can be installed easily with pip.</li>
+</ul>
+<h2 id="removed">Removed</h2>
+<ul>
+<li>Remove requirements.txt as not needed now dependencies are in pyproject.toml.</li>
+</ul>
+<h2 id="v0120-2024-01-30">v0.12.0 (2024-01-30)</h2>
+<h3 id="summary_15">Summary</h3>
+<p>Add the option to run simulations with phase averaged thermal conductivity to better match ice depth for real sea
+ice growth. We also add the functionality to run a single simulation config or a directory of simulation configs,
+which can be dimensional or not, from the command line using the <code>python -m celestine</code> command.</p>
+<h3 id="added_1">Added</h3>
+<ul>
+<li>Add parameters to the dimensional params configuration class so that a simulation configuration can be generated
+without supplying any additional objects.</li>
+<li>Add <strong>main</strong>.py file which uses argparse to run simulation configurations from the command line.</li>
+<li>Option to calculate conductive heat transfer using phase averaged thermal conductivities.</li>
+</ul>
+<h2 id="changed_1">Changed</h2>
+<ul>
+<li>Remove data_path as a configuration option and change solver methods to specify where they will save output.</li>
+<li>Flux module calculation to calculate phase average thermal conductivities.</li>
+</ul>
+<h2 id="removed_1">Removed</h2>
+<ul>
+<li>Remove tests/run_tests.py as tests can now be run from the command line using <code>python -m celestine test_data</code>.</li>
+</ul>
+<h3 id="docs_1">Docs</h3>
+<ul>
+<li>Update test procedure in README.</li>
+</ul>
+<h2 id="v0110-2024-01-15">v0.11.0 (2024-01-15)</h2>
+<h3 id="summary_16">Summary</h3>
+<p>We have added options to the simulation to use a brine convection parameterisation (Rees Jones 2014).
+This desalinates the ice and brings in saturated ocean water, assuming continuity of velocity at the ice interface.
+This seems to work relatively well to desalinate the ice for the barrow simulation if we start with ocean bulk salinity.
+This however also changes the heat balance so to get the ice growth correct we need to use a thermal conductivity value
+that is an average of ice and water. Going forward we could just implement the full heat conduction term for each phase.
+To further improve the barrow simulation we use thermistor data for the ocean to force the bottom of the domain.
+We also give the option to use thermistor data at the ice snow interface to better match temperature evolution of the ice.
+This is better than the air temperature as we do not simulate the insulating layer of snow.</p>
+<h3 id="added_2">Added</h3>
+<ul>
+<li>Functionality to calculate the liquid velocity associated with brine convection using Rees Jones
+2014 parameterisation by turning the brine_convection_parameterisation to True in the simulation configuration.
+The parameterisation should advect tracers with the broad upward liquid flow and also remove salt, heat and bulk gas
+via a sink term that appears as the downward brine channel flow. There are two more true/false flags that
+decide wether to couple bubble motion to the vertical flow that should move bubbles upward and to the horizontal flow
+which is responsible for transporting bubbles to brine channels where they would be expelled and so this appears in
+the sink term.</li>
+<li>Added configuration parameters needed for the brine convection parameterisation. The critical Rayleigh number,
+the convection strength tuning parameter and then the dimensional haline contraction coefficient and reference permeability.
+The two tuning parameters are given default values from the Rees Jones 2014 paper but later work (Thomas 2022) suggests
+using lower values of these will work better to desalinate the ice.</li>
+<li>test_brine_drainage.py This script is useful as it generates some plots illustrating the functions
+used to calculate the ice depth, rayleigh number and convecting liquid velocity.
+This can be used to visually confirm the parameterisation is working as expected and the templates for
+plotting these quantities may come in handy.</li>
+<li>drainage_test.py This script runs a simulation with the brine drainage parameterisation turned on.</li>
+<li>celestine/brine_drainage.py This module calculates the quantities needed for the Rees Jones 2014
+brine convection parameterisation and provides the parameterised darcy liquid velocity to the rest of
+the simulation.</li>
+<li>celestine/brine_channel_sink_terms.py This module implements the loss of heat, salt and bulk gas
+through the downward brine channel flow in the Rees Jones 2014 convective parameterisation.
+This provides the terms in the conservation equations that loose heat, salt and bulk gas to the ocean.</li>
+<li>Added the option to choose the thermistor temperature data used to force the top of the simulation for the barrow simulation.
+This is important as we don't simulate a snow layer so we can choose via the new option Barrow_top_temperature_data_choice
+in the configuration if we want to use temperature data recorded at the air interface, bottom snow or top of ice.</li>
+<li>Added option in the barrow configuration to choose the bulk gas content of the initial ice cover.</li>
+</ul>
+<h2 id="changed_2">Changed</h2>
+<ul>
+<li>Make the barrow simulation configuration use recorded ocean temperature to force the bottom of the domain.</li>
+</ul>
+<h3 id="docs_2">Docs</h3>
+<ul>
+<li>Add the modules brine_drainage and brine_channel_sink_terms to the documentation index.</li>
+</ul>
+<h3 id="bugs">Bugs</h3>
+<ul>
+<li>The brine convection parameterisation seems to work but the option to couple bubbles to the horizontal flow
+and hence remove free gas phase via brine channels does not work as it seems some quantity is calculated on the wrong
+grid. This option currently just breaks the simulation if set to True.</li>
+</ul>
+<h2 id="v0100-2023-11-24">v0.10.0 (2023-11-24)</h2>
+<h3 id="summary_17">Summary</h3>
+<p>To calculation of gas velocity we add options to use a different fit for wall drag enhancement
+function taken from a paper by Haberman. We also add the option to use a critical liquid
+velocity percolation threshold to cut off gas motion. We add some plots comparing different
+gas rise parameterisations.</p>
+<h3 id="added_3">Added</h3>
+<ul>
+<li>Alternative fit for wall drag enhancement as a function of scaled bubble radius taken from
+a paper by Haberman.</li>
+<li>parameters in config and non dimensional config to choose the type of wall drag funciton used.</li>
+<li>plot of different wall drag enhancement functions and bubble rise velocities against liquid
+fraction for different bubble distributions and drag laws.</li>
+<li>Add critical liquid fraction porosity cutoff of 2.4% from Maus paper.</li>
+<li>Add options to enable this cutoff, leave the default behaviour the same.</li>
+<li>Gas velocity plots comparing different bubble terminal rise velocities to Moreau 2014 paper.</li>
+</ul>
+<h2 id="changed_3">Changed</h2>
+<ul>
+<li>Values for pore throat radius and scaling taken from Maus paper for gas velocity plots.
+Before we were wrongly using diameter instead of radius.</li>
+<li>Change default value of dynamic liquid viscosity used in dimensional configuration to
+match the value of kinematic viscosity used in Moreau 2014 paper.</li>
+</ul>
+<h2 id="v090-2023-11-12">v0.9.0 (2023-11-12)</h2>
+<h3 id="summary_18">Summary</h3>
+<p>This version adds the funcitonality to calculate the gas Darcy flux using the interstitial
+terminal rise velocity of a bubble averaged over a power law bubble size distribution.
+The default behaviour remains to use a single bubble size but parameters now exist for
+the power law case. The velocities module has also been refactored and in anticipation
+of parameterising the liquid flow instead of direct calculation the lagged upwind solver
+and funcitons for solving the pressure ODE are removed here.</p>
+<h3 id="added_4">Added</h3>
+<ul>
+<li>script called plot_gas_velocity.py to plot different versions of the calculated gas
+interstitial velocity against liquid fraction.</li>
+<li>Functions in the velocities module to calculate the gas interstitial velocity
+averaged over a power law distribution of bubble sizes.</li>
+<li>Parameters needed (dimesnional and non dimensional) to select either a single bubble size
+or power law distribution case. In the power law case added the maximum and minimum bubble
+sizes and the power law slope as parameters.</li>
+</ul>
+<h2 id="changed_4">Changed</h2>
+<ul>
+<li>Refactor calculation of gas interstitial velocity to make it possible to add options
+to calculate this with a monodispersed bubble size distribution or a power law distribution.</li>
+<li>The definition of the non dimensional buoyancy parameter B is changed to use the pore
+length scale as this doesn't change as we integrate over bubble size distributions.</li>
+</ul>
+<h3 id="removed_2">Removed</h3>
+<ul>
+<li>For simplicity we remove the functions which calculate liquid Darcy velocity from
+solving an ODE for the pressure at each timestep. These are not necessary for the
+reduced model approximation.</li>
+<li>Remove the lagged upwind solver which was the only one to attempt to use the pressure
+solve.</li>
+</ul>
+<h3 id="docs_3">Docs</h3>
+<ul>
+<li>Equation for calculation of gas bubble interstitial velocity is updated in the numerical
+method documentation.</li>
+</ul>
+<h3 id="tests_1">Tests</h3>
+<ul>
+<li>Remove test cases that use the now removed lagged upwind solver.</li>
+</ul>
+<h2 id="v080-2023-05-23">v0.8.0 (2023-05-23)</h2>
+<h3 id="summary_19">Summary</h3>
+<p>This code can now generate a simulation configuration from dimensional parameter inputs.
+It can also convert the output to dimensional units for plots.
+It can also now run simulations with the "barrow_2009" forcing and initial conditions option
+which uses surface temperature data from the Barrow field station in 2009 to compare our
+simulation data to the field data of Zhou and Tison.</p>
+<h3 id="added_5">Added</h3>
+<ul>
+<li>Dimensional parameters module to handle input of dimensional parameters and converting
+between non dimensional and dimensional variables.</li>
+<li>Example script to run a simulation with Barrow 2009 Jan-Jun configuration called <code>barrow.py</code>.</li>
+<li>Barrow field station temperature data and metadata in <code>celestine/forcing_data/</code>. Must be read
+in to use "barrow_2009" temperature forcing option.</li>
+<li>Initial conditions module so we can use different initial conditions chosen in configuration.</li>
+<li>Method in Scales class to convert bulk air content into mircro moles of Argon per Liter of ice,
+under some assumptions that mass ratio of Argon in air is the same as in the atmosphere. This lets
+us compare to the field data for Argon of Zhou and Tison.</li>
+</ul>
+<h3 id="docs_4">Docs</h3>
+<ul>
+<li>Document explaining numerical methods used. </li>
+<li>README containing install instructions, how to run the tests, a breakdown of the documentation
+and checklist for creating a new release.</li>
+</ul>
+<h2 id="v070-2023-05-19">v0.7.0 (2023-05-19)</h2>
+<h3 id="summary_20">Summary</h3>
+<p>This code is now capable of solving the reduced model configuration for the same forcing
+and boundary conditions as the full model. This is a set of approximations where the gas
+fraction is neglected in the enthalpy method and so no liquid flow is generated by gas
+motion, so we do not need to solve for the liquid pressure. The reduced model can be solved
+using a forward euler upwind scheme or using RK23 with scipy solve_ivp. As this includes
+adaptive timestepping this works well for simulations with high gas buoyancy. It is 
+important to note that as gas fraction is decoupled from solid and liquid fraction in
+the reduced model we must impose that gas cannot enter a cell which already contains high
+enough gas fraction to saturate the pore space.</p>
+<h3 id="added_6">Added</h3>
+<ul>
+<li>Reduced model classes for the phase boundaries, enthalpy method and solver. This is chosen
+with the solver choice "RED" in the simulation configuration.</li>
+<li>Solver class to solve the reduced model using the <code>scipy.integrate.solve_ivp</code> function
+with the RK23 method. This solver option is "SCI" in the simulation configuration.</li>
+</ul>
+<h3 id="docs_5">Docs</h3>
+<ul>
+<li>Add docs pages for the reduced model solver and the reduced model solver that uses
+<code>scipy.integrate.solve_ivp</code>.</li>
+</ul>
+<h3 id="tests_2">Tests</h3>
+<ul>
+<li>Include configurations with the two new solvers in the test cases.</li>
+</ul>
+<h2 id="v060-2023-05-19">v0.6.0 (2023-05-19)</h2>
+<h2 id="summary_21">Summary</h2>
+<p>Can run only the lagged upwind solver (LU) for the full enthalpy method with constant or
+yearly surface temperature forcing with given initial state. A lot of broken or redundant
+code was removed from v0.5.0 and refactored to make it easier to extend adding reduced model
+as another enthalpy method and new solvers and boundary conditions.</p>
+<h3 id="added_7">Added</h3>
+<ul>
+<li>Helper function for grids to add ghost cells to a quantity on cell centers. This is very
+useful for applying boundary conditions.</li>
+<li>Module called flux to calculate fluxes for heat, salt and gas. This should make
+implementing new solvers easier and more reliable.</li>
+<li>Function for lagged upwind solver to take forward euler timestep given fluxes.</li>
+<li>State module for working with solution state at each timestep. Contains the State
+class for working with the solution on cell centers at each timestep and running the
+appropriate enthalpy method. StateBCs is responsible for adding the boundary conditions.
+Solution is responsible for storing the timesteps to be saved.</li>
+<li>Class interface for enthalpy method so we can implement different versions. The
+enthalpy method is picked from the solver choice in the configuration.</li>
+<li>Class interface for phase boundary calculation so we can implement difference versions.</li>
+</ul>
+<h3 id="changed_5">Changed</h3>
+<ul>
+<li>Refactor solver template and enthalpy method to use a state class. 
+This contains all the variables needed at a timestep so makes writing solvers more concise.</li>
+<li>Solver template uses solution class to store variables to be saved in a numpy array of
+fixed dimensions. This has better performance than appending to an array each time we
+want to save new data.</li>
+<li>Simplify boundary conditions module to just add a fixed condition to each variable we may
+need on the ghost grid. Then the StateBCs class handles adding these to the state at each
+timestep.</li>
+<li>Before boundary conditions were calculated by inverting the enthalpy method. Now we just
+impose appropriate values of temperature, dissolved gas etc... I have chosen to extrapolate
+the liquid fraction to the ghost cells as being equal to the top and bottom cell centers.</li>
+<li>Solution output of simulation is now given on the cell centers but can be easily extended
+to the ghost cells by using the StateBCs class.</li>
+<li>Initial solution is now uniform profile of enthalpy, bulk salt and bulk gas given by their
+given values at the bottom of the domain.</li>
+<li>Lagged Upwind solver uses new template solver interface.</li>
+<li>Velocities module now takes stateBCs object.</li>
+</ul>
+<h3 id="docs_6">Docs</h3>
+<ul>
+<li>Auto generate docstring documentation for each module using sphinx as <code>docs/manual.pdf</code>.</li>
+</ul>
+<h3 id="tests_3">Tests</h3>
+<ul>
+<li>Put tests in their own package <code>tests/</code>.</li>
+<li>Run different bubble sizes and constant/yearly forcing for only lagged upwind solver as
+test case. Record if the simulation runs or crashes.</li>
+</ul>
+<h3 id="removed_3">Removed</h3>
+<ul>
+<li>Implicit lax friedrich solver (LXFImplicit).</li>
+<li>Lax Friedrich solver (LXF).</li>
+<li>Other partially written solvers that I wasn't using.</li>
+<li>Adaptive timestepping option. This wasn't really being utilised and was making the code
+more opaque.</li>
+<li>Checks on initial timestep and grid size. Now just log a warning if Courant number for
+thermal diffusion exceeds 0.5 in the lagged upwind solver as this treats the diffusive term
+explicitly.</li>
+<li>Code to plot full enthalpy method phase space diagram from <code>celestine.phase_boundaries.py</code>.</li>
+<li>Code to plot enthalpy method quantities from <code>celestine.enthalpy_method.py</code>.</li>
+<li>Scripts to plot benchmark case for comparing the three solvers in v0.5.0.</li>
+</ul>
+<h2 id="v050-2023-04-27">v0.5.0 (2023-04-27)</h2>
+<h2 id="summary_22">Summary</h2>
+<p>Runs full enthalpy method with three different solvers:
+- LU (forward euler explicit upwind scheme, calculate velocity from previous timestep)
+- LXF (forward euler explicit lax-friedrich scheme)
+- LXFImplicit (same as LXF but calculate heat diffusion implictly for better resolution)</p>
+<p>Contains benchmark scripts to compare these solvers during yearly temperature forcing run.</p>
+<p>Contains code in enthalpy_method and phase_boundaries to plot phase space diagrams.</p>
+<p>Contained artificial cut off in liquid darcy velocity calculation and all of the solvers
+suffer the same instability during melting part of yearly cycle.</p>
+<h3 id="added_8">Added</h3>
+<ul>
+<li>Options to forcing configuration to control sinusoidal yearly temperature forcing.</li>
+<li>LXFImplicit solver option which is the same as lax friedrich solver but uses backwards
+Euler for temperature diffusion terms. This relaxes timestep constraint so that grid can 
+be refined to investigate numerical diffusion introduced by this method.</li>
+<li>Scripts to generate benchmark configuration, run the simulations and plot the data.
+These scripts compare the LU, LXF and LXFImplicit solvers for a yearly temperature forcing
+run with micro bubbles and plot the profiles from the different solvers on the same axis to
+compare.</li>
+</ul>
+<h3 id="changed_6">Changed</h3>
+<ul>
+<li>Example simulation in main.py now plots solid fraction and temperature.</li>
+<li>Adaptive timestepping now controlled by flag in nuerical params object.
+Default is false so solve will just proceed with initial timestep.</li>
+<li>Calculate liquid Darcy velocity with permeability as the cube of liquid fraction.
+This reverts a change made to debug instability which I forgot about.</li>
+<li>Pressure solver regularisation increased from 1e-15 to 1e-4 so it can have more of
+an effect.</li>
+</ul>
+<h3 id="tests_4">Tests</h3>
+<ul>
+<li>Add LXFImplicit solver to manual testing cases.</li>
+</ul>
+<h2 id="v040-2023-04-18">v0.4.0 (2023-04-18)</h2>
+<h3 id="added_9">Added</h3>
+<ul>
+<li>Lagged upwind solver as an option to use.</li>
+</ul>
+<h3 id="changed_7">Changed</h3>
+<ul>
+<li>Refactored solvers to use a template solver which handles common methods.
+Implemented solvers should inherit and overwrite the relevant methods.</li>
+</ul>
+<h2 id="docs_7">Docs</h2>
+<ul>
+<li>Specified a testing procedure to run for each release.</li>
+</ul>
+<h3 id="tests_5">Tests</h3>
+<ul>
+<li>Added script to generate test simulation config yaml files in <code>test_data/</code>.</li>
+<li>Added script to run test simulation config and log if any crash.</li>
+<li>This information can be recorded manually in the template file in <code>docs/</code>.</li>
+</ul>
+<h2 id="v030-2023-04-17">v0.3.0 (2023-04-17)</h2>
+<h3 id="added_10">Added</h3>
+<ul>
+<li>Logging. Logs are generated for the simulation in main stating the version
+number and duration of the simulation stored in the logs/ directory.</li>
+</ul>
+<h3 id="changed_8">Changed</h3>
+<ul>
+<li>Split the Params class into multiple different classes. These are combined
+in the new Config class. </li>
+<li>Code refactored to use the Config class (only the lax friedrich solver not
+the others).</li>
+<li>Config object can be saved to and loaded from a yaml file not json.</li>
+</ul>
+<h3 id="docs_8">Docs</h3>
+<ul>
+<li>Added release checklist.</li>
+</ul>
+<h3 id="removed_4">Removed</h3>
+<ul>
+<li>Removed dependency on tqdm for progress bar.</li>
+</ul>
+<h2 id="v020-2023-04-14">v0.2.0 (2023-04-14)</h2>
+<h3 id="docs_9">Docs</h3>
+<ul>
+<li>add requirements in requirements.txt file</li>
+</ul>
+<h3 id="added_11">Added</h3>
+<ul>
+<li>lax friedrich solver (still upwind enthalpy, boundary values and solid regions)</li>
+</ul>
+<h2 id="removed_5">Removed</h2>
+<ul>
+<li>remove dependency on scienceplots</li>
+</ul>
+<h3 id="changed_9">Changed</h3>
+<ul>
+<li>change yearly temperature forcing period to be 4 units of time</li>
+<li>function to compute cell edge values as arithmetic mean of centers</li>
+<li>main function just run one yearly simulation with small bubbles and plot gas fraction and bulk salinity for debugging</li>
+</ul>
+<h2 id="v010-2023-04-13">v0.1.0 (2023-04-13)</h2>
+<ul>
+<li>Simulate bubbles in a mushy layer in 1D using the enthalpy method with given surface forcing.</li>
+<li>Phase fractions of solid, liquid and gas must sum to one and so bubble nucleation and motion drives a liquid flow.</li>
+<li>Implemented a variety of implicit and semi-implicit solvers as calculating liquid velocity from pressure solver requires knowlege of gas fraction time derivative.</li>
+<li>Backward euler approach uses scipy root findding (krylov solver) to solve non linear system of residuals.</li>
+<li>Iterative solver performs a fixed point iteration for each timestep until residuals are suitably lows.</li>
+<li>Lagged solver assumes velocity calculated in between each timestep, this will introduce some error in the flow calculated.</li>
+</ul>
+<h1 id="problems">Problems</h1>
+<ul>
+<li>All of these methods seem to suffer instabilities when gas accumulates below an impermeable eutectic layer which melts as surface temperature forcing warms.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.88dd0f4e.min.js"></script>
+      
+    
+  </body>
+</html>
