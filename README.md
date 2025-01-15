@@ -1,12 +1,14 @@
 # seaice3p #
 
-Code for simulating gas content of sea ice in 1D using enthalpy method.
+Code for simulating the seasonal evolution of a 1D layer of sea ice using an enthalpy method.
+Optionally can simulate the air fraction within the ice or the motion of oil droplets.
 
 ## Install ##
 
-Install via pip (v0.13.0 and above).
+Install via pip (v0.13.0 and above):
+`pip install seaice3p`
+
 To install a specific version run `pip install git+file:///ABSOLUTE/PATH/TO/LOCAL/GIT/REPO@vX.X.X`.
-Alternatively use poetry to build a wheel for a specific version and pip install this.
 
 ## Usage ##
 
@@ -19,12 +21,7 @@ Example script that generates, runs and plots a simulation can be run with `pyth
 
 ## Documentation ##
 
-found in the `docs/` directory
-
-- `Changelog.md`
-- `manual.pdf` is the sphinx generated documentation from docstrings.
-Generate by running `make latexpdf` in the `docs/` directory and then copying the ouput in the `docs/build/` directory to `docs/manual.pdf`. 
-- `numerical_method.pdf` is a written description of the numerical method used for each solver option.
+Files to generate documentation using mkdocs found in the `docs/` directory as well as `Changelog.md`.
 
 ## Tests ##
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.27.0 (2025-01-15) ##
+
+### Summary ###
+Upgrade dependency for shortwave radiative transfer scheme oilrad 1.0.0 -> 2.0.0.
+Use the SixBandModel for shortwave radiative transfer which better resolves the propagation of visible wavelengths through snow and SSL.
+Remove redundant parameters from shortwave forcing configuration and add paramters to specify snow and SSL spectral albedos and extinction coefficients and SSL thickness.
+Remove the redundant module oil_simulation.
+
 ## v0.26.0 (2024-11-04) ##
 
 ### Summary ###
