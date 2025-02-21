@@ -125,8 +125,7 @@ class ERA5Forcing:
 
     def __post_init__(self):
         data = xr.open_dataset(self.data_path)
-        daily_data = data.resample(valid_time="1d").mean()
-        DATES = daily_data.valid_time.to_numpy()
+        DATES = data.valid_time.to_numpy()
         DIMLESS_TIMES = (1 / self.timescale_in_days) * np.array(
             [
                 (date - np.datetime64(self.start_date)) / np.timedelta64(1, "D")
@@ -135,14 +134,14 @@ class ERA5Forcing:
         )
 
         # convert to deg C
-        T2M = daily_data.t2m[:, 0, 0].to_numpy() - 273.15
-        D2M = daily_data.d2m[:, 0, 0].to_numpy() - 273.15
+        T2M = data.t2m[:, 0, 0].to_numpy() - 273.15
+        D2M = data.d2m[:, 0, 0].to_numpy() - 273.15
 
-        LW = daily_data.msdwlwrf[:, 0, 0].to_numpy()
-        SW = daily_data.msdwswrf[:, 0, 0].to_numpy()
+        LW = data.msdwlwrf[:, 0, 0].to_numpy()
+        SW = data.msdwswrf[:, 0, 0].to_numpy()
 
         # convert to KPa
-        ATM = daily_data.sp[:, 0, 0].to_numpy() / 1e3
+        ATM = data.sp[:, 0, 0].to_numpy() / 1e3
 
         # Calculate specific humidity in kg/kg from dewpoint temperature
         SPEC_HUM = _calculate_specific_humidity(ATM, D2M)
@@ -151,7 +150,7 @@ class ERA5Forcing:
         if self.use_snow_data:
             if self.snow_density is None:
                 raise ValueError("No snow density provided")
-            SNOW_DEPTH = daily_data.sd[:, 0, 0].to_numpy() * (1000 / self.snow_density)
+            SNOW_DEPTH = data.sd[:, 0, 0].to_numpy() * (1000 / self.snow_density)
         else:
             SNOW_DEPTH = np.zeros_like(DIMLESS_TIMES)
 
