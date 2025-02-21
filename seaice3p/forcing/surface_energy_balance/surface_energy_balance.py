@@ -44,7 +44,7 @@ def _calculate_total_heat_flux(
     top_cell_conductivity: float,
 ) -> float:
     """Takes non-dimensional surface temperature and returns non-dimensional heat flux"""
-    if isinstance(cfg.forcing_config, ERA5Forcing) and cfg.forcing_config.use_snow_data:
+    if isinstance(cfg.forcing_config, ERA5Forcing):
         dimensional_temperature_gradient = (
             cfg.scales.temperature_difference * temp_gradient / cfg.scales.lengthscale
         )
