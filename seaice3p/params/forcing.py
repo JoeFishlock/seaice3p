@@ -134,14 +134,14 @@ class ERA5Forcing:
         )
 
         # convert to deg C
-        T2M = data.t2m[:, 0, 0].to_numpy() - 273.15
-        D2M = data.d2m[:, 0, 0].to_numpy() - 273.15
+        T2M = data.t2m.to_numpy() - 273.15
+        D2M = data.d2m.to_numpy() - 273.15
 
-        LW = data.msdwlwrf[:, 0, 0].to_numpy()
-        SW = data.msdwswrf[:, 0, 0].to_numpy()
+        LW = data.msdwlwrf.to_numpy()
+        SW = data.msdwswrf.to_numpy()
 
         # convert to KPa
-        ATM = data.sp[:, 0, 0].to_numpy() / 1e3
+        ATM = data.sp.to_numpy() / 1e3
 
         # Calculate specific humidity in kg/kg from dewpoint temperature
         SPEC_HUM = _calculate_specific_humidity(ATM, D2M)
@@ -150,7 +150,7 @@ class ERA5Forcing:
         if self.use_snow_data:
             if self.snow_density is None:
                 raise ValueError("No snow density provided")
-            SNOW_DEPTH = data.sd[:, 0, 0].to_numpy() * (1000 / self.snow_density)
+            SNOW_DEPTH = data.sd.to_numpy() * (1000 / self.snow_density)
         else:
             SNOW_DEPTH = np.zeros_like(DIMLESS_TIMES)
 
