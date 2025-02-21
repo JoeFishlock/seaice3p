@@ -1,6 +1,7 @@
 from .ocean_forcing import (
     OceanForcingConfig,
     FixedHeatFluxOceanForcing,
+    MonthlyHeatFluxOceanForcing,
     FixedTempOceanForcing,
     BRW09OceanForcing,
 )

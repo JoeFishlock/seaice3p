@@ -32,6 +32,7 @@ from .forcing import (
 from .ocean_forcing import (
     DimensionalBRW09OceanForcing,
     DimensionalFixedHeatFluxOceanForcing,
+    DimensionalMonthlyHeatFluxOceanForcing,
     DimensionalFixedTempOceanForcing,
 )
 from .initial_conditions import (
@@ -63,7 +64,7 @@ class DimensionalParams:
     bubble_params: DimensionalMonoBubbleParams | DimensionalPowerLawBubbleParams
     brine_convection_params: DimensionalRJW14Params | NoBrineConvection
     forcing_config: DimensionalRadForcing | DimensionalBRW09Forcing | DimensionalConstantForcing | DimensionalYearlyForcing | DimensionalRobinForcing | DimensionalERA5Forcing
-    ocean_forcing_config: DimensionalBRW09OceanForcing | DimensionalFixedTempOceanForcing | DimensionalFixedHeatFluxOceanForcing
+    ocean_forcing_config: DimensionalBRW09OceanForcing | DimensionalFixedTempOceanForcing | DimensionalFixedHeatFluxOceanForcing | DimensionalMonthlyHeatFluxOceanForcing
     initial_conditions_config: DimensionalOilInitialConditions | UniformInitialConditions | BRW09InitialConditions | PreviousSimulation
 
     water_params: DimensionalWaterParams = DimensionalWaterParams()

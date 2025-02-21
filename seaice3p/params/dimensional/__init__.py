@@ -2,6 +2,7 @@ from .ocean_forcing import (
     DimensionalBRW09OceanForcing,
     DimensionalFixedHeatFluxOceanForcing,
     DimensionalFixedTempOceanForcing,
+    DimensionalMonthlyHeatFluxOceanForcing,
 )
 from .dimensional import (
     DimensionalParams,

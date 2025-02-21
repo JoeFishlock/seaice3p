@@ -1,3 +1,4 @@
+from typing import Tuple
 from dataclasses import dataclass
 from serde import serde, coerce
 from pathlib import Path
@@ -8,6 +9,7 @@ from .dimensional import (
     DimensionalFixedTempOceanForcing,
     DimensionalFixedHeatFluxOceanForcing,
     DimensionalBRW09OceanForcing,
+    DimensionalMonthlyHeatFluxOceanForcing,
 )
 
 
@@ -27,6 +29,41 @@ class FixedHeatFluxOceanForcing:
     saturation state."""
 
     ocean_heat_flux: float = 1
+    ocean_gas_sat: float = 1.0
+
+
+@serde(type_check=coerce)
+@dataclass(frozen=True)
+class MonthlyHeatFluxOceanForcing:
+    """Provides constant dimensionless ocean heat flux at the bottom of the domain in
+    each month
+
+    and ocean gas saturation state.
+
+    Proivde an average monthly ocean heat flux with the entries
+    i=0, 1, 2, 3, ...., 11
+    in the tuple corresponding to the months
+    January, February, March, April, ...., December
+
+    Args:
+        monthly_ocean_heat_flux: Tuple of dimensionless ocean heat flux values in
+        each month
+    """
+
+    monthly_ocean_heat_flux: Tuple[float, ...] = (
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+    )
     ocean_gas_sat: float = 1.0
 
 
@@ -61,7 +98,10 @@ class BRW09OceanForcing:
 
 
 OceanForcingConfig = (
-    FixedTempOceanForcing | FixedHeatFluxOceanForcing | BRW09OceanForcing
+    FixedTempOceanForcing
+    | FixedHeatFluxOceanForcing
+    | BRW09OceanForcing
+    | MonthlyHeatFluxOceanForcing
 )
 
 
@@ -84,6 +124,17 @@ def get_dimensionless_ocean_forcing_config(
             )
             return FixedHeatFluxOceanForcing(
                 ocean_heat_flux=ocean_heat_flux, ocean_gas_sat=ocean_gas_sat
+            )
+        case DimensionalMonthlyHeatFluxOceanForcing():
+            monthly_ocean_heat_flux = tuple(
+                [
+                    scales.convert_from_dimensional_heat_flux(ocean_heat_flux)
+                    for ocean_heat_flux in dimensional_params.ocean_forcing_config.monthly_ocean_heat_flux
+                ]
+            )
+            return MonthlyHeatFluxOceanForcing(
+                monthly_ocean_heat_flux=monthly_ocean_heat_flux,
+                ocean_gas_sat=ocean_gas_sat,
             )
 
         case DimensionalBRW09OceanForcing():
