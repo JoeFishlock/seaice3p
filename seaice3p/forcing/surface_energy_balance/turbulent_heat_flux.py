@@ -25,7 +25,12 @@ GRAVITY = 9.81  # m/s2
 
 def _calculate_ref_windspeed(cfg: Config, time: float) -> float:
     """return windspeed at reference level above the ice"""
-    return cfg.forcing_config.turbulent_flux.windspeed
+    if isinstance(cfg.forcing_config, RadForcing):
+        return cfg.forcing_config.turbulent_flux.windspeed
+    elif isinstance(cfg.forcing_config, ERA5Forcing):
+        return cfg.forcing_config.get_windspeed(time)
+    else:
+        raise NotImplementedError("No windspeed for this forcing configuration")
 
 
 def _calculate_ref_air_temp(cfg: Config, time: float) -> float:
