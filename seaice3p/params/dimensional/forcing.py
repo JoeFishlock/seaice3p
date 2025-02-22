@@ -82,6 +82,9 @@ class DimensionalConstantTurbulentFlux:
     NOTE: If you are running a simulation with ERA5 reanalysis forcing you must set
     the ref_height=2m as this is the appropriate value for the atmospheric reanalysis
     quantities
+
+    The windspeed given here will only be used with ERA5 forcing if the windspeed key
+    is set to None in the forcing_data_file_keys dictionary.
     """
 
     ref_height: float = 10  # m
@@ -109,16 +112,42 @@ class DimensionalRadForcing:
 
 
 @serde(type_check=coerce)
+@dataclass(frozen=True)
+class ERA5FileKeys:
+    time: str = "valid_time"
+    temperature_at_2m_in_K: str = "t2m"
+    dewpoint_at_2m_in_K: str = "d2m"
+    surface_pressure_in_Pa: str = "sp"
+    shortwave_radiation_in_W_m2: str = "avg_sdswrf"
+    longwave_radiation_in_W_m2: str = "avg_sdlwrf"
+    snow_depth_in_m: Optional[str] = "snod"
+    windspeed_at_2m_in_m_s: Optional[str] = "wind2m"
+
+
+@serde(type_check=coerce)
 class DimensionalERA5Forcing:
     """read ERA5 data from netCDF file located at data_path.
 
     Simulation will take atmospheric forcings from the start date specified in the
-    format YYYY-MM-DD
+    string format YYYY-MM-DD
+
+    forcing_data_file_keys is a mapping of the descriptive names of the
+    forcing data to be provided to the simulationa and the values are the corresponding
+    strings giving the name of that variable in the netCDF file.
+    The default values are the ERA5 variable names and the SnowModel-LG snow depth name.
+
+    Note that if you pass "sd" for the snow depth the simulation will assume you have
+    provided snow depth in m of water equivalent and you must provide a snow density for
+    the conversion.
+
+    If you pass None for the snow depth the simulation will procede with no snow layer.
+    If you pass None for the windspeed the simulation will use the constant windspeed
+    defined in the turbulent flux forcing parameters.
     """
 
     data_path: Path
     start_date: str  # YYYY-MM-DD
-    use_snow_data: bool = False
+    forcing_data_file_keys: ERA5FileKeys = ERA5FileKeys()
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
     turbulent_flux: DimensionalTurbulentFlux = DimensionalConstantTurbulentFlux()

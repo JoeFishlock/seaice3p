@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.28.0 (2025-02-22) ##
+
+### Summary ###
+Add parameters to ERA5 forcing configuration to specify the names of the forcing variables in the netcdf file.
+The simulation expects a netcdf file with a single coordinate (time) at a given location.
+Add DimensionalMonthlyOceanHeatFluxForcing to provide monthly ocean heat flux forcing: user specifies a value in each month which is interpolated.
+This will only work when using ERA5 forcing as the simulation needs a start date.
+
 ## v0.27.0 (2025-01-15) ##
 
 ### Summary ###

@@ -1,6 +1,6 @@
 from functools import partial
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional
 from numpy.typing import NDArray
 from serde import serde, coerce
@@ -21,6 +21,7 @@ from .dimensional import (
     DimensionalTurbulentFlux,
     DimensionalConstantTurbulentFlux,
     DimensionalERA5Forcing,
+    ERA5FileKeys,
 )
 import xarray as xr
 from metpy.calc import specific_humidity_from_dewpoint
@@ -116,7 +117,7 @@ class ERA5Forcing:
     data_path: Path
     start_date: str
     timescale_in_days: float
-    use_snow_data: bool = False
+    forcing_data_file_keys: ERA5FileKeys = ERA5FileKeys()
     snow_density: Optional[float] = None
     SW_forcing: DimensionalSWForcing = DimensionalConstantSWForcing()
     LW_forcing: DimensionalLWForcing = DimensionalConstantLWForcing()
@@ -125,8 +126,7 @@ class ERA5Forcing:
 
     def __post_init__(self):
         data = xr.open_dataset(self.data_path)
-        daily_data = data.resample(valid_time="1d").mean()
-        DATES = daily_data.valid_time.to_numpy()
+        DATES = getattr(data, self.forcing_data_file_keys.time).to_numpy()
         DIMLESS_TIMES = (1 / self.timescale_in_days) * np.array(
             [
                 (date - np.datetime64(self.start_date)) / np.timedelta64(1, "D")
@@ -135,26 +135,55 @@ class ERA5Forcing:
         )
 
         # convert to deg C
-        T2M = daily_data.t2m[:, 0, 0].to_numpy() - 273.15
-        D2M = daily_data.d2m[:, 0, 0].to_numpy() - 273.15
+        T2M = (
+            getattr(data, self.forcing_data_file_keys.temperature_at_2m_in_K).to_numpy()
+            - 273.15
+        )
+        D2M = (
+            getattr(data, self.forcing_data_file_keys.dewpoint_at_2m_in_K).to_numpy()
+            - 273.15
+        )
 
-        LW = daily_data.msdwlwrf[:, 0, 0].to_numpy()
-        SW = daily_data.msdwswrf[:, 0, 0].to_numpy()
+        LW = getattr(
+            data, self.forcing_data_file_keys.longwave_radiation_in_W_m2
+        ).to_numpy()
+        SW = getattr(
+            data, self.forcing_data_file_keys.shortwave_radiation_in_W_m2
+        ).to_numpy()
 
         # convert to KPa
-        ATM = daily_data.sp[:, 0, 0].to_numpy() / 1e3
+        ATM = (
+            getattr(data, self.forcing_data_file_keys.surface_pressure_in_Pa).to_numpy()
+            / 1e3
+        )
+
+        wind_key = self.forcing_data_file_keys.windspeed_at_2m_in_m_s
+        if wind_key is None:
+            WIND = np.full_like(DIMLESS_TIMES, self.turbulent_flux.windspeed)
+        else:
+            WIND = getattr(data, wind_key).to_numpy()
 
         # Calculate specific humidity in kg/kg from dewpoint temperature
         SPEC_HUM = _calculate_specific_humidity(ATM, D2M)
 
-        # Convert snow depth from m of water equivalent to m of snow
-        if self.use_snow_data:
+        snow_key = self.forcing_data_file_keys.snow_depth_in_m
+        # if ERA5 standard short name for snow depth in m of water equivalent use snow
+        # density to convert to m of snow
+        if snow_key == "sd":
             if self.snow_density is None:
                 raise ValueError("No snow density provided")
-            SNOW_DEPTH = daily_data.sd[:, 0, 0].to_numpy() * (1000 / self.snow_density)
+            SNOW_DEPTH = getattr(data, "sd").to_numpy() * (1000 / self.snow_density)
+
+        # If snow key is another name assume snow depth is just in m of snow
+        elif snow_key is not None:
+            SNOW_DEPTH = getattr(data, snow_key).to_numpy()
+
+        # If snow key is None assume no snow
         else:
             SNOW_DEPTH = np.zeros_like(DIMLESS_TIMES)
 
+        # Provide functions to interpolate forcing data at non-dimensional times
+        # during simulation
         self.get_2m_temp = partial(
             np.interp, xp=DIMLESS_TIMES, fp=T2M, left=np.nan, right=np.nan
         )
@@ -172,6 +201,9 @@ class ERA5Forcing:
         )
         self.get_snow_depth = partial(
             np.interp, xp=DIMLESS_TIMES, fp=SNOW_DEPTH, left=np.nan, right=np.nan
+        )
+        self.get_windspeed = partial(
+            np.interp, xp=DIMLESS_TIMES, fp=WIND, left=np.nan, right=np.nan
         )
 
 
@@ -252,7 +284,7 @@ def get_dimensionless_forcing_config(
                 data_path=dimensional_params.forcing_config.data_path,
                 start_date=dimensional_params.forcing_config.start_date,
                 timescale_in_days=dimensional_params.scales.time_scale,
-                use_snow_data=dimensional_params.forcing_config.use_snow_data,
+                forcing_data_file_keys=dimensional_params.forcing_config.forcing_data_file_keys,
                 snow_density=dimensional_params.water_params.snow_density,
                 SW_forcing=dimensional_params.forcing_config.SW_forcing,
                 LW_forcing=dimensional_params.forcing_config.LW_forcing,
