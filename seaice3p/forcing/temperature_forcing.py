@@ -3,7 +3,6 @@
 Note that the barrow temperature data is read in from a file if needed by the
 simulation configuration.
 """
-from datetime import datetime, timedelta
 import numpy as np
 from scipy.optimize import fsolve
 
@@ -139,22 +138,8 @@ def _barrow_ocean_temperature_forcing(state: StateFull, cfg: Config) -> float:
 def _constant_ocean_heat_flux_ghost_temperature(state: StateFull, cfg: Config) -> float:
     if isinstance(cfg.ocean_forcing_config, FixedHeatFluxOceanForcing):
         ocean_heat_flux = cfg.ocean_forcing_config.ocean_heat_flux
-        print(ocean_heat_flux)
     elif isinstance(cfg.ocean_forcing_config, MonthlyHeatFluxOceanForcing):
-        start_datetime = datetime.strptime(cfg.forcing_config.start_date, "%Y-%m-%d")
-        current_datetime = start_datetime + timedelta(
-            days=cfg.scales.convert_to_dimensional_time(state.time)
-        )
-        current_day = (
-            current_datetime - datetime(start_datetime.year, 1, 1)
-        ).total_seconds() / 86400
-        ocean_heat_flux = np.interp(
-            current_day,
-            np.array([15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349]),
-            np.array(cfg.ocean_forcing_config.monthly_ocean_heat_flux),
-            period=365,
-        )
-        print(current_datetime, current_day, ocean_heat_flux)
+        ocean_heat_flux = cfg.ocean_forcing_config.get_ocean_heat_flux(state.time)
     else:
         raise NotImplementedError
 
