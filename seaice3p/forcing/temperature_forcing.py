@@ -5,10 +5,12 @@ simulation configuration.
 """
 import numpy as np
 from scipy.optimize import fsolve
+
 from ..params import (
     Config,
     FixedTempOceanForcing,
     FixedHeatFluxOceanForcing,
+    MonthlyHeatFluxOceanForcing,
     BRW09OceanForcing,
 )
 from ..params.forcing import (
@@ -41,6 +43,7 @@ def get_bottom_temperature_forcing(state: StateFull, cfg: Config):
         FixedTempOceanForcing: _constant_ocean_temperature_forcing,
         BRW09OceanForcing: _barrow_ocean_temperature_forcing,
         FixedHeatFluxOceanForcing: _constant_ocean_heat_flux_ghost_temperature,
+        MonthlyHeatFluxOceanForcing: _constant_ocean_heat_flux_ghost_temperature,
     }
     return OCEAN_TEMPERATURE_FORCINGS[type(cfg.ocean_forcing_config)](state, cfg)
 
@@ -133,8 +136,14 @@ def _barrow_ocean_temperature_forcing(state: StateFull, cfg: Config) -> float:
 
 
 def _constant_ocean_heat_flux_ghost_temperature(state: StateFull, cfg: Config) -> float:
+    if isinstance(cfg.ocean_forcing_config, FixedHeatFluxOceanForcing):
+        ocean_heat_flux = cfg.ocean_forcing_config.ocean_heat_flux
+    elif isinstance(cfg.ocean_forcing_config, MonthlyHeatFluxOceanForcing):
+        ocean_heat_flux = cfg.ocean_forcing_config.get_ocean_heat_flux(state.time)
+    else:
+        raise NotImplementedError
+
     conductivity = calculate_conductivity(cfg, state.solid_fraction[0])
     return state.temperature[0] + (
-        (cfg.ocean_forcing_config.ocean_heat_flux * cfg.numerical_params.step)
-        / conductivity
+        (ocean_heat_flux * cfg.numerical_params.step) / conductivity
     )
