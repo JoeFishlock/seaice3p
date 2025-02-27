@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.29.0 (2025-02-27) ##
+
+### Summary ###
+Fix two bugs that were causing seasonal simulations with mobile oil droplets to crash.
+Fix a division by zero in the calculation of the bubble / droplet brine channel sink when the liquid fraction is zero.
+Make sure that the bulk salinity can not go below zero in the enthalpy method calculation as this will cause the calculation of an imaginary solid fraction.
+
 ## v0.28.0 (2025-02-22) ##
 
 ### Summary ###
