@@ -115,6 +115,8 @@ def _calculate_gas_sink(state_BCs, cfg: Config, grids):
             raise NotImplementedError
 
         bubble_term = 2 * gas_fraction * geometric(lag_factor) / liquid_fraction
+        is_frozen_solid = liquid_fraction == 0.0
+        bubble_term[is_frozen_solid] = 0
     else:
         bubble_term = np.zeros_like(liquid_fraction)
 
