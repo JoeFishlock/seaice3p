@@ -17,16 +17,22 @@ def calculate_common_enthalpy_method_vars(
     temperature = _calculate_temperature(
         state, solid_fraction, physical_params, phase_masks
     )
-    liquid_salinity = _calculate_liquid_salinity(state, temperature, phase_masks)
+    liquid_salinity = _calculate_liquid_salinity(
+        state, temperature, phase_masks, physical_params
+    )
     return solid_fraction, liquid_fraction, temperature, liquid_salinity
 
 
 def _calculate_solid_fraction(state, physical_params: PhysicalParams, phase_masks):
     enthalpy, salt = state.enthalpy, state.salt
+
+    # don't let salinity go below 1e-6
+    conc = physical_params.concentration_ratio
+    salt = np.where(salt + conc < 1e-6, -conc + 1e-6, salt)
+
     solid_fraction = np.full_like(enthalpy, np.nan)
     L, M, E, S = phase_masks
     St = physical_params.stefan_number
-    conc = physical_params.concentration_ratio
     ratio = physical_params.specific_heat_ratio
 
     solid_fraction[L] = 0
@@ -43,7 +49,6 @@ def _calculate_solid_fraction(state, physical_params: PhysicalParams, phase_mask
         C = -(enthalpy[M] + salt[M])
 
         solid_fraction[M] = (1 / (2 * A)) * (-B - np.sqrt(B**2 - 4 * A * C))
-
         return solid_fraction
 
     # Cubic liquidus
@@ -88,8 +93,13 @@ def _calculate_liquid_fraction(solid_fraction):
     return 1 - solid_fraction
 
 
-def _calculate_liquid_salinity(state, temperature, phase_masks):
+def _calculate_liquid_salinity(state, temperature, phase_masks, physical_params):
     salt = state.salt
+
+    # don't let salinity go below 1e-6
+    conc = physical_params.concentration_ratio
+    salt = np.where(salt + conc < 1e-6, -conc + 1e-6, salt)
+
     liquid_salinity = np.full_like(salt, np.nan)
     L, M, E, S = phase_masks
 
