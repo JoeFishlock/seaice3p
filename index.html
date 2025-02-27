@@ -8917,7 +8917,7 @@ defined in the turbulent flux forcing parameters.</p>
                 <code>ocean_heat_flux</code>
             </td>
             <td>
-                  <code>float</code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9179,7 +9179,7 @@ January, February, March, April, ...., December</p>
                 <code>monthly_ocean_heat_flux</code>
             </td>
             <td>
-                  <code><span title="typing.Tuple">Tuple</span>[float, ...]</code>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="float">float</span>, ...]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -13213,9 +13213,7 @@ convecting region when using this parameterisation</p>
 
             <details class="quote">
               <summary>Source code in <code>seaice3p/equations/RJW14/brine_channel_sink_terms.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">126</span>
 <span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span>
@@ -13228,7 +13226,9 @@ convecting region when using this parameterisation</p>
 <span class="normal">136</span>
 <span class="normal">137</span>
 <span class="normal">138</span>
-<span class="normal">139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_calculate_bulk_dissolved_gas_sink</span><span class="p">(</span><span class="n">state_BCs</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">grids</span><span class="p">):</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_calculate_bulk_dissolved_gas_sink</span><span class="p">(</span><span class="n">state_BCs</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">grids</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is for the DISEQ model&quot;&quot;&quot;</span>
     <span class="n">liquid_fraction</span> <span class="o">=</span> <span class="n">state_BCs</span><span class="o">.</span><span class="n">liquid_fraction</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">liquid_salinity</span> <span class="o">=</span> <span class="n">state_BCs</span><span class="o">.</span><span class="n">liquid_salinity</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -13299,7 +13299,9 @@ convecting region when using this parameterisation</p>
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
-<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_calculate_gas_sink</span><span class="p">(</span><span class="n">state_BCs</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">grids</span><span class="p">):</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">_calculate_gas_sink</span><span class="p">(</span><span class="n">state_BCs</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">grids</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This is for the EQM model</span>
 
 <span class="sd">    TODO: fix bug in bubble coupling to flow</span>
@@ -13329,6 +13331,8 @@ convecting region when using this parameterisation</p>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
         <span class="n">bubble_term</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">gas_fraction</span> <span class="o">*</span> <span class="n">geometric</span><span class="p">(</span><span class="n">lag_factor</span><span class="p">)</span> <span class="o">/</span> <span class="n">liquid_fraction</span>
+        <span class="n">is_frozen_solid</span> <span class="o">=</span> <span class="n">liquid_fraction</span> <span class="o">==</span> <span class="mf">0.0</span>
+        <span class="n">bubble_term</span><span class="p">[</span><span class="n">is_frozen_solid</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">bubble_term</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">liquid_fraction</span><span class="p">)</span>
 
@@ -20561,7 +20565,7 @@ defined in the turbulent flux forcing parameters.</p>
                 <code>ocean_heat_flux</code>
             </td>
             <td>
-                  <code>float</code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -20823,7 +20827,7 @@ January, February, March, April, ...., December</p>
                 <code>monthly_ocean_heat_flux</code>
             </td>
             <td>
-                  <code><span title="typing.Tuple">Tuple</span>[float, ...]</code>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="float">float</span>, ...]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -25536,7 +25540,7 @@ fixed gas saturation state</p>
                 <code>ocean_heat_flux</code>
             </td>
             <td>
-                  <code>float</code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -25701,7 +25705,7 @@ January, February, March, April, ...., December</p>
                 <code>monthly_ocean_heat_flux</code>
             </td>
             <td>
-                  <code><span title="typing.Tuple">Tuple</span>[float, ...]</code>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="float">float</span>, ...]</code>
             </td>
             <td>
               <div class="doc-md-description">
