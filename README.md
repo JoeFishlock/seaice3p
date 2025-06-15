@@ -1,30 +1,26 @@
 # seaice3p #
 
 Code for simulating the seasonal evolution of a 1D layer of sea ice using an enthalpy method.
-Optionally can simulate the air fraction within the ice or the motion of oil droplets.
+Inlcudes three-phase mushy-layer physics which can be used to simulate air bubbles or oil droplets in the ice.
+See Joseph Fishlock's DPhil thesis for further details.
 
 ## Install ##
-
-Install via pip (v0.13.0 and above):
-`pip install seaice3p`
-
-To install a specific version run `pip install git+file:///ABSOLUTE/PATH/TO/LOCAL/GIT/REPO@vX.X.X`.
+Seaice3p is available on PyPI and can be installed with pip via
+```bash
+pip install seaice3p
+```
 
 ## Usage ##
-
-Save configurations for a simulation (either dimensional or non-dimensional but not a mixture) as yaml files.
-This can be done by editing examples or by using classes within the dimensional_params and params modules.
+Configurations to run simulations can be created via a Python script using the `DimensionalParams` object and are saved as yaml files.
 Once you have a directory of configuration files the simulation for each can be run using `python -m seaice3p path_to_configuration_directory path_to_output_directory`.
 The `--dimensional` flag should be added to this command if running dimensional parameter configurations.
 The simulation will be run for each configuration and the data saved as a numpy archive with the same name as the simulation in the specified output directory.
-Example script that generates, runs and plots a simulation can be run with `python -m seaice3p.example`.
 
 ## Documentation ##
-
-Files to generate documentation using mkdocs found in the `docs/` directory as well as `Changelog.md`.
+Some incomplete API reference documentation built using `mkdocs gh-deploy` is available at
+[documentation](https://joefishlock.github.io/seaice3p).
 
 ## Tests ##
-
 Run `pytest` to run all tests.
 Note this may take some time so you can also run `pytest -m "not slow"`.
 To speed this up run in parallel using `pytest-xdist` with the extra options `pytest -n auto --dist worksteal`.
